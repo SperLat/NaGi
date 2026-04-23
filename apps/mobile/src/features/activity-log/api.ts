@@ -1,6 +1,6 @@
 import { localDb } from '@/lib/db';
 import { db } from '@/lib/supabase';
-import { enqueueOutbox } from '@/lib/sync/outbox';
+import { enqueue } from '@/features/outbox/enqueue';
 import { isMock } from '@/config/mode';
 import type { ActivityLog, ActivityKind } from './types';
 
@@ -56,7 +56,9 @@ export async function logActivity(
      VALUES (?, ?, ?, ?, ?, ?, ?)`,
     [entry.id, elderId, organizationId, kind, JSON.stringify(payload), entry.client_ts, entry.device_id],
   );
-  enqueueOutbox('activity_log', 'insert', entry as unknown as Record<string, unknown>);
+  // Enqueue for server delivery — idempotent via client_op_id upsert.
+  // Use entry.id as the op id so the same SQLite row is the idempotency key.
+  void enqueue({ id: entry.id, kind: 'activity_log', payload: entry });
 }
 
 function parseRow(row: Record<string, unknown>): ActivityLog {

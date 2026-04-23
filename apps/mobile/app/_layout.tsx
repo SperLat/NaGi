@@ -7,12 +7,19 @@ import { supabase } from '@/lib/supabase';
 import { getActiveOrg } from '@/features/auth';
 import { useSession } from '@/state';
 import { startSyncManager } from '@/lib/sync';
+import { startAutoDrain } from '@/features/outbox';
 import { isMock } from '@/config/mode';
 
 const queryClient = new QueryClient();
 
 export default function RootLayout() {
   const { setSession, clearSession, setHydrated } = useSession();
+
+  // Start the AsyncStorage outbox drain loop once on mount (real mode only).
+  useEffect(() => {
+    if (isMock) return;
+    return startAutoDrain();
+  }, []);
 
   // Start sync when org session is active.
   const { activeOrgId } = useSession();

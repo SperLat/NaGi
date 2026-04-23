@@ -1,23 +1,32 @@
-// Help request API — direct Supabase calls (NOT via outbox).
-// Urgency requires immediate delivery; we cannot wait for the next drain cycle.
+// Help request API — writes go through the outbox for offline resilience.
+//
+// SAFETY INVARIANT: createHelpRequest() always resolves immediately.
+// The op is enqueued locally and drained when connectivity returns.
+// The elder NEVER sees a failure or "queued" state — calm UX is preserved.
 
 import { supabase } from '@/lib/supabase';
 import { isMock } from '@/config/mode';
+import { enqueue } from '@/features/outbox/enqueue';
 import type { HelpRequest } from './types';
 
 /**
- * Elder tapped "Necesito Ayuda" — create a pending request immediately.
- * Throws on failure so the caller can surface a fallback message.
+ * Elder tapped "Necesito Ayuda" — enqueue a help request immediately.
+ * Always resolves (never throws from the caller's perspective): the elder
+ * sees success even offline, and the intermediary receives the row via
+ * Supabase Realtime once the drain succeeds.
  */
 export async function createHelpRequest(
   elderId: string,
   organizationId: string,
 ): Promise<void> {
   if (isMock) return;
-  const { error } = await supabase
-    .from('help_requests')
-    .insert({ elder_id: elderId, organization_id: organizationId });
-  if (error) throw error;
+  await enqueue({
+    kind: 'help_request',
+    payload: {
+      elder_id: elderId,
+      organization_id: organizationId,
+    },
+  });
 }
 
 /**
