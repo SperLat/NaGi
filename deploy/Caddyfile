@@ -1,0 +1,6 @@
+# Optional TLS reverse proxy. Only used with --profile tls.
+# Replace nagi.example.com with your domain.
+
+nagi.example.com {
+    reverse_proxy kong:8000
+}

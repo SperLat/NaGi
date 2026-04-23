@@ -1,0 +1,54 @@
+# Nagi self-host deployment.
+# This compose references the official Supabase self-host stack.
+# See: https://github.com/supabase/supabase/tree/master/docker
+#
+# Setup:
+#   1. Clone the Supabase repo and copy docker/ alongside this file, OR
+#      use Supabase's official self-host docs: https://supabase.com/docs/guides/self-hosting
+#   2. Copy .env.example to .env and fill in all values
+#   3. Run: docker compose up -d
+#   4. Run migrations: pnpm supabase db push --linked
+#   5. Deploy edge functions: pnpm supabase functions deploy
+
+version: "3.8"
+
+services:
+  # ── Supabase stack ───────────────────────────────────────────────────────────
+  # Source the full Supabase self-host stack from upstream.
+  # Do not vendor it here — keep self-hosters on the upstream release cadence.
+  # Reference: https://github.com/supabase/supabase/blob/master/docker/docker-compose.yml
+
+  # ── Edge runtime (Nagi functions) ────────────────────────────────────────────
+  edge-runtime:
+    image: supabase/edge-runtime:v1.67.3
+    restart: unless-stopped
+    volumes:
+      - ../supabase/functions:/home/deno/functions:ro
+    environment:
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      ANTHROPIC_BASE_URL: ${ANTHROPIC_BASE_URL:-https://api.anthropic.com}
+    depends_on:
+      - kong
+    ports:
+      - "9000:9000"
+
+  # ── Optional TLS reverse proxy ───────────────────────────────────────────────
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    profiles:
+      - tls
+
+volumes:
+  caddy_data:
+  caddy_config:

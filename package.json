@@ -1,0 +1,24 @@
+{
+  "name": "cedar",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "typecheck": "pnpm --filter @cedar/mobile typecheck",
+    "verify-rls": "tsx scripts/verify-rls.ts",
+    "seed": "tsx scripts/seed-mock.ts"
+  },
+  "devDependencies": {
+    "supabase": "^2.93.0",
+    "tsx": "^4.19.2"
+  },
+  "pnpm": {
+    "overrides": {
+      "react": "19.1.0",
+      "react-dom": "19.1.0"
+    }
+  },
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  }
+}

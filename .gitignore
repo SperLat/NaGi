@@ -1,0 +1,31 @@
+node_modules/
+.expo/
+dist/
+build/
+
+# env files with secrets
+deploy/.env
+supabase/functions/.env
+apps/mobile/.env
+.env
+.env.local
+
+# local supabase
+supabase/.branches/
+supabase/.temp/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# AI tool session state (never commit)
+.claude/
+.remember/
+.continue/
+.cursor/
+.cline/
+.mcp/
+.aider*
+
+# Internal docs (snapshots, strategy, working notes)
+docs/internal/

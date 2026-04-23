@@ -1,0 +1,37 @@
+{
+  "expo": {
+    "name": "Nagi",
+    "slug": "nagi",
+    "version": "0.0.1",
+    "scheme": "nagi",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.cedar.nagi"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.cedar.nagi"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single-page-app"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-sqlite"
+    ],
+    "experiments": {
+      "typedRoutes": false
+    },
+    "newArchEnabled": false
+  }
+}
