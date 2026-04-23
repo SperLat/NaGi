@@ -12,7 +12,7 @@ import { isMock } from '@/config/mode';
 const queryClient = new QueryClient();
 
 export default function RootLayout() {
-  const { setSession, clearSession } = useSession();
+  const { setSession, clearSession, setHydrated } = useSession();
 
   // Start sync when org session is active.
   const { activeOrgId } = useSession();
@@ -35,10 +35,12 @@ export default function RootLayout() {
       } else {
         clearSession();
       }
+      // Mark the store as hydrated after the first auth state is known.
+      setHydrated();
     });
 
     return () => subscription.unsubscribe();
-  }, [setSession, clearSession]);
+  }, [setSession, clearSession, setHydrated]);
 
   return (
     <QueryClientProvider client={queryClient}>

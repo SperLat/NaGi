@@ -8,12 +8,13 @@ import {
   acknowledgeHelpRequest,
   type HelpRequest,
 } from '@/features/help-request';
+import { signOut } from '@/features/auth';
 import { supabase } from '@/lib/supabase';
 import { isMock } from '@/config/mode';
 import { useSession } from '@/state';
 
 export default function IntermediaryDashboard() {
-  const { activeOrgId, userId } = useSession();
+  const { activeOrgId, userId, clearSession } = useSession();
   const [elders, setElders]         = useState<Elder[]>([]);
   const [loading, setLoading]       = useState(true);
   const [alerts, setAlerts]         = useState<HelpRequest[]>([]);
@@ -65,6 +66,12 @@ export default function IntermediaryDashboard() {
     if (!userId) return;
     await acknowledgeHelpRequest(req.id, userId);
     setAlerts(prev => prev.filter(a => a.id !== req.id));
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    clearSession();
+    router.replace('/(auth)/sign-in');
   };
 
   // IDs of elders with pending alerts (for red dot on list)
@@ -178,6 +185,13 @@ export default function IntermediaryDashboard() {
           onPress={() => router.push('/(intermediary)/elders/new')}
         >
           <Text className="text-white font-semibold text-lg">Add Elder</Text>
+        </Pressable>
+        <Pressable
+          className="items-center pt-4 pb-1"
+          style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+          onPress={handleSignOut}
+        >
+          <Text className="text-neutral-400 text-sm">Sign out</Text>
         </Pressable>
       </View>
     </SafeAreaView>
