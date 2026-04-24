@@ -5,7 +5,6 @@
     "version": "0.0.1",
     "scheme": "nagi",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "resizeMode": "contain",
@@ -31,7 +30,6 @@
     ],
     "experiments": {
       "typedRoutes": false
-    },
-    "newArchEnabled": false
+    }
   }
 }

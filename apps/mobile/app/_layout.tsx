@@ -32,21 +32,49 @@ export default function RootLayout() {
     // Mock mode: session is pre-populated in the store at creation time.
     if (isMock) return;
 
-    // Real mode: subscribe to Supabase auth state changes.
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event: string, session: { user?: { id: string } } | null) => {
+    let cancelled = false;
+
+    const applySession = async (session: { user?: { id: string } } | null) => {
+      if (cancelled) return;
       if (session?.user) {
         const orgId = await getActiveOrg(session.user.id);
+        if (cancelled) return;
         setSession(session.user.id, orgId ?? '');
       } else {
         clearSession();
       }
-      // Mark the store as hydrated after the first auth state is known.
       setHydrated();
-    });
+    };
 
-    return () => subscription.unsubscribe();
+    // Primary path: read the persisted session directly. This is the
+    // reliable way to rehydrate on web hard-reload, where the first
+    // onAuthStateChange can race with storage restore or silently not fire.
+    supabase.auth
+      .getSession()
+      .then(({ data }: { data: { session: { user?: { id: string } } | null } }) => applySession(data.session))
+      .catch(() => {
+        // Never leave the UI hanging on the hydration gate. If we can't
+        // read the session, treat it as "no session" and let the router
+        // send us to sign-in.
+        if (!cancelled) {
+          clearSession();
+          setHydrated();
+        }
+      });
+
+    // Secondary path: react to subsequent auth changes (sign-in, sign-out,
+    // token refresh). Idempotent with the primary path because setSession /
+    // clearSession / setHydrated are all safe to call repeatedly.
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(
+      (_event: string, session: { user?: { id: string } } | null) => applySession(session),
+    );
+
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
   }, [setSession, clearSession, setHydrated]);
 
   return (

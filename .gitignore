@@ -13,6 +13,7 @@ apps/mobile/.env
 # local supabase
 supabase/.branches/
 supabase/.temp/
+supabase/snippets/
 
 # OS
 .DS_Store

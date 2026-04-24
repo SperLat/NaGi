@@ -7,7 +7,7 @@
  * endpoint (https://www.google.com/generate_204) with a 5s timeout.
  * This is a standard connectivity probe URL — returns 204 when online.
  */
-import { AppState, AppStateStatus } from 'react-native';
+import { AppState, AppStateStatus, Platform } from 'react-native';
 import { drainNow } from './drain';
 import { readQueue } from './storage';
 
@@ -16,6 +16,16 @@ const PROBE_TIMEOUT_MS = 5_000;
 const POLL_INTERVAL_MS = 30_000;
 
 async function isOnline(): Promise<boolean> {
+  // Web: navigator.onLine is reliable and reflects DevTools offline toggle.
+  // The Google probe is blocked by CORS from non-google origins, so it
+  // would always report "offline" and the outbox would never drain.
+  if (Platform.OS === 'web') {
+    return typeof navigator !== 'undefined' && navigator.onLine !== false;
+  }
+
+  // Native: navigator.onLine reports only connection state (not reachability),
+  // so use a real HTTP probe. generate_204 returns a 204 with no body when
+  // reachable — the standard Android/Chromium connectivity check.
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), PROBE_TIMEOUT_MS);
   try {

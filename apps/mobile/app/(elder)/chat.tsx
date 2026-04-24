@@ -10,7 +10,8 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
+import { router, Redirect } from 'expo-router';
+import { useSession } from '@/state';
 import * as Speech from 'expo-speech';
 import { startListening, isSupported } from '@/lib/voice';
 import { sendChatMessage, loadChatHistory, type ChatMessage } from '@/features/ai-chat';
@@ -33,6 +34,7 @@ interface DisplayMsg {
 
 export default function ElderChat() {
   const { elder, textSize, highContrast, orgId } = useElderCtx();
+  const { activeElderId } = useSession();
   const s = useStrings(elder?.preferred_lang);
   const [messages, setMessages]   = useState<ChatMessage[]>([]);
   const [display, setDisplay]     = useState<DisplayMsg[]>([]);
@@ -245,6 +247,15 @@ export default function ElderChat() {
   const bg        = highContrast ? 'bg-black' : 'bg-gray-50';
   const textColor = highContrast ? 'text-white' : 'text-gray-900';
 
+  // No elder selected (typically after a page reload — Zustand state
+  // doesn't persist across reloads by design). Bounce back to the
+  // intermediary dashboard instead of spinning forever; the normal entry
+  // point into chat is dashboard → tap elder.
+  if (!activeElderId) {
+    return <Redirect href="/(intermediary)/" />;
+  }
+
+  // Elder is selected but still loading from the backend.
   if (!elder) {
     return (
       <SafeAreaView className="flex-1 bg-white items-center justify-center">
