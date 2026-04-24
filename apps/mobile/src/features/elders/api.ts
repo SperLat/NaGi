@@ -1,8 +1,14 @@
-import { db } from '@/lib/supabase';
+import { db, supabase } from '@/lib/supabase';
 import { localDb } from '@/lib/db';
 import { enqueueOutbox } from '@/lib/sync/outbox';
 import { isMock } from '@/config/mode';
-import type { Elder, CreateElderInput, UpdateElderInput } from './types';
+import type {
+  Elder,
+  CreateElderInput,
+  UpdateElderInput,
+  ElderIntermediary,
+  InviteIntermediaryResult,
+} from './types';
 
 // SQLite stores profile/ui_config as JSON text — parse on read.
 function parseRow(row: Record<string, unknown>): Elder {
@@ -149,4 +155,75 @@ export async function updateElder(
   }
 
   return { data: updated, error: null };
+}
+
+// ── Intermediary membership ──────────────────────────────────────────────────
+// These go through SECURITY DEFINER RPCs (0009) because auth.users is not
+// visible to the anon client. In mock mode we read/write the in-memory store
+// directly and synthesise an email from the user_id.
+
+export async function listIntermediaries(
+  elderId: string,
+): Promise<{ data: ElderIntermediary[]; error: string | null }> {
+  if (isMock) {
+    const { data } = await db
+      .from<{
+        elder_id: string;
+        user_id: string;
+        relation: string | null;
+        created_at: string;
+      }>('elder_intermediaries')
+      .select('*')
+      .eq('elder_id', elderId);
+
+    const rows = (data ?? []).map(r => ({
+      user_id: r.user_id,
+      email:
+        r.user_id === 'user-demo-0001'
+          ? 'mock-intermediary@local'
+          : `${r.user_id}@local`,
+      relation: r.relation ?? null,
+      created_at: r.created_at,
+    }));
+    return { data: rows, error: null };
+  }
+
+  const { data, error } = await supabase.rpc('list_elder_intermediaries', {
+    elder: elderId,
+  });
+  if (error) return { data: [], error: error.message };
+  return { data: (data ?? []) as ElderIntermediary[], error: null };
+}
+
+export async function inviteIntermediary(
+  elderId: string,
+  email: string,
+  relation: string,
+): Promise<InviteIntermediaryResult> {
+  const trimmedEmail = email.trim().toLowerCase();
+  const trimmedRelation = relation.trim();
+
+  if (isMock) {
+    // The mock store only has one known user (MOCK_USER). Any other email
+    // falls through to "not_joined" — matching the real-backend UX.
+    const known = trimmedEmail === 'mock-intermediary@local';
+    if (!known) return { status: 'not_joined' };
+
+    await db.from('elder_intermediaries').insert({
+      elder_id: elderId,
+      user_id: 'user-demo-0001',
+      relation: trimmedRelation || null,
+      created_at: new Date().toISOString(),
+    });
+    return { status: 'added', user_id: 'user-demo-0001' };
+  }
+
+  const { data, error } = await supabase.rpc('add_elder_intermediary', {
+    elder: elderId,
+    email: trimmedEmail,
+    relation: trimmedRelation || null,
+  });
+  if (error) return { status: 'error', message: error.message };
+  if (!data) return { status: 'not_joined' };
+  return { status: 'added', user_id: data as string };
 }

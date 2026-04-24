@@ -20,6 +20,18 @@ export interface ElderUiConfig {
   voice_input?: boolean;
 }
 
+export interface ElderIntermediary {
+  user_id: string;
+  email: string;
+  relation: string | null;
+  created_at: string;
+}
+
+export type InviteIntermediaryResult =
+  | { status: 'added'; user_id: string }
+  | { status: 'not_joined' }
+  | { status: 'error'; message: string };
+
 export interface Elder {
   id: string;
   organization_id: string;
