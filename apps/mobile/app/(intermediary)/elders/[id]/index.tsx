@@ -60,7 +60,17 @@ export default function ElderOverview() {
       });
       return;
     }
-    setInviteNote({ kind: 'info', text: 'Could not add them just now. Try again in a moment.' });
+    // result.status === 'error' — show the RPC message in dev so silent
+    // failures (missing migration, RLS deny, etc.) stop looking like
+    // generic "try again" noise. In production fall back to the friendlier
+    // copy since raw pg errors aren't useful to an intermediary.
+    const devMessage = __DEV__ && result.status === 'error' ? result.message : null;
+    setInviteNote({
+      kind: 'info',
+      text: devMessage
+        ? `Could not add them: ${devMessage}`
+        : 'Could not add them just now. Try again in a moment.',
+    });
   };
 
   if (!elder) {
@@ -142,7 +152,16 @@ export default function ElderOverview() {
                 key={p.user_id}
                 className="bg-white rounded-2xl p-4 border border-gray-100"
               >
-                <Text className="font-semibold text-gray-900">{p.email}</Text>
+                <View className="flex-row items-center gap-2">
+                  <Text className="font-semibold text-gray-900 flex-shrink">
+                    {p.email}
+                  </Text>
+                  {p.accepted_at === null ? (
+                    <View className="bg-gray-100 rounded-full px-2.5 py-0.5">
+                      <Text className="text-gray-600 text-xs font-medium">Pending</Text>
+                    </View>
+                  ) : null}
+                </View>
                 {p.relation ? (
                   <Text className="text-gray-500 text-sm mt-0.5">{p.relation}</Text>
                 ) : null}

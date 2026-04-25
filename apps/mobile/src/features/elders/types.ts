@@ -25,6 +25,16 @@ export interface ElderIntermediary {
   email: string;
   relation: string | null;
   created_at: string;
+  accepted_at: string | null;
+}
+
+export interface PendingInvitation {
+  elder_id: string;
+  elder_name: string;
+  org_name: string;
+  inviter_email: string;
+  relation: string | null;
+  created_at: string;
 }
 
 export type InviteIntermediaryResult =

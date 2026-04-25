@@ -8,6 +8,7 @@ import type {
   UpdateElderInput,
   ElderIntermediary,
   InviteIntermediaryResult,
+  PendingInvitation,
 } from './types';
 
 // SQLite stores profile/ui_config as JSON text — parse on read.
@@ -184,6 +185,9 @@ export async function listIntermediaries(
           : `${r.user_id}@local`,
       relation: r.relation ?? null,
       created_at: r.created_at,
+      // Mock store doesn't model the pending → accept flow; treat all
+      // mock rows as already accepted so the UI doesn't show stale pills.
+      accepted_at: r.created_at,
     }));
     return { data: rows, error: null };
   }
@@ -192,7 +196,14 @@ export async function listIntermediaries(
     elder: elderId,
   });
   if (error) return { data: [], error: error.message };
-  return { data: (data ?? []) as ElderIntermediary[], error: null };
+  const rows = (data ?? []).map((r: Record<string, unknown>) => ({
+    user_id: r.user_id as string,
+    email: r.email as string,
+    relation: (r.relation as string | null) ?? null,
+    created_at: r.created_at as string,
+    accepted_at: (r.accepted_at as string | null) ?? null,
+  }));
+  return { data: rows, error: null };
 }
 
 export async function inviteIntermediary(
@@ -226,4 +237,47 @@ export async function inviteIntermediary(
   if (error) return { status: 'error', message: error.message };
   if (!data) return { status: 'not_joined' };
   return { status: 'added', user_id: data as string };
+}
+
+// ── Invitation acceptance (invitee side) ─────────────────────────────────
+// Packet 4: invitees see pending offers on their dashboard and accept or
+// decline. Accepting promotes the elder_intermediaries row AND grants the
+// invitee membership in the elder's organization.
+
+export async function listMyPendingInvitations(): Promise<{
+  data: PendingInvitation[];
+  error: string | null;
+}> {
+  if (isMock) {
+    // Mock store doesn't model cross-user invitations — return empty.
+    return { data: [], error: null };
+  }
+
+  const { data, error } = await supabase.rpc('list_my_pending_invitations');
+  if (error) return { data: [], error: error.message };
+  return { data: (data ?? []) as PendingInvitation[], error: null };
+}
+
+export async function acceptInvitation(
+  elderId: string,
+): Promise<{ ok: boolean; error: string | null }> {
+  if (isMock) return { ok: true, error: null };
+
+  const { error } = await supabase.rpc('accept_elder_intermediary', {
+    elder: elderId,
+  });
+  if (error) return { ok: false, error: error.message };
+  return { ok: true, error: null };
+}
+
+export async function declineInvitation(
+  elderId: string,
+): Promise<{ ok: boolean; error: string | null }> {
+  if (isMock) return { ok: true, error: null };
+
+  const { error } = await supabase.rpc('decline_elder_intermediary', {
+    elder: elderId,
+  });
+  if (error) return { ok: false, error: error.message };
+  return { ok: true, error: null };
 }

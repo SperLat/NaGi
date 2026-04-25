@@ -5,6 +5,7 @@ export type {
   UpdateElderInput,
   ElderIntermediary,
   InviteIntermediaryResult,
+  PendingInvitation,
 } from './types';
 export {
   listElders,
@@ -13,4 +14,7 @@ export {
   updateElder,
   listIntermediaries,
   inviteIntermediary,
+  listMyPendingInvitations,
+  acceptInvitation,
+  declineInvitation,
 } from './api';

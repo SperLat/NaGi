@@ -2,7 +2,15 @@ import { useEffect, useRef, useState } from 'react';
 import { View, Text, ScrollView, Pressable, ActivityIndicator, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { listElders, type Elder } from '@/features/elders';
+import {
+  listElders,
+  listMyPendingInvitations,
+  acceptInvitation,
+  declineInvitation,
+  type Elder,
+  type PendingInvitation,
+} from '@/features/elders';
+import { getActiveOrg } from '@/features/auth';
 import {
   listPendingRequests,
   acknowledgeHelpRequest,
@@ -14,11 +22,81 @@ import { isMock } from '@/config/mode';
 import { useSession } from '@/state';
 
 export default function IntermediaryDashboard() {
-  const { activeOrgId, userId, clearSession } = useSession();
+  const { activeOrgId, userId, clearSession, setSession } = useSession();
   const [elders, setElders]         = useState<Elder[]>([]);
   const [loading, setLoading]       = useState(true);
   const [alerts, setAlerts]         = useState<HelpRequest[]>([]);
+  const [invitations, setInvitations] = useState<PendingInvitation[]>([]);
+  const [invitationError, setInvitationError] = useState<string | null>(null);
+  const [busyInvitationId, setBusyInvitationId] = useState<string | null>(null);
   const shakeAnim                   = useRef(new Animated.Value(0)).current;
+
+  const refreshInvitations = async () => {
+    const { data, error } = await listMyPendingInvitations();
+    setInvitations(data);
+    if (error) setInvitationError(error);
+  };
+
+  // ── Pending invitations ──────────────────────────────────────────────────
+  useEffect(() => {
+    refreshInvitations();
+  }, [userId]);
+
+  const handleAccept = async (inv: PendingInvitation) => {
+    if (!userId) return;
+    setBusyInvitationId(inv.elder_id);
+    setInvitationError(null);
+    const { ok, error } = await acceptInvitation(inv.elder_id);
+    setBusyInvitationId(null);
+
+    if (!ok) {
+      // Same dev-mode error surfacing as the invite flow in
+      // (intermediary)/elders/[id]/index.tsx — raw RPC errors in dev,
+      // friendly fallback in production.
+      setInvitationError(
+        __DEV__ && error
+          ? `Could not accept: ${error}`
+          : 'Could not accept just now. Try again in a moment.',
+      );
+      return;
+    }
+
+    // Accepted elder may belong to a different org than activeOrgId. We
+    // refetch the user's "active" org via getActiveOrg and switch them via
+    // setSession. This is the cleanest path for the hackathon — useSession
+    // exposes setSession (userId, orgId) and there is no dedicated
+    // setActiveOrg setter. If the elder's org becomes the new active org,
+    // the elder list effect re-runs automatically (activeOrgId is in its
+    // deps array) and the elder appears.
+    await refreshInvitations();
+    if (userId) {
+      const newOrgId = await getActiveOrg(userId);
+      if (newOrgId && newOrgId !== activeOrgId) {
+        setSession(userId, newOrgId);
+      } else if (activeOrgId) {
+        // Same org — just refetch the list.
+        listElders(activeOrgId).then(({ data }) => {
+          if (data) setElders(data);
+        });
+      }
+    }
+  };
+
+  const handleDecline = async (inv: PendingInvitation) => {
+    setBusyInvitationId(inv.elder_id);
+    setInvitationError(null);
+    const { ok, error } = await declineInvitation(inv.elder_id);
+    setBusyInvitationId(null);
+    if (!ok) {
+      setInvitationError(
+        __DEV__ && error
+          ? `Could not decline: ${error}`
+          : 'Could not decline just now. Try again in a moment.',
+      );
+      return;
+    }
+    await refreshInvitations();
+  };
 
   // ── Elder list ────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -119,6 +197,61 @@ export default function IntermediaryDashboard() {
             ))}
           </View>
         </Animated.View>
+      )}
+
+      {/* ── Pending invitations ─────────────────────────────────────────── */}
+      {invitations.length > 0 && (
+        <View className="mx-6 mb-3 gap-2">
+          <Text className="text-xs font-medium text-gray-500 ml-1 uppercase tracking-wide">
+            Invitations
+          </Text>
+          {invitations.map(inv => {
+            const busy = busyInvitationId === inv.elder_id;
+            return (
+              <View
+                key={inv.elder_id}
+                className="bg-white rounded-2xl p-4 border border-gray-100"
+              >
+                <Text className="text-gray-900 leading-snug">
+                  <Text className="font-semibold">{inv.inviter_email}</Text>
+                  {' invited you to help care for '}
+                  <Text className="font-semibold">{inv.elder_name}</Text>
+                  {inv.org_name ? (
+                    <Text className="text-gray-500">{` (${inv.org_name})`}</Text>
+                  ) : null}
+                </Text>
+                {inv.relation ? (
+                  <Text className="text-gray-500 text-sm mt-1">as {inv.relation}</Text>
+                ) : null}
+                <View className="flex-row gap-2 mt-3">
+                  <Pressable
+                    className="flex-1 border border-gray-200 rounded-xl py-2.5 items-center"
+                    style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                    onPress={() => handleDecline(inv)}
+                    disabled={busy}
+                  >
+                    <Text className="text-gray-700 font-medium">Decline</Text>
+                  </Pressable>
+                  <Pressable
+                    className="flex-1 bg-accent-600 rounded-xl py-2.5 items-center"
+                    style={({ pressed }) => ({ opacity: pressed ? 0.82 : 1 })}
+                    onPress={() => handleAccept(inv)}
+                    disabled={busy}
+                  >
+                    {busy ? (
+                      <ActivityIndicator color="white" />
+                    ) : (
+                      <Text className="text-white font-semibold">Accept</Text>
+                    )}
+                  </Pressable>
+                </View>
+              </View>
+            );
+          })}
+          {invitationError ? (
+            <Text className="text-gray-600 text-sm ml-1">{invitationError}</Text>
+          ) : null}
+        </View>
       )}
 
       <ScrollView className="flex-1 px-6">
