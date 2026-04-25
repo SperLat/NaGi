@@ -46,6 +46,10 @@ export default function ElderChat() {
   const [volume, setVolume]       = useState(0);
   const [voiceMode, setVoiceMode] = useState(elder?.ui_config?.voice_input ?? true);
   const [ttsVoice, setTtsVoice]   = useState<string | undefined>(undefined);
+  // Tracks the initial history fetch so the empty-state welcome doesn't
+  // flash before Supabase responds. Stays true until loadChatHistory
+  // resolves (or the effect tears down on elder change / unmount).
+  const [historyLoading, setHistoryLoading] = useState(true);
 
   const streamRef      = useRef('');
   const listRef        = useRef<FlatList>(null);
@@ -71,41 +75,64 @@ export default function ElderChat() {
     const lang = elder?.preferred_lang;
     if (!lang) return;
 
-    Speech.getAvailableVoicesAsync().then(voices => {
-      const pickFirst = (locales: string[]): string | undefined => {
-        for (const locale of locales) {
-          const v = voices.find(
-            v => v.language === locale || v.identifier?.includes(locale.replace('-', '_')),
-          );
-          if (v) return v.identifier;
+    // Web Speech API quirk: getVoices() returns [] on first call after a
+    // cold browser process — voices populate asynchronously and the browser
+    // fires 'voiceschanged' when the catalog is ready. Re-run the picker
+    // on that event so a fresh page load doesn't get stuck on the OS
+    // default voice (which is usually English on Windows = English engine
+    // pronouncing Spanish text phonetically).
+    const pickAndSetVoice = () => {
+      Speech.getAvailableVoicesAsync().then(voices => {
+        const pickFirst = (locales: string[]): string | undefined => {
+          for (const locale of locales) {
+            const v = voices.find(
+              v => v.language === locale || v.identifier?.includes(locale.replace('-', '_')),
+            );
+            if (v) return v.identifier;
+          }
+          return undefined;
+        };
+
+        let voice: string | undefined;
+
+        if (lang === 'es') {
+          voice =
+            pickFirst(['es-419', 'es-MX', 'es-US', 'es-AR', 'es-CO', 'es-CL']) ??
+            voices.find(
+              v =>
+                (v.language ?? '').startsWith('es') &&
+                !v.language?.startsWith('es-ES') &&
+                !(v.identifier ?? '').includes('es_ES'),
+            )?.identifier;
+        } else if (lang === 'pt') {
+          voice =
+            pickFirst(['pt-BR', 'pt-PT']) ??
+            voices.find(v => (v.language ?? '').startsWith('pt'))?.identifier;
+        } else {
+          // English (and any unrecognised lang) — prefer en-US
+          voice =
+            pickFirst(['en-US', 'en-GB', 'en-AU']) ??
+            voices.find(v => (v.language ?? '').startsWith('en'))?.identifier;
         }
-        return undefined;
-      };
 
-      let voice: string | undefined;
+        setTtsVoice(voice);
+      }).catch(() => {}); // API unavailable on some platforms — silent fallback
+    };
 
-      if (lang === 'es') {
-        voice =
-          pickFirst(['es-419', 'es-MX', 'es-US', 'es-AR', 'es-CO', 'es-CL']) ??
-          voices.find(
-            v =>
-              (v.language ?? '').startsWith('es') &&
-              !v.language?.startsWith('es-ES') &&
-              !(v.identifier ?? '').includes('es_ES'),
-          )?.identifier;
-      } else if (lang === 'pt') {
-        voice =
-          pickFirst(['pt-BR', 'pt-PT']) ??
-          voices.find(v => (v.language ?? '').startsWith('pt'))?.identifier;
-      } else {
-        // English (and any unrecognised lang) — prefer en-US
-        voice =
-          pickFirst(['en-US', 'en-GB', 'en-AU']) ??
-          voices.find(v => (v.language ?? '').startsWith('en'))?.identifier;
-      }
+    pickAndSetVoice();
 
-      setTtsVoice(voice);
-    }).catch(() => {}); // API unavailable on some platforms — silent fallback
+    // Web only: re-run the picker when the voice catalog finishes loading.
+    // Idempotent — re-running with the same voices just re-sets the same
+    // identifier. No-op on native (no window.speechSynthesis).
+    const ss =
+      typeof window !== 'undefined' && 'speechSynthesis' in window
+        ? window.speechSynthesis
+        : null;
+    if (ss && typeof ss.addEventListener === 'function') {
+      const handler = () => pickAndSetVoice();
+      ss.addEventListener('voiceschanged', handler);
+      return () => ss.removeEventListener('voiceschanged', handler);
+    }
   }, [elder?.preferred_lang]);
 
   // ── TTS ─────────────────────────────────────────────────────────────────────
@@ -138,18 +165,30 @@ export default function ElderChat() {
   useEffect(() => () => { Speech.stop(); }, []);
 
   // ── History ──────────────────────────────────────────────────────────────────
-  // Load the last 10 turns from local SQLite on session start so Nagi
-  // doesn't ask the same questions twice. Fires once when elder is ready.
+  // Load the last 10 turns on session start so Nagi doesn't ask the same
+  // questions twice. Tries local SQLite first (instant on native), falls
+  // back to Supabase (required on web where localDb is a stub, and also
+  // covers cross-device — elder picks up where they left off when they
+  // switch from tablet to phone).
+  //
+  // The `cancelled` flag drops a stale fetch if the elder switches mid-load.
   useEffect(() => {
     if (!elder) return;
-    const history = loadChatHistory(elder.id);
-    if (history.length === 0) return;
-    setMessages(history);
-    setDisplay(history.map((msg, i) => ({
-      id:      `history-${i}`,
-      role:    msg.role,
-      content: msg.content,
-    })));
+    let cancelled = false;
+    setHistoryLoading(true);
+    loadChatHistory(elder.id).then(history => {
+      if (cancelled) return;
+      if (history.length > 0) {
+        setMessages(history);
+        setDisplay(history.map((msg, i) => ({
+          id:      `history-${i}`,
+          role:    msg.role,
+          content: msg.content,
+        })));
+      }
+      setHistoryLoading(false);
+    });
+    return () => { cancelled = true; };
   }, [elder?.id]);
 
   // ── STT ─────────────────────────────────────────────────────────────────────
@@ -294,8 +333,33 @@ export default function ElderChat() {
           ref={listRef}
           data={display}
           keyExtractor={m => m.id}
-          contentContainerStyle={{ padding: 16, paddingBottom: 8 }}
+          contentContainerStyle={
+            display.length === 0
+              ? { flex: 1, justifyContent: 'center', padding: 24 }
+              : { padding: 16, paddingBottom: 8 }
+          }
           onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
+          ListEmptyComponent={
+            // Suppressed during history fetch so the welcome doesn't flash
+            // before Supabase responds with prior turns. Once historyLoading
+            // is false and display is still empty, this is a genuinely fresh
+            // chat — show the warm hello instead of a blank void.
+            historyLoading ? null : (
+              <View className="items-center">
+                <Text className="text-6xl mb-4" accessible={false}>凪</Text>
+                <Text
+                  className={`${tc.btn} font-semibold text-center mb-2 ${textColor}`}
+                >
+                  {s.chatEmptyTitle(elder.display_name)}
+                </Text>
+                <Text
+                  className={`${tc.body} text-center ${highContrast ? 'text-gray-200' : 'text-gray-500'}`}
+                >
+                  {s.chatEmptySubtitle}
+                </Text>
+              </View>
+            )
+          }
           renderItem={({ item }) => (
             <View className={`mb-4 max-w-[82%] ${item.role === 'user' ? 'self-end' : 'self-start'}`}>
               <View

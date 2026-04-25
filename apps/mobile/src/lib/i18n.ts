@@ -33,6 +33,9 @@ export interface ElderStrings {
   speak:          string;
   replay:         string;
   offlineMessage: string;
+  // Empty chat state — first-time or no-history case
+  chatEmptyTitle:    (firstName: string) => string;
+  chatEmptySubtitle: string;
 }
 
 const strings: Record<Lang, ElderStrings> = {
@@ -62,6 +65,8 @@ const strings: Record<Lang, ElderStrings> = {
     speak:          'Hablar',
     replay:         '▶ Repetir',
     offlineMessage: 'Ahora mismo no puedo responder. Llama a tu familia si necesitas ayuda.',
+    chatEmptyTitle:    (n) => `Hola, ${n}.`,
+    chatEmptySubtitle: 'Soy Nagi. Aquí estoy. ¿De qué te gustaría hablar?',
   },
 
   pt: {
@@ -90,6 +95,8 @@ const strings: Record<Lang, ElderStrings> = {
     speak:          'Falar',
     replay:         '▶ Repetir',
     offlineMessage: 'Não consigo responder agora. Ligue para sua família se precisar de ajuda.',
+    chatEmptyTitle:    (n) => `Olá, ${n}.`,
+    chatEmptySubtitle: 'Sou o Nagi. Estou aqui. Sobre o que você gostaria de conversar?',
   },
 
   en: {
@@ -118,6 +125,8 @@ const strings: Record<Lang, ElderStrings> = {
     speak:          'Speak',
     replay:         '▶ Replay',
     offlineMessage: 'I cannot respond right now. Call your family if you need help.',
+    chatEmptyTitle:    (n) => `Hello, ${n}.`,
+    chatEmptySubtitle: "I'm Nagi. I'm here. What would you like to talk about?",
   },
 };
 

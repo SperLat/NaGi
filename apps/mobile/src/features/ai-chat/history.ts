@@ -21,30 +21,57 @@ interface AiTurnPayload {
  * in chronological order, ready to pass as the `messages` array
  * to the ai-chat edge function.
  *
- * Returns [] in mock mode or if the elder has no history yet.
+ * Read order: local SQLite first (instant, native-only), then Supabase
+ * (works on web where localDb is a stub, also covers cross-device — elder
+ * picks up where they left off when they switch from tablet to phone).
+ *
+ * Returns [] in mock mode, or if neither path has any rows yet.
  */
-export function loadChatHistory(elderId: string): ChatMessage[] {
+export async function loadChatHistory(elderId: string): Promise<ChatMessage[]> {
   if (isMock) return [];
-  try {
-    const rows = localDb.getAllSync<{ payload: string }>(
-      `SELECT payload
-         FROM activity_log
-        WHERE elder_id = ? AND kind = 'ai_turn'
-        ORDER BY client_ts DESC
-        LIMIT ?`,
-      [elderId, HISTORY_TURNS],
-    );
 
-    // getAllSync returns DESC order — reverse to restore chronological order
-    return rows.reverse().flatMap(row => {
-      const { message, response } = JSON.parse(row.payload) as AiTurnPayload;
-      return [
-        { role: 'user'      as const, content: message  },
-        { role: 'assistant' as const, content: response },
-      ];
-    });
+  // ── Path 1: native SQLite (instant) ─────────────────────────────────────
+  // localDb is null on web; only attempt when it actually exists. We bail
+  // OUT of the local path on any error, but only return early on a
+  // successful read with rows — empty local on web shouldn't block the
+  // server fallback, otherwise the elder shell would always start blank.
+  if (localDb) {
+    try {
+      const rows = localDb.getAllSync<{ payload: string }>(
+        `SELECT payload
+           FROM activity_log
+          WHERE elder_id = ? AND kind = 'ai_turn'
+          ORDER BY client_ts DESC
+          LIMIT ?`,
+        [elderId, HISTORY_TURNS],
+      );
+
+      if (rows.length > 0) {
+        // getAllSync returns DESC order — reverse to restore chronological order
+        return rows.reverse().flatMap(row => {
+          const { message, response } = JSON.parse(row.payload) as AiTurnPayload;
+          return [
+            { role: 'user'      as const, content: message  },
+            { role: 'assistant' as const, content: response },
+          ];
+        });
+      }
+    } catch {
+      // SQLite unavailable or payload malformed — fall through to server
+    }
+  }
+
+  // ── Path 2: server (web + cross-device) ─────────────────────────────────
+  // Reuses the same pull the intermediary transcript uses. listConversationTurns
+  // returns DESC; we reverse to chronological so it can be fed straight into
+  // the messages array.
+  try {
+    const turns = await listConversationTurns(elderId, { limit: HISTORY_TURNS });
+    return turns.reverse().flatMap(turn => [
+      { role: 'user'      as const, content: turn.user_message      },
+      { role: 'assistant' as const, content: turn.assistant_message },
+    ]);
   } catch {
-    // SQLite unavailable or payload malformed — start fresh rather than crash
     return [];
   }
 }
