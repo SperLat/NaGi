@@ -111,6 +111,7 @@ Deno.serve(async (req: Request) => {
     try {
       const stream = anthropic.messages.stream(
         {
+          // MODELS — change here when Anthropic releases a new version
           model: 'claude-sonnet-4-6',
           max_tokens: 1024,
           system: systemBlocks,
@@ -148,6 +149,7 @@ Deno.serve(async (req: Request) => {
       await db.from('ai_interactions').insert({
         elder_id,
         organization_id: organizationId,
+        // MODELS — change here when Anthropic releases a new version
         model: 'claude-sonnet-4-6',
         profile_version: (elder as { profile_version: number }).profile_version,
         input_tokens: inputTokens,

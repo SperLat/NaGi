@@ -62,6 +62,7 @@ Deno.serve(async (req: Request) => {
 
   try {
     const response = await anthropic.messages.create({
+      // MODELS — change here when Anthropic releases a new version
       model: 'claude-haiku-4-5',
       max_tokens: 64,
       system: CLASSIFY_SYSTEM,

@@ -88,6 +88,7 @@ export async function sendChatMessage(
   await logActivity(elderId, organizationId, 'ai_turn', {
     message: lastMsg,
     response: fullResponse,
+    // MODELS — change here when Anthropic releases a new version
     model: 'claude-sonnet-4-6',
   });
 }

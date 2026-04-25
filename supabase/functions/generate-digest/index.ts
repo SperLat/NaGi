@@ -206,6 +206,7 @@ Don't repeat the raw numbers — weave them in only when they help the story. Do
   try {
     const response = await anthropic.messages.create(
       {
+        // MODELS — change here when Anthropic releases a new version
         model: 'claude-sonnet-4-6',
         max_tokens: 800,
         messages: [{ role: 'user', content: userPrompt }],
