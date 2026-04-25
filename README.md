@@ -10,6 +10,9 @@ Nagi helps trusted intermediaries — family members, caregivers, volunteers —
 
 ## Quickstart (mock mode — no backend needed)
 
+Fakes auth, AI, and persistence — useful for poking at the UI, useless for
+evaluating the product end-to-end.
+
 ```bash
 git clone https://github.com/SperLat/NaGi
 cd NaGi
@@ -18,6 +21,17 @@ cd apps/mobile
 cp .env.example .env          # defaults to EXPO_PUBLIC_MOCK_MODE=true
 pnpm start
 ```
+
+## Run the real product locally (recommended for evaluation)
+
+If you want to actually exercise Nagi — sign up, create elders, invite
+intermediaries, see help requests stream in over Realtime — bring up the
+full Supabase stack on your laptop. No cloud accounts needed; everything
+runs in Docker.
+
+**→ See [docs/LOCAL_DEVELOPMENT.md](docs/LOCAL_DEVELOPMENT.md)** for the
+end-to-end walkthrough (clone → migrations → Anthropic key → two-browser
+smoke test).
 
 ## Stack
 
