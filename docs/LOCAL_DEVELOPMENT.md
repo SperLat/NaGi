@@ -252,22 +252,60 @@ branch.
 
 ---
 
-## Stopping the stack
+## Stopping the stack — read this carefully
+
+> **⚠ Data-loss warning.** In the Supabase CLI version pinned by this
+> repo, `npx supabase stop` has been observed to **dismantle the local
+> Postgres Docker volume**, destroying all signed-up users, elders, and
+> message history — *even when invoked with `--no-backup`*. The flag's
+> name is misleading: `--no-backup` does not protect data, it only
+> skips the snapshot step. We learned this the hard way.
+
+**Use the wrapper script instead:**
 
 ```bash
-# From the repo root
-npx supabase stop
+pnpm db:safe-stop
 ```
 
-This stops Docker containers but **preserves your local data** (signed-up
-users, created elders, message history). Next `supabase start` brings
-everything back.
+This auto-runs `pg_dump` first, drops a timestamped `.sql` file into
+`supabase/.backups/`, and only then invokes `supabase stop`. If the volume
+gets nuked, you restore from the dump in a single command.
 
-To wipe the local DB clean:
+**Manual backup at any time:**
+
+```bash
+pnpm db:backup
+# → supabase/.backups/auto-<timestamp>.sql
+```
+
+**Restore from a backup:**
+
+```bash
+docker exec -i supabase_db_Cedar psql -U postgres -d postgres < supabase/.backups/auto-XXXX.sql
+```
+
+**To wipe the local DB clean** (intentional reset):
 
 ```bash
 npx supabase db reset
 ```
+
+This is genuinely destructive — it drops the entire local DB and
+re-applies all migrations from scratch. Safe in local development; do
+not run against a remote.
+
+### Restarting just an edge function
+
+If you only need to apply a code change to an edge function (or pick up a
+new function added to `supabase/functions/`), restart **only** the edge
+container — never stop/start the whole stack:
+
+```bash
+docker restart supabase_edge_runtime_Cedar
+```
+
+This re-reads `config.toml` and re-scans `supabase/functions/` without
+touching the Postgres volume.
 
 ---
 

@@ -5,7 +5,9 @@
   "scripts": {
     "typecheck": "pnpm --filter @cedar/mobile typecheck",
     "verify-rls": "tsx scripts/verify-rls.ts",
-    "seed": "tsx scripts/seed-mock.ts"
+    "seed": "tsx scripts/seed-mock.ts",
+    "db:backup": "bash scripts/db-backup.sh",
+    "db:safe-stop": "bash scripts/db-safe-stop.sh"
   },
   "devDependencies": {
     "supabase": "^2.93.0",

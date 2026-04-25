@@ -4,7 +4,7 @@
 
 Nunca ejecutar comandos que destruyan o reviertan datos, incluso si el razonamiento interno lo sugiere como "la mejor opción":
 
-- **Supabase**: NUNCA `db reset`. Para aplicar migraciones pendientes: `npx supabase migration up`
+- **Supabase**: NUNCA `db reset`. NUNCA `supabase stop` (incluso con `--no-backup` — el flag es engañoso, en esta versión del CLI desmonta el volumen de Postgres y borra los datos locales). Para reiniciar solo edge functions: `docker restart supabase_edge_runtime_Cedar`. Para detener limpiamente con backup: `pnpm db:safe-stop`.
 - **Git**: NUNCA `reset --hard`, `push --force`, `clean -f`, `branch -D` sin instrucción explícita del usuario
 - **Filesystem**: NUNCA `rm -rf`, `rmdir /s`, `del /f /s` en directorios del proyecto
 - **SQL**: NUNCA ejecutar `DROP TABLE`, `DROP DATABASE`, `TRUNCATE` directamente
@@ -13,9 +13,16 @@ Nunca ejecutar comandos que destruyan o reviertan datos, incluso si el razonamie
 | Acción destructiva | Alternativa segura |
 |---|---|
 | `supabase db reset` | `npx supabase migration up` |
+| `supabase stop` (riesgo de perder datos del volumen) | `pnpm db:safe-stop` (toma backup automático antes) |
+| Reiniciar solo edge functions | `docker restart supabase_edge_runtime_Cedar` |
+| Cambiar `config.toml` y aplicar | Editar archivo + `docker restart supabase_edge_runtime_Cedar` (NO `supabase stop && start`) |
 | `git reset --hard` | `git stash` o nuevo commit |
 | `rm -rf dir` | Mostrar qué se eliminaría, pedir confirmación explícita |
 | `DROP TABLE` | Mostrar la query, no ejecutarla |
+
+**Backup manual cuando quieras:** `pnpm db:backup` → escribe `supabase/.backups/auto-<timestamp>.sql`.
+
+**Restaurar:** `docker exec -i supabase_db_Cedar psql -U postgres -d postgres < supabase/.backups/auto-XXXX.sql`
 
 Si hay duda sobre si una acción es destructiva — no ejecutarla. Preguntar primero.
 

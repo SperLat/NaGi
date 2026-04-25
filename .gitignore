@@ -14,6 +14,7 @@ apps/mobile/.env
 supabase/.branches/
 supabase/.temp/
 supabase/snippets/
+supabase/.backups/
 
 # OS
 .DS_Store
