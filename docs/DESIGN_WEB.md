@@ -1,7 +1,11 @@
 # Nagi — Web Design Spec
 **Status:** Single-page marketing site, implementation of [BRAND.md](./BRAND.md) via [BRAND_MANUAL.md](./BRAND_MANUAL.md) | **Date:** 2026-04-22
 **Bound by:** BRAND.md (spine), BRAND_MANUAL.md (tokens), PRINCIPLES.md (constitution).
-**Domain candidate:** `nagi.app` (proposal — do not register as part of this packet).
+**Domain plan:**
+- **Hackathon demo:** `nagi.kasvu.dev` (subdomain on Kasvu infra; signals the lineage to judges; zero registration cost).
+- **Defensive registration:** `iamnagi.org` (acquired separately; the .org TLD signals non-commercial/community alignment with the Apache 2.0 + open-source posture).
+- **Premium-if-affordable:** `nagi.care` (~$80–120/yr if available — the most semantically perfect TLD; redirect to `iamnagi.org` if acquired).
+- **Not pursuing:** `nagi.com`, `nagi.app` — both taken or unavailable; no rebrand is worth losing the kokuji story for.
 
 ---
 

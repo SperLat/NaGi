@@ -4,62 +4,18 @@
 
 ---
 
-## 0. Migration note — existing implementation vs. this spec
+## 0. Token migration — complete
 
-The 12 routes currently compile and run. They use `bg-nagi-600` (`#4f46e5`, indigo) as their accent. Per BRAND.md §7 ("warm accent") and BRAND_MANUAL.md §3.2, the accent is `#B8552B` (muted terracotta).
+Historical note: an earlier pre-Kasvu version of the app used `bg-nagi-600` (`#4f46e5`, indigo) as the primary accent. That migration to the warm-terracotta palette specified by [BRAND_MANUAL.md](./BRAND_MANUAL.md) §3 has fully landed in [`apps/mobile/tailwind.config.js`](../apps/mobile/tailwind.config.js). The current token set:
 
-This spec is written as if the migration has landed. The required config change is a single diff in `apps/mobile/tailwind.config.js`:
+- `surface-elder`, `surface-elder-raised`, `surface-elder-sunken` — warm off-white family for the elder surface
+- `surface-intermediary`, `surface-intermediary-raised`, `surface-intermediary-sunken` — cooler stone for the intermediary surface
+- `accent-50…700` + `accent-ink` — muted terracotta `#B8552B` family (the single warm accent)
+- `neutral-50…900` — warm-biased 9-step scale (HSL hue ≈ 30°)
+- `safety-critical*` — `#C8392E` reserved for *Necesito ayuda* button only
+- `presence` (olive) and `info` (slate) — semantic status tokens
 
-```js
-// BEFORE
-colors: {
-  nagi: {
-    50:  '#f0f4ff',
-    100: '#e0e9ff',
-    500: '#4f6ef7',
-    600: '#3b5bf6',
-    700: '#2d49e0',
-  },
-}
-
-// AFTER
-colors: {
-  surface: {
-    elder:          '#FBF7F0',
-    'elder-raised': '#FFFFFF',
-    'elder-sunken': '#F4EFE6',
-    intermediary:   '#F6F5F2',
-    'intermediary-raised': '#FFFFFF',
-    'intermediary-sunken': '#EDEAE3',
-    dark:           '#1A1714',
-    'dark-raised':  '#26221E',
-  },
-  accent: {
-    50:  '#FBF2EC',
-    100: '#F2D9C9',
-    500: '#D06534',
-    600: '#B8552B',   // primary — replaces nagi-600
-    700: '#964521',
-    ink: '#5A2810',
-  },
-  neutral: {
-    50:  '#FAF8F5', 100: '#F0EDE7', 200: '#E2DDD3',
-    300: '#C8C1B3', 400: '#9C9485', 500: '#736B5C',
-    600: '#544D42', 700: '#3D372F', 800: '#2A2520', 900: '#1A1714',
-  },
-  safety: {
-    critical:        '#C8392E',
-    'critical-soft': '#FBE8E5',
-    'critical-border': '#F4C4BE',
-  },
-  presence: { DEFAULT: '#7A8C4F', soft: '#EEF1E2' },
-  info:     { DEFAULT: '#4A6B7A', soft: '#E0E8EC' },
-  // Transitional alias — remove once all files migrated:
-  nagi: { 50: '#FBF2EC', 100: '#F2D9C9', 500: '#D06534', 600: '#B8552B', 700: '#964521' },
-}
-```
-
-This spec references the AFTER token names. The `nagi` alias exists only during migration; CI should flag any new `nagi-*` reference after step 10 of the BUILD sequence.
+No `nagi-*` color token exists in the current config. If a `bg-nagi-*` reference appears in a code review, it is a regression from before Apr 2026 and should be replaced with the appropriate `accent-*` or `neutral-*` token.
 
 ---
 
@@ -258,7 +214,7 @@ This spec references the AFTER token names. The `nagi` alias exists only during 
 - Root: `bg-surface-intermediary`
 - Header row: title `text-2xl font-bold text-neutral-800`, subtitle `text-sm text-neutral-500`, `+` button `w-11 h-11` (44px Vigía min) with Lucide `Plus` icon replacing `+` glyph
 - List row card: per BRAND_MANUAL §6.2 — `bg-surface-intermediary-raised border-neutral-100 rounded-2xl p-5 mb-3`
-- Lang pill: `bg-accent-100 text-accent-ink` (replaces `bg-nagi-100 text-nagi-700`)
+- Lang pill: `bg-accent-100 text-accent-ink`
 - Status pill active: `bg-info-soft text-info` (replaces `bg-green-100 text-green-700`)
 - Status pill paused: `bg-neutral-100 text-neutral-500`
 - Empty-state container: `bg-white rounded-2xl p-6 border-neutral-100` — replace `👴` with Lucide `Users` icon at 32px in `text-neutral-400`, not `text-4xl` emoji
@@ -572,7 +528,7 @@ This spec references the AFTER token names. The `nagi` alias exists only during 
 - Help button (replace):
   - `bg-safety-critical-soft border-2 border-safety-critical-border rounded-2xl py-5`
   - Label: `text-safety-critical font-bold text-3xl` (tc.btn matches BRAND_MANUAL §4.2)
-- Remove the `text-nagi-500` on subtitle line 56 — replace with `text-accent-500`
+- Subtitle: `text-accent-500`
 
 **Accessibility checks (Vigía 1C, 1B):**
 - Text sizes: `TEXT_CLASS` covers lg/xl/2xl — `TEXT_CLASS.lg.heading = text-3xl = 32px`, far above 20px floor. PASS.
@@ -632,7 +588,7 @@ This spec references the AFTER token names. The `nagi` alias exists only during 
 - Root: `bg-surface-elder` (or `bg-surface-dark` in HC) — replace `bg-gray-50` / `bg-black`
 - Header border: `border-neutral-100` (replace `border-gray-100`)
 - Messages FlatList: contentContainerStyle unchanged
-- User bubble: `bg-accent-600` with `text-white` (replaces `bg-nagi-600`)
+- User bubble: `bg-accent-600` with `text-white`
 - Assistant bubble: `bg-surface-elder-raised border-neutral-100` with `text-neutral-800`
 - Mic button:
   - Idle: `bg-accent-600`, size 80×80, `rounded-full`
@@ -690,7 +646,7 @@ This spec references the AFTER token names. The `nagi` alias exists only during 
 - `bg-surface-intermediary` (replace `bg-white`)
 - Kanji `text-6xl mb-4 text-neutral-800` (replace default black)
 - Title `text-xl font-semibold text-neutral-800`
-- Link `text-accent-600 font-medium` (replaces `text-nagi-600`)
+- Link `text-accent-600 font-medium`
 
 **Accessibility checks:** standard — PASS.
 

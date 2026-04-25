@@ -12,6 +12,12 @@ A trusted human helped you set this up. The screen you are looking at was prepar
 
 That sentence is the entire brand. Every visual, every word, every motion exists to make it feel true.
 
+### 1.1 Tagline
+
+> **Where care grows still.**
+
+This is the public-facing distillation — used as the signature on marketing surfaces, beneath the wordmark in lockup, and as the close of the demo video. It joins Kasvu's growth language with Nagi's earned stillness. Use it in full lockup with the wordmark, in brand advertising, and as the signature of official communications. **Do not use it inside product UI** — the product earns its calm through the experience itself, not through a slogan repeated on screens.
+
 ---
 
 ## 2. Name
@@ -164,7 +170,9 @@ Pattern: **what happened → what we are doing → what they can do**.
 
 ## 10. Posture for the Open-Source Audience
 
-Nagi is MIT-licensed. The codebase will be read by developers, NGOs, and clinicians evaluating it for their own deployments. The brand for that audience has the same voice but a different surface: technical, complete, not ashamed of the seriousness of the problem.
+Nagi software is **Apache License 2.0** (see [LICENSE](../LICENSE)). Brand assets and documentation are **CC BY 4.0**. The Kasvu philosophy (the upstream lineage) is CC BY-NC-SA 4.0 with a specific carve-out for software implementations in the elder-care, caregiving, and community-health domains — Nagi falls under that carve-out. See [PHILOSOPHY.md](./PHILOSOPHY.md) for the full lineage.
+
+The codebase will be read by developers, NGOs, and clinicians evaluating it for their own deployments. The brand for that audience has the same voice but a different surface: technical, complete, not ashamed of the seriousness of the problem.
 
 - **README and docs:** plain English, no marketing varnish. Show the architecture, name the trade-offs, link the principles.
 - **Hosted version vs self-host:** named clearly, no upsell pressure. The hosted version exists because someone has to run it; the self-host path is first-class.
@@ -205,4 +213,4 @@ If any item fails, the artifact returns for revision.
 
 ---
 
-*Authored under Kronos discipline. Voice principles by ALMA. Bound to PRINCIPLES.md. Licensed CC BY 4.0 — share freely, attribute Cedar.*
+*Authored under Kronos discipline. Voice principles by ALMA. Bound to [PHILOSOPHY.md](./PHILOSOPHY.md) (upstream lineage) and [PRINCIPLES.md](./PRINCIPLES.md) (design constitution). Licensed CC BY 4.0 — share freely, attribute Cedar.*

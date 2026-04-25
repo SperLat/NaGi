@@ -98,7 +98,7 @@ Per BRAND.md §7 (visual ground rules — color). Every value is hex. WCAG ratio
 | `accent-primary-soft` | `#F2D9C9` | Tag backgrounds, subtle highlights, voice-mode toggle on state |
 | `accent-primary-ink` | `#5A2810` | Text-on-soft-accent, deep-context emphasis |
 
-**Rationale:** `#B8552B` is a muted terracotta — burnt sienna with the saturation pulled down (HSL ≈ 17°, 62%, 44%). It carries warmth without becoming alarming, reads as "earthen" not "branded", and contrasts cleanly against both surfaces. It is the *only* warm accent on any screen (§7: "one accent per screen"). The current implementation uses indigo `#4f46e5` (`nagi-600` in `tailwind.config.js`); that token is replaced wholesale — see DESIGN_APP.md §0 for the migration note.
+**Rationale:** `#B8552B` is a muted terracotta — burnt sienna with the saturation pulled down (HSL ≈ 17°, 62%, 44%). It carries warmth without becoming alarming, reads as "earthen" not "branded", and contrasts cleanly against both surfaces. It is the *only* warm accent on any screen (§7: "one accent per screen").
 
 ### 3.3 Neutrals (warm-biased)
 
@@ -322,7 +322,7 @@ Tag pill shape: `rounded-full px-2.5 py-0.5`, `text-xs` weight 500.
 | Active | `info-soft` `#E0E8EC` | `info` `#4A6B7A` | Elder status pill |
 | Paused | `neutral-100` | `neutral-500` | Elder status pill |
 | Synced | `success-presence-soft` | `success-presence` | "Saved" / "Sent" pill |
-| Language | `accent-primary-soft` | `accent-primary-ink` | Lang code pill (replaces existing `bg-nagi-100`) |
+| Language | `accent-primary-soft` | `accent-primary-ink` | Lang code pill |
 
 ### 6.6 Empty states
 
