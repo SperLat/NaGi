@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { View, Text, Pressable, ActivityIndicator, TextInput } from 'react-native';
+import { View, Text, Pressable, ActivityIndicator, TextInput, ScrollView, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, router } from 'expo-router';
 import { safeBack } from '@/lib/nav';
@@ -10,6 +10,7 @@ import {
   type Elder,
   type ElderIntermediary,
 } from '@/features/elders';
+import { generateDigest, type DigestResult } from '@/features/digest';
 import { useSession } from '@/state';
 
 export default function ElderOverview() {
@@ -24,6 +25,28 @@ export default function ElderOverview() {
     { kind: 'info' | 'success'; text: string } | null
   >(null);
   const { setActiveElder } = useSession();
+
+  // Weekly digest — stateless, regenerated each click. Lives in a modal
+  // because it's a heavy block of text and the rest of the screen still
+  // needs to be reachable underneath.
+  const [digest, setDigest] = useState<DigestResult | null>(null);
+  const [digestOpen, setDigestOpen] = useState(false);
+  const [digestBusy, setDigestBusy] = useState(false);
+  const [digestError, setDigestError] = useState<string | null>(null);
+
+  const handleGenerateDigest = useCallback(async () => {
+    setDigestOpen(true);
+    setDigestBusy(true);
+    setDigestError(null);
+    try {
+      const result = await generateDigest(id);
+      setDigest(result);
+    } catch (e) {
+      setDigestError(String(e));
+    } finally {
+      setDigestBusy(false);
+    }
+  }, [id]);
 
   const refreshPeople = useCallback(async () => {
     const { data } = await listIntermediaries(id);
@@ -84,7 +107,8 @@ export default function ElderOverview() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
-      <View className="flex-1 px-6 pt-6">
+      <ScrollView className="flex-1" contentContainerStyle={{ padding: 24, paddingTop: 24 }}>
+      <View className="flex-1">
         <Pressable className="mb-6" onPress={() => safeBack('/(intermediary)/')}>
           <Text className="text-accent-600 font-medium">← Back</Text>
         </Pressable>
@@ -133,6 +157,19 @@ export default function ElderOverview() {
             <View className="flex-1">
               <Text className="font-semibold text-gray-900">Activity log</Text>
               <Text className="text-gray-500 text-sm">Where they succeed and get stuck</Text>
+            </View>
+            <Text className="text-gray-300 text-xl">›</Text>
+          </Pressable>
+
+          <Pressable
+            className="bg-white rounded-2xl p-4 border border-gray-100 flex-row items-center"
+            style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+            onPress={handleGenerateDigest}
+          >
+            <Text className="text-2xl mr-3">📰</Text>
+            <View className="flex-1">
+              <Text className="font-semibold text-gray-900">Generate this week's summary</Text>
+              <Text className="text-gray-500 text-sm">A note you can forward to family</Text>
             </View>
             <Text className="text-gray-300 text-xl">›</Text>
           </Pressable>
@@ -254,6 +291,110 @@ export default function ElderOverview() {
           </>
         )}
       </View>
+      </ScrollView>
+
+      <DigestModal
+        visible={digestOpen}
+        busy={digestBusy}
+        digest={digest}
+        error={digestError}
+        elderName={elder.display_name}
+        onClose={() => setDigestOpen(false)}
+        onRegenerate={handleGenerateDigest}
+      />
     </SafeAreaView>
+  );
+}
+
+// ── Digest modal ─────────────────────────────────────────────────────────
+// Kept in this file because it's only used here and pulling apart the
+// state would just push prop-drilling through nothing.
+
+interface DigestModalProps {
+  visible: boolean;
+  busy: boolean;
+  digest: DigestResult | null;
+  error: string | null;
+  elderName: string;
+  onClose: () => void;
+  onRegenerate: () => void;
+}
+
+function DigestModal({ visible, busy, digest, error, elderName, onClose, onRegenerate }: DigestModalProps) {
+  const handleCopy = async () => {
+    if (!digest?.digest_markdown) return;
+    // Web (where the intermediary lives) supports navigator.clipboard
+    // directly. For a tiny one-call dependency we just feature-detect
+    // rather than pulling in expo-clipboard.
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      try {
+        await navigator.clipboard.writeText(digest.digest_markdown);
+      } catch {
+        // swallow — copy is a nice-to-have, not a contract
+      }
+    }
+  };
+
+  return (
+    <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
+      <View className="flex-1 bg-black/40 items-center justify-center p-4">
+        <View className="bg-white rounded-2xl w-full max-w-2xl max-h-[85%] flex flex-col">
+          <View className="flex-row items-center justify-between px-5 py-4 border-b border-gray-100">
+            <Text className="text-lg font-bold text-gray-900">This week with {elderName}</Text>
+            <Pressable onPress={onClose} className="px-2">
+              <Text className="text-gray-400 text-xl">✕</Text>
+            </Pressable>
+          </View>
+
+          <ScrollView className="flex-1" contentContainerStyle={{ padding: 20 }}>
+            {busy ? (
+              <View className="items-center py-12">
+                <ActivityIndicator color="#B8552B" />
+                <Text className="text-gray-500 text-sm mt-3">Reading the past 7 days…</Text>
+              </View>
+            ) : error ? (
+              <View className="py-6">
+                <Text className="text-red-700 text-sm">Could not generate a summary right now.</Text>
+                {__DEV__ ? <Text className="text-gray-400 text-xs mt-2">{error}</Text> : null}
+              </View>
+            ) : digest ? (
+              <>
+                <Text className="text-gray-800 leading-relaxed" selectable>
+                  {digest.digest_markdown}
+                </Text>
+                <View className="mt-6 pt-4 border-t border-gray-100 flex-row flex-wrap gap-x-4 gap-y-1">
+                  <Text className="text-xs text-gray-400">
+                    {digest.stats.questions_asked} questions
+                  </Text>
+                  <Text className="text-xs text-gray-400">
+                    {digest.stats.help_requests_total} help requests
+                  </Text>
+                  <Text className="text-xs text-gray-400">
+                    {digest.stats.errors + digest.stats.offline_unavailable} stuck moments
+                  </Text>
+                </View>
+              </>
+            ) : null}
+          </ScrollView>
+
+          <View className="flex-row gap-2 px-5 py-4 border-t border-gray-100">
+            <Pressable
+              className="flex-1 bg-gray-100 rounded-xl py-3 items-center"
+              onPress={onRegenerate}
+              disabled={busy}
+            >
+              <Text className="text-gray-700 font-medium">Regenerate</Text>
+            </Pressable>
+            <Pressable
+              className="flex-1 bg-accent-600 rounded-xl py-3 items-center"
+              onPress={handleCopy}
+              disabled={busy || !digest}
+            >
+              <Text className="text-white font-medium">Copy to clipboard</Text>
+            </Pressable>
+          </View>
+        </View>
+      </View>
+    </Modal>
   );
 }
