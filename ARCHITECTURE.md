@@ -326,7 +326,8 @@ This is **named scope**: no on-device LLM in v0.
 
 | Feature | Model | Reason |
 |---|---|---|
-| Elder conversation turn | `claude-sonnet-4-6` | Nuanced language, empathy, latency still acceptable |
+| Elder conversation turn | `claude-opus-4-7` | 1M-context recall of months of activity_log, nuanced language, adaptive thinking only when the turn warrants it |
+| Weekly digest narrative | `claude-opus-4-7` | Non-latency-sensitive; narrative quality of the family-facing summary matters more than speed |
 | Intent classification, short yes/no, summary titles | `claude-haiku-4-5` | Cheap, fast, adequate |
 | Any design/governance/architectural reasoning | off-runtime (Opus, Kronos only) | Not in product path |
 

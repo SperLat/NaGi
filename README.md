@@ -78,7 +78,7 @@ smoke test).
 - Expo Router + React Native + TypeScript
 - Supabase (Auth, Postgres, Edge Functions, Realtime) — self-hostable
 - NativeWind (Tailwind CSS for React Native)
-- Claude API (claude-haiku-4-5 for classification, claude-sonnet-4-6 for chat + digest)
+- Claude API (claude-opus-4-7 for chat + digest with 1M-context elder recall, claude-haiku-4-5 for classification)
 - `.claude/skills/` — runtime AI skill files in plain markdown
 
 ## Self-hosting

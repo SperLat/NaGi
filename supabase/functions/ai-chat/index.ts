@@ -1,5 +1,5 @@
 // ai-chat edge function — streaming conversational AI for elder sessions.
-// Model: claude-sonnet-4-6 with prompt caching on elder profile.
+// Model: claude-opus-4-7 with prompt caching on elder profile.
 // Flow: validate JWT → check membership → stream Claude → log ai_interactions
 
 import Anthropic from '@anthropic-ai/sdk';
@@ -112,7 +112,7 @@ Deno.serve(async (req: Request) => {
       const stream = anthropic.messages.stream(
         {
           // MODELS — change here when Anthropic releases a new version
-          model: 'claude-sonnet-4-6',
+          model: 'claude-opus-4-7',
           max_tokens: 1024,
           system: systemBlocks,
           // deno-lint-ignore no-explicit-any
@@ -150,7 +150,7 @@ Deno.serve(async (req: Request) => {
         elder_id,
         organization_id: organizationId,
         // MODELS — change here when Anthropic releases a new version
-        model: 'claude-sonnet-4-6',
+        model: 'claude-opus-4-7',
         profile_version: (elder as { profile_version: number }).profile_version,
         input_tokens: inputTokens,
         output_tokens: outputTokens,

@@ -32,7 +32,7 @@ Si hay duda sobre si una acción es destructiva — no ejecutarla. Preguntar pri
 
 - **Mobile**: Expo SDK 54, React Native, NativeWind v4, expo-router
 - **Backend**: Supabase local (`npx supabase start` desde raíz)
-- **AI**: Claude claude-sonnet-4-6 con prompt caching
+- **AI**: Claude `claude-opus-4-7` (chat + digest, 1M context) y `claude-haiku-4-5` (clasificación) con prompt caching
 - **Comandos**: Siempre `npx supabase` (no global), `pnpm` en apps/mobile
 
 ## Para iniciar el entorno

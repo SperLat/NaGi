@@ -89,6 +89,6 @@ export async function sendChatMessage(
     message: lastMsg,
     response: fullResponse,
     // MODELS — change here when Anthropic releases a new version
-    model: 'claude-sonnet-4-6',
+    model: 'claude-opus-4-7',
   });
 }
