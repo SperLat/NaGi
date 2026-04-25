@@ -8,6 +8,18 @@
 
 ---
 
+## For Anthropic 4.7 hackathon judges
+
+The shortest path to feeling what Nagi does:
+
+- **What's 4.7-native here:** `claude-opus-4-7` powers the elder conversation. With `profile.long_context_recall = true`, the chat path loads up to ~200 prior turns from `activity_log` into the system block — Opus 4.7's 1M context lets Nagi recall what the elder said weeks ago without RAG, embeddings, or a vector store. See [`supabase/functions/ai-chat/index.ts`](supabase/functions/ai-chat/index.ts) — the `Long-context recall` block. The same model powers the family-facing weekly digest in [`supabase/functions/generate-digest/index.ts`](supabase/functions/generate-digest/index.ts).
+- **Two more 4.7-line capabilities in the same file:** three-block prompt caching (static policy → skills → per-elder profile) preserves the warm-path cache when the long-context block is appended; `claude-haiku-4-5` runs the intent classifier in [`ai-classify`](supabase/functions/ai-classify/index.ts) so chat latency stays in the calm-and-unhurried budget.
+- **The product story in two sentences:** by 2030, 1.4B people will be 65+. Nagi is open-source AI-native elder companion software the family configures and the elder talks to — not a locked-down launcher, not a panic button, not a facility SaaS contract.
+- **To evaluate end-to-end locally:** [`docs/LOCAL_DEVELOPMENT.md`](docs/LOCAL_DEVELOPMENT.md) walks from `git clone` through two-browser smoke test in ~15 minutes. Bring your own `ANTHROPIC_API_KEY`. Everything else (Postgres, Auth, Edge Functions, Realtime) runs in Docker.
+- **Philosophy + brand:** [`docs/PHILOSOPHY.md`](docs/PHILOSOPHY.md) is the upstream layer of the doc hierarchy — Kasvu cultivation philosophy, the parable, voice principles, and what Nagi is *not*. Read this first if you want the *why*.
+
+---
+
 ## What's different
 
 Other senior-care software falls in two camps:
