@@ -121,6 +121,8 @@ export async function updateElder(
   const updated: Elder = {
     ...existing,
     ...patch,
+    // Structured ElderProfile lacks an index signature; widen for storage.
+    profile: (patch.profile ?? existing.profile) as Record<string, unknown>,
     profile_version: bumpVersion ? existing.profile_version + 1 : existing.profile_version,
     updated_at: new Date().toISOString(),
   };

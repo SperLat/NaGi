@@ -5,6 +5,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { createClient } from '@supabase/supabase-js';
 import { STATIC_SYSTEM, buildElderSystemBlock } from '../_shared/anthropic.ts';
+import { resolveSkills } from '../_shared/skills.ts';
 import { verifyAndCheckMembership } from '../_shared/auth.ts';
 import { checkRateLimit } from '../_shared/rate-limit.ts';
 
@@ -57,15 +58,34 @@ Deno.serve(async (req: Request) => {
 
   const anthropic = new Anthropic({ apiKey: Deno.env.get('ANTHROPIC_API_KEY') ?? '' });
 
-  // Two-layer cache: static policy (deploy-level) + per-elder profile (profile_version)
-  const systemBlocks = [
-    { type: 'text' as const, text: STATIC_SYSTEM, cache_control: { type: 'ephemeral' as const } },
-    {
-      type: 'text' as const,
-      text: buildElderSystemBlock(elder),
-      cache_control: { type: 'ephemeral' as const },
-    },
+  // Three-layer cache: static policy (deploy-level) + skill bundle (mostly
+  // shared across elders) + per-elder profile (profile_version). The skill
+  // block goes BEFORE the per-elder block so it stays cache-stable when one
+  // elder's profile changes — Anthropic invalidates from the first changed
+  // block forward, so the cheaper-to-recompute thing comes last.
+  const profileObj: Record<string, unknown> =
+    typeof elder.profile === 'string' ? JSON.parse(elder.profile) : (elder.profile ?? {});
+  const skills = resolveSkills(profileObj, elder.preferred_lang);
+
+  const systemBlocks: Array<{
+    type: 'text';
+    text: string;
+    cache_control: { type: 'ephemeral' };
+  }> = [
+    { type: 'text', text: STATIC_SYSTEM, cache_control: { type: 'ephemeral' } },
   ];
+  if (skills.text) {
+    systemBlocks.push({
+      type: 'text',
+      text: skills.text,
+      cache_control: { type: 'ephemeral' },
+    });
+  }
+  systemBlocks.push({
+    type: 'text',
+    text: buildElderSystemBlock(elder),
+    cache_control: { type: 'ephemeral' },
+  });
 
   const startTs = Date.now();
   let inputTokens = 0;

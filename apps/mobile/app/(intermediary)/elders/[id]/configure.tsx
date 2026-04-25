@@ -3,7 +3,21 @@ import { View, Text, TextInput, Pressable, ScrollView, Switch, ActivityIndicator
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
 import { safeBack } from '@/lib/nav';
-import { getElder, updateElder, type Elder } from '@/features/elders';
+import { getElder, updateElder, type Elder, type ElderProfile } from '@/features/elders';
+
+/**
+ * Comma → array, trimming and dropping empties.
+ *
+ * Caregivers type "gardening, telenovelas, her grandkids" — we don't want
+ * a chips picker for v1 because that's friction without payoff. The AI
+ * just needs the list; commas are the universal "or" people already use.
+ */
+function csvToArray(s: string): string[] {
+  return s
+    .split(',')
+    .map(t => t.trim())
+    .filter(Boolean);
+}
 
 const LANGUAGES = [
   { code: 'es', label: 'Español' },
@@ -28,6 +42,17 @@ export default function ElderConfigure() {
   const [offlineMsg, setOfflineMsg] = useState('');
   const [saving, setSaving] = useState(false);
 
+  // About-this-person fields. Stored in elders.profile (jsonb); typed via ElderProfile.
+  const [preferredName, setPreferredName] = useState('');
+  const [spokenLanguages, setSpokenLanguages] = useState('');
+  const [topicsEnjoy, setTopicsEnjoy] = useState('');
+  const [topicsAvoid, setTopicsAvoid] = useState('');
+  const [communicationNotes, setCommunicationNotes] = useState('');
+  const [accessibilityNotes, setAccessibilityNotes] = useState('');
+  const [emergencyName, setEmergencyName] = useState('');
+  const [emergencyPhone, setEmergencyPhone] = useState('');
+  const [emergencyRelation, setEmergencyRelation] = useState('');
+
   useEffect(() => {
     getElder(id).then(({ data }) => {
       if (!data) return;
@@ -38,15 +63,52 @@ export default function ElderConfigure() {
       setHighContrast(data.ui_config.high_contrast ?? false);
       setVoiceInput(data.ui_config.voice_input ?? true);
       setOfflineMsg(data.ui_config.offline_message ?? '');
+
+      const p = (data.profile ?? {}) as ElderProfile;
+      setPreferredName(p.preferred_name ?? '');
+      setSpokenLanguages((p.spoken_languages ?? []).join(', '));
+      setTopicsEnjoy((p.topics_they_enjoy ?? []).join(', '));
+      setTopicsAvoid((p.topics_to_avoid ?? []).join(', '));
+      setCommunicationNotes(p.communication_notes ?? '');
+      setAccessibilityNotes(p.accessibility_notes ?? '');
+      setEmergencyName(p.emergency_contact?.name ?? '');
+      setEmergencyPhone(p.emergency_contact?.phone ?? '');
+      setEmergencyRelation(p.emergency_contact?.relation ?? '');
     });
   }, [id]);
 
   const handleSave = async () => {
     if (!elder) return;
     setSaving(true);
+
+    // Merge new structured fields over the existing profile so we keep any
+    // legacy keys (bio/interests/common_tasks) the prompt builder still
+    // reads. Only include emergency_contact when at least a name exists.
+    const nextProfile: Record<string, unknown> = {
+      ...(elder.profile ?? {}),
+      preferred_name: preferredName.trim() || undefined,
+      spoken_languages: csvToArray(spokenLanguages),
+      topics_they_enjoy: csvToArray(topicsEnjoy),
+      topics_to_avoid: csvToArray(topicsAvoid),
+      communication_notes: communicationNotes.trim() || undefined,
+      accessibility_notes: accessibilityNotes.trim() || undefined,
+      emergency_contact: emergencyName.trim()
+        ? {
+            name: emergencyName.trim(),
+            phone: emergencyPhone.trim(),
+            relation: emergencyRelation.trim(),
+          }
+        : undefined,
+    };
+    // Strip undefined so jsonb stays clean.
+    for (const k of Object.keys(nextProfile)) {
+      if (nextProfile[k] === undefined) delete nextProfile[k];
+    }
+
     await updateElder(id, {
       display_name: name.trim() || elder.display_name,
       preferred_lang: lang,
+      profile: nextProfile,
       ui_config: {
         ...elder.ui_config,
         text_size: textSize,
@@ -169,6 +231,122 @@ export default function ElderConfigure() {
               placeholder="e.g. Estoy aquí contigo. Llama a tu hija si necesitas ayuda."
               placeholderTextColor="#9ca3af"
             />
+          </View>
+
+          {/* ── About this person ──────────────────────────────────── */}
+          <View className="mt-2 pt-6 border-t border-gray-200">
+            <Text className="text-xl font-bold text-gray-900 mb-1">About {elder.display_name}</Text>
+            <Text className="text-gray-500 text-sm mb-5">
+              Helps Nagi talk to them as a real person. All optional.
+            </Text>
+
+            <View className="gap-5">
+              <View>
+                <Text className="text-xs font-medium text-gray-500 mb-1.5 ml-1">What they like to be called</Text>
+                <TextInput
+                  className="border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 bg-white"
+                  value={preferredName}
+                  onChangeText={setPreferredName}
+                  placeholder={`e.g. Mami, Doña ${elder.display_name.split(' ')[0]}`}
+                  placeholderTextColor="#9ca3af"
+                />
+              </View>
+
+              <View>
+                <Text className="text-xs font-medium text-gray-500 mb-1.5 ml-1">Languages they speak</Text>
+                <Text className="text-gray-400 text-xs mb-2 ml-1">Comma-separated. The first one is preferred.</Text>
+                <TextInput
+                  className="border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 bg-white"
+                  value={spokenLanguages}
+                  onChangeText={setSpokenLanguages}
+                  placeholder="e.g. Spanish, some English"
+                  placeholderTextColor="#9ca3af"
+                />
+              </View>
+
+              <View>
+                <Text className="text-xs font-medium text-gray-500 mb-1.5 ml-1">Topics they enjoy</Text>
+                <Text className="text-gray-400 text-xs mb-2 ml-1">Things to bring up when conversation lulls.</Text>
+                <TextInput
+                  className="border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 bg-white"
+                  multiline
+                  numberOfLines={2}
+                  value={topicsEnjoy}
+                  onChangeText={setTopicsEnjoy}
+                  placeholder="e.g. her grandkids Leo and Sofia, gardening, telenovelas"
+                  placeholderTextColor="#9ca3af"
+                />
+              </View>
+
+              <View>
+                <Text className="text-xs font-medium text-gray-500 mb-1.5 ml-1">Topics to handle gently</Text>
+                <Text className="text-gray-400 text-xs mb-2 ml-1">Don't raise these first.</Text>
+                <TextInput
+                  className="border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 bg-white"
+                  multiline
+                  numberOfLines={2}
+                  value={topicsAvoid}
+                  onChangeText={setTopicsAvoid}
+                  placeholder="e.g. her late husband, her recent diagnosis"
+                  placeholderTextColor="#9ca3af"
+                />
+              </View>
+
+              <View>
+                <Text className="text-xs font-medium text-gray-500 mb-1.5 ml-1">Communication notes</Text>
+                <TextInput
+                  className="border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 bg-white"
+                  multiline
+                  numberOfLines={3}
+                  value={communicationNotes}
+                  onChangeText={setCommunicationNotes}
+                  placeholder="e.g. Speak slowly. Repeat important answers in different words. Some memory issues — don't quiz."
+                  placeholderTextColor="#9ca3af"
+                />
+              </View>
+
+              <View>
+                <Text className="text-xs font-medium text-gray-500 mb-1.5 ml-1">Accessibility notes</Text>
+                <TextInput
+                  className="border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 bg-white"
+                  multiline
+                  numberOfLines={3}
+                  value={accessibilityNotes}
+                  onChangeText={setAccessibilityNotes}
+                  placeholder="e.g. Glaucoma — describe images verbally. Hard of hearing on left side."
+                  placeholderTextColor="#9ca3af"
+                />
+              </View>
+
+              <View className="bg-white rounded-2xl border border-gray-100 p-4">
+                <Text className="text-gray-900 font-medium mb-1">Trusted person</Text>
+                <Text className="text-gray-500 text-xs mb-3">Who Nagi suggests calling for things outside its scope.</Text>
+                <View className="gap-2">
+                  <TextInput
+                    className="border border-gray-200 rounded-xl px-4 py-3 text-gray-900 bg-white"
+                    value={emergencyName}
+                    onChangeText={setEmergencyName}
+                    placeholder="Name (e.g. Carlos)"
+                    placeholderTextColor="#9ca3af"
+                  />
+                  <TextInput
+                    className="border border-gray-200 rounded-xl px-4 py-3 text-gray-900 bg-white"
+                    value={emergencyPhone}
+                    onChangeText={setEmergencyPhone}
+                    placeholder="Phone"
+                    placeholderTextColor="#9ca3af"
+                    keyboardType="phone-pad"
+                  />
+                  <TextInput
+                    className="border border-gray-200 rounded-xl px-4 py-3 text-gray-900 bg-white"
+                    value={emergencyRelation}
+                    onChangeText={setEmergencyRelation}
+                    placeholder="Relation (e.g. son, daughter)"
+                    placeholderTextColor="#9ca3af"
+                  />
+                </View>
+              </View>
+            </View>
           </View>
         </View>
       </ScrollView>

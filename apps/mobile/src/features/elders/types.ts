@@ -7,9 +7,31 @@ export interface CreateElderInput {
 export interface UpdateElderInput {
   display_name?: string;
   preferred_lang?: string;
-  profile?: Record<string, unknown>;
+  profile?: ElderProfile | Record<string, unknown>;
   ui_config?: ElderUiConfig;
   status?: Elder['status'];
+}
+
+/**
+ * Structured "About this person" — drives the AI system prompt.
+ *
+ * Every field is optional so caregivers can fill in what they know and
+ * leave the rest. The shape stays narrow on purpose: each field maps
+ * cleanly to a line we render into the model's system context. Free-form
+ * sprawl belongs in `communication_notes`, not in new fields.
+ *
+ * Stored in `elders.profile` (jsonb). Backward-compatible: legacy fields
+ * (bio/interests/common_tasks) may still appear in older rows and are
+ * preserved by the merge in `updateElder`.
+ */
+export interface ElderProfile {
+  preferred_name?: string;
+  spoken_languages?: string[];
+  topics_they_enjoy?: string[];
+  topics_to_avoid?: string[];
+  communication_notes?: string;
+  accessibility_notes?: string;
+  emergency_contact?: { name: string; phone: string; relation: string };
 }
 
 export interface ElderUiConfig {

@@ -19,8 +19,12 @@ supabase/snippets/
 .DS_Store
 Thumbs.db
 
-# AI tool session state (never commit)
-.claude/
+# AI tool session state (never commit) — but DO commit the runtime-skills
+# artifact (.claude/skills/), which is the human-readable open-source
+# version of what the elder-facing AI loads at runtime. The actual code
+# the edge function consumes lives in supabase/functions/_shared/skills.ts.
+.claude/*
+!.claude/skills/
 .remember/
 .continue/
 .cursor/

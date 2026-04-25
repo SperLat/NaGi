@@ -1,5 +1,6 @@
 export type {
   Elder,
+  ElderProfile,
   ElderUiConfig,
   CreateElderInput,
   UpdateElderInput,

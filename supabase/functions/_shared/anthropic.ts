@@ -34,28 +34,84 @@ SAFETY
 - Never provide medical, legal, or financial advice.
 - Outside your scope → redirect warmly to their trusted person.`;
 
-export interface ElderProfile {
+/**
+ * Wrapper around the elder row for prompt construction.
+ *
+ * The interface name was `ElderProfile` historically; renamed to make
+ * room for the structured About-this-person schema (which IS now called
+ * `ElderProfile` on the mobile side and lives inside `elder.profile`).
+ */
+export interface ElderForPrompt {
   display_name: string;
   preferred_lang: string;
   profile: Record<string, unknown> | string;
   profile_version: number;
 }
 
-export function buildElderSystemBlock(elder: ElderProfile): string {
+function langName(code: string): string {
+  if (code === 'es') return 'Spanish';
+  if (code === 'pt') return 'Portuguese';
+  return 'English';
+}
+
+/**
+ * Renders the per-elder system block.
+ *
+ * Prefers the structured `ElderProfile` shape (preferred_name,
+ * spoken_languages, topics_they_enjoy, …). Falls back to the legacy
+ * fields (bio/interests/common_tasks) so older rows still produce
+ * sensible context. Both shapes can coexist in a single profile.
+ *
+ * Caregivers fill these via the "About [name]" form on the configure
+ * screen. Free-form sprawl belongs in `communication_notes` — keeps
+ * the schema narrow and the cache key stable.
+ */
+export function buildElderSystemBlock(elder: ElderForPrompt): string {
   const profile: Record<string, unknown> =
     typeof elder.profile === 'string' ? JSON.parse(elder.profile) : elder.profile;
 
-  const langName =
-    elder.preferred_lang === 'es'
-      ? 'Spanish'
-      : elder.preferred_lang === 'pt'
-        ? 'Portuguese'
-        : 'English';
+  const callName =
+    typeof profile.preferred_name === 'string' && profile.preferred_name.trim()
+      ? profile.preferred_name.trim()
+      : elder.display_name;
 
   const lines = [
-    `This elder's name is ${elder.display_name}. Always address them by name. Speak to them in ${langName}.`,
+    `This elder's name is ${elder.display_name}. Address them as "${callName}". Speak to them in ${langName(elder.preferred_lang)}.`,
   ];
 
+  // ── Structured "About" fields ─────────────────────────────────────────
+  if (Array.isArray(profile.spoken_languages) && profile.spoken_languages.length) {
+    lines.push(`Languages they speak: ${(profile.spoken_languages as string[]).join(', ')}.`);
+  }
+  if (Array.isArray(profile.topics_they_enjoy) && profile.topics_they_enjoy.length) {
+    lines.push(
+      `Topics they enjoy talking about: ${(profile.topics_they_enjoy as string[]).join(', ')}. Bring these up naturally when conversation lulls.`,
+    );
+  }
+  if (Array.isArray(profile.topics_to_avoid) && profile.topics_to_avoid.length) {
+    lines.push(
+      `Topics to handle gently or avoid raising first: ${(profile.topics_to_avoid as string[]).join(', ')}.`,
+    );
+  }
+  if (typeof profile.communication_notes === 'string' && profile.communication_notes.trim()) {
+    lines.push(`Communication notes: ${profile.communication_notes.trim()}`);
+  }
+  if (typeof profile.accessibility_notes === 'string' && profile.accessibility_notes.trim()) {
+    lines.push(`Accessibility: ${profile.accessibility_notes.trim()}`);
+  }
+  if (
+    profile.emergency_contact &&
+    typeof profile.emergency_contact === 'object' &&
+    'name' in (profile.emergency_contact as Record<string, unknown>)
+  ) {
+    const ec = profile.emergency_contact as { name: string; phone?: string; relation?: string };
+    const rel = ec.relation ? ` (${ec.relation})` : '';
+    lines.push(
+      `Trusted person: ${ec.name}${rel}${ec.phone ? `, ${ec.phone}` : ''}. Suggest calling them when something is outside your scope.`,
+    );
+  }
+
+  // ── Legacy fallback fields ────────────────────────────────────────────
   if (profile.bio) lines.push(`About them: ${profile.bio}`);
   if (Array.isArray(profile.interests) && profile.interests.length) {
     lines.push(`Their interests: ${(profile.interests as string[]).join(', ')}.`);
@@ -63,6 +119,7 @@ export function buildElderSystemBlock(elder: ElderProfile): string {
   if (Array.isArray(profile.common_tasks) && profile.common_tasks.length) {
     lines.push(`They often need help with: ${(profile.common_tasks as string[]).join(', ')}.`);
   }
+
   lines.push('Be patient and warm. Keep all responses under 3 sentences unless explaining a step-by-step task.');
 
   return lines.join('\n');
