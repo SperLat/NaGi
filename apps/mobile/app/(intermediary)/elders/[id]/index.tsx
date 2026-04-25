@@ -177,6 +177,19 @@ export default function ElderOverview() {
           <Pressable
             className="bg-white rounded-2xl p-4 border border-gray-100 flex-row items-center"
             style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+            onPress={() => router.push(`/(intermediary)/elders/${id}/notes`)}
+          >
+            <Text className="text-2xl mr-3">📓</Text>
+            <View className="flex-1">
+              <Text className="font-semibold text-gray-900">Notes</Text>
+              <Text className="text-gray-500 text-sm">Shared journal for the care team</Text>
+            </View>
+            <Text className="text-gray-300 text-xl">›</Text>
+          </Pressable>
+
+          <Pressable
+            className="bg-white rounded-2xl p-4 border border-gray-100 flex-row items-center"
+            style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
             onPress={handleGenerateDigest}
           >
             <Text className="text-2xl mr-3">📰</Text>

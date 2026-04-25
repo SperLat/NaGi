@@ -30,6 +30,7 @@ export default function IntermediaryLayout() {
       <Stack.Screen name="elders/[id]/configure" />
       <Stack.Screen name="elders/[id]/activity" />
       <Stack.Screen name="elders/[id]/conversations" />
+      <Stack.Screen name="elders/[id]/notes" />
     </Stack>
   );
 
