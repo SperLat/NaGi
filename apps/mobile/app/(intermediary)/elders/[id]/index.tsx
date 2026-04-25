@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { View, Text, Pressable, ActivityIndicator, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, router } from 'expo-router';
+import { safeBack } from '@/lib/nav';
 import {
   getElder,
   listIntermediaries,
@@ -84,7 +85,7 @@ export default function ElderOverview() {
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
       <View className="flex-1 px-6 pt-6">
-        <Pressable className="mb-6" onPress={() => router.back()}>
+        <Pressable className="mb-6" onPress={() => safeBack('/(intermediary)/')}>
           <Text className="text-accent-600 font-medium">← Back</Text>
         </Pressable>
 

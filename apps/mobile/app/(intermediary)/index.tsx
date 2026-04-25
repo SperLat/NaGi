@@ -80,6 +80,9 @@ export default function IntermediaryDashboard() {
         });
       }
     }
+    // Take the user to the elder they just accepted — otherwise nothing
+    // visibly happens beyond the card disappearing, which feels broken.
+    router.push(`/(intermediary)/elders/${inv.elder_id}`);
   };
 
   const handleDecline = async (inv: PendingInvitation) => {

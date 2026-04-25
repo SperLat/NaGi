@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
+import { safeBack } from '@/lib/nav';
 import { signUp } from '@/features/auth';
 import { useSession } from '@/state';
 import { isMock } from '@/config/mode';
@@ -58,7 +59,7 @@ export default function SignUp() {
           keyboardShouldPersistTaps="handled"
         >
           <View className="flex-1 justify-center px-8 py-12">
-            <Pressable className="mb-8" onPress={() => router.back()}>
+            <Pressable className="mb-8" onPress={() => safeBack('/(auth)/sign-in')}>
               <Text className="text-accent-600 font-medium">← Back</Text>
             </Pressable>
 
@@ -119,7 +120,7 @@ export default function SignUp() {
               )}
             </Pressable>
 
-            <Pressable className="mt-5 items-center" onPress={() => router.back()}>
+            <Pressable className="mt-5 items-center" onPress={() => safeBack('/(auth)/sign-in')}>
               <Text className="text-gray-500 text-sm">
                 Already have an account?{' '}
                 <Text className="text-accent-600 font-medium">Sign in</Text>

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { View, Text, TextInput, Pressable, ScrollView, Switch, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
+import { safeBack } from '@/lib/nav';
 import { getElder, updateElder, type Elder } from '@/features/elders';
 
 const LANGUAGES = [
@@ -55,7 +56,7 @@ export default function ElderConfigure() {
       },
     });
     setSaving(false);
-    router.back();
+    safeBack(`/(intermediary)/elders/${id}`);
   };
 
   if (!elder) {
@@ -69,7 +70,7 @@ export default function ElderConfigure() {
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
       <ScrollView className="flex-1" contentContainerStyle={{ padding: 24 }}>
-        <Pressable className="mb-6" onPress={() => router.back()}>
+        <Pressable className="mb-6" onPress={() => safeBack(`/(intermediary)/elders/${id}`)}>
           <Text className="text-accent-600 font-medium">← Back</Text>
         </Pressable>
 

@@ -10,7 +10,8 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router, Redirect } from 'expo-router';
+import { Redirect } from 'expo-router';
+import { safeBack } from '@/lib/nav';
 import { useSession } from '@/state';
 import * as Speech from 'expo-speech';
 import { startListening, isSupported } from '@/lib/voice';
@@ -273,7 +274,7 @@ export default function ElderChat() {
 
         {/* Header */}
         <View className="px-5 py-3 flex-row items-center border-b border-gray-100">
-          <Pressable onPress={() => { stopSpeech(); router.back(); }} className="mr-4 p-1">
+          <Pressable onPress={() => { stopSpeech(); safeBack('/(elder)/'); }} className="mr-4 p-1">
             <Text className="text-accent-600 text-xl">←</Text>
           </Pressable>
           <Text className={`font-bold ${textColor} text-lg flex-1`}>凪 Nagi</Text>

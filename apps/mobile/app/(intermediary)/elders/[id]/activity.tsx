@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { View, Text, FlatList, Pressable, ActivityIndicator, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
+import { safeBack } from '@/lib/nav';
 import { listActivity, type ActivityLog } from '@/features/activity-log';
 import { pullActivityLog } from '@/lib/sync';
 import { useSession } from '@/state';
@@ -61,7 +62,7 @@ export default function ElderActivity() {
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
       <View className="px-6 pt-6 pb-4 flex-row items-center">
-        <Pressable onPress={() => router.back()} className="mr-4">
+        <Pressable onPress={() => safeBack(`/(intermediary)/elders/${id}`)} className="mr-4">
           <Text className="text-accent-600 font-medium">←</Text>
         </Pressable>
         <Text className="text-xl font-bold text-gray-900">Activity log</Text>

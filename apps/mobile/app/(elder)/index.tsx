@@ -3,6 +3,7 @@ import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useNavigation } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { safeBack } from '@/lib/nav';
 import { logActivity } from '@/features/activity-log';
 import { useStrings } from '@/lib/i18n';
 import { useElderCtx } from './_layout';
@@ -80,7 +81,7 @@ export default function ElderHome() {
         {/* Exit to intermediary dashboard — only visible when pushed from that flow */}
         {canGoBack && (
           <Pressable
-            onPress={() => router.back()}
+            onPress={() => safeBack('/(intermediary)/')}
             className="self-start mb-4 px-2 py-1"
             style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
           >

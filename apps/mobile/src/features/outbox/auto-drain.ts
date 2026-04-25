@@ -41,7 +41,7 @@ async function isOnline(): Promise<boolean> {
   }
 }
 
-async function maybeDerain(): Promise<void> {
+async function maybeDrain(): Promise<void> {
   const queue = await readQueue();
   if (queue.length === 0) return;
 
@@ -62,17 +62,17 @@ export function startAutoDrain(): () => void {
   // Drain on app foreground.
   const onAppStateChange = (state: AppStateStatus) => {
     if (state === 'active') {
-      maybeDerain().catch(() => {});
+      maybeDrain().catch(() => {});
     }
   };
   const subscription = AppState.addEventListener('change', onAppStateChange);
 
   // Kick off an immediate drain attempt.
-  maybeDerain().catch(() => {});
+  maybeDrain().catch(() => {});
 
   // Poll every 30s while app is running.
   const intervalId = setInterval(() => {
-    maybeDerain().catch(() => {});
+    maybeDrain().catch(() => {});
   }, POLL_INTERVAL_MS);
 
   return () => {
