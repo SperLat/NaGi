@@ -28,10 +28,24 @@ export default function IntermediaryLayout() {
 
   if (!isWide) return stack;
 
+  // Explicit `height: '100vh'` (not min-height) is needed on web because
+  // react-native-screens renders the active screen with position:absolute
+  // filling its parent — that requires the parent to have a real, computed
+  // height. NativeWind's `min-h-screen` was unreliable here: the outer flex
+  // row collapsed to 0 and the sidebar disappeared.
   return (
-    <View style={{ flex: 1, flexDirection: 'row' }} className="min-h-screen">
+    <View
+      style={{
+        flex: 1,
+        flexDirection: 'row',
+        height: '100vh' as unknown as number,
+      }}
+    >
       <Sidebar />
-      <View style={{ flex: 1 }} className="bg-gray-50 min-h-screen">
+      <View
+        style={{ flex: 1, position: 'relative', height: '100%' as unknown as number }}
+        className="bg-gray-50"
+      >
         {stack}
       </View>
     </View>
