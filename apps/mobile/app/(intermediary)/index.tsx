@@ -156,8 +156,16 @@ export default function IntermediaryDashboard() {
 
     if (isMock) return; // Realtime unavailable in mock mode
 
+    // supabase-js caches channels by name. In React 19 strict mode (or any
+    // remount) the same channel object can be returned to a second mount
+    // before the first mount's removeChannel() round-trip completes —
+    // calling .on() on a channel that already saw .subscribe() throws
+    // "cannot add postgres_changes callbacks ... after subscribe()". The
+    // suffix makes each mount a brand-new channel instance and sidesteps
+    // the cache entirely.
+    const channelName = `help-requests-${activeOrgId}-${Math.random().toString(36).slice(2, 10)}`;
     const channel = supabase
-      .channel(`help-requests-${activeOrgId}`)
+      .channel(channelName)
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'help_requests',
