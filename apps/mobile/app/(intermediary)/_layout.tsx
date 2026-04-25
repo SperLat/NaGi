@@ -1,13 +1,154 @@
-import { Stack } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { Platform, Pressable, ScrollView, Text, useWindowDimensions, View } from 'react-native';
+import { Stack, router, usePathname } from 'expo-router';
+import {
+  listElders,
+  listMyPendingInvitations,
+  type Elder,
+  type PendingInvitation,
+} from '@/features/elders';
+import { signOut } from '@/features/auth';
+import { useSession } from '@/state';
+
+const WIDE_BREAKPOINT = 1024;
 
 export default function IntermediaryLayout() {
-  return (
-    <Stack>
-      <Stack.Screen name="index" options={{ title: 'My Elders' }} />
-      <Stack.Screen name="organization" options={{ title: 'Organization' }} />
-      <Stack.Screen name="elders/[id]/index" options={{ title: 'Elder' }} />
-      <Stack.Screen name="elders/[id]/configure" options={{ title: 'Configure' }} />
-      <Stack.Screen name="elders/[id]/activity" options={{ title: 'Activity' }} />
+  const { width } = useWindowDimensions();
+  const isWide = Platform.OS === 'web' && width >= WIDE_BREAKPOINT;
+
+  const stack = (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" />
+      <Stack.Screen name="organization" />
+      <Stack.Screen name="elders/[id]/index" />
+      <Stack.Screen name="elders/[id]/configure" />
+      <Stack.Screen name="elders/[id]/activity" />
     </Stack>
+  );
+
+  if (!isWide) return stack;
+
+  return (
+    <View style={{ flex: 1, flexDirection: 'row' }} className="min-h-screen">
+      <Sidebar />
+      <View style={{ flex: 1 }} className="bg-gray-50 min-h-screen">
+        {stack}
+      </View>
+    </View>
+  );
+}
+
+function Sidebar() {
+  const { activeOrgId, userId, clearSession } = useSession();
+  const pathname = usePathname();
+  const [elders, setElders] = useState<Elder[]>([]);
+  const [invitations, setInvitations] = useState<PendingInvitation[]>([]);
+
+  // Refetch elders whenever the active org changes OR the route changes.
+  // Cheap on a hackathon scale and keeps the sidebar in sync after the user
+  // accepts an invitation on the dashboard (which switches activeOrgId and/or
+  // changes the URL).
+  useEffect(() => {
+    if (!activeOrgId) {
+      setElders([]);
+      return;
+    }
+    listElders(activeOrgId).then(({ data }) => {
+      if (data) setElders(data);
+    });
+  }, [activeOrgId, pathname]);
+
+  useEffect(() => {
+    listMyPendingInvitations().then(({ data }) => setInvitations(data));
+  }, [userId, pathname]);
+
+  const handleSignOut = async () => {
+    await signOut();
+    clearSession();
+    router.replace('/(auth)/sign-in');
+  };
+
+  const isActive = (target: string) => pathname === target || pathname.startsWith(target + '/');
+
+  return (
+    <View
+      style={{ width: 280 }}
+      className="bg-white border-r border-gray-200 px-4 py-6"
+    >
+      <Pressable onPress={() => router.push('/(intermediary)/')}>
+        <Text className="text-xl font-bold text-accent-700 mb-6 px-2">Nagi</Text>
+      </Pressable>
+
+      <ScrollView className="flex-1" contentContainerStyle={{ gap: 4 }}>
+        <Text className="text-xs font-medium text-gray-400 uppercase tracking-wide px-2 mb-1">
+          Elders
+        </Text>
+        {elders.length === 0 ? (
+          <Text className="text-gray-400 text-sm px-2 py-2">No elders yet</Text>
+        ) : (
+          elders.map(elder => {
+            const target = `/(intermediary)/elders/${elder.id}`;
+            const active = isActive(`/elders/${elder.id}`);
+            return (
+              <Pressable
+                key={elder.id}
+                onPress={() => router.push(target)}
+                style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                className={`rounded-xl px-3 py-2.5 ${active ? 'bg-accent-100' : ''}`}
+              >
+                <Text
+                  className={`text-sm font-medium ${
+                    active ? 'text-accent-700' : 'text-gray-700'
+                  }`}
+                  numberOfLines={1}
+                >
+                  {elder.display_name}
+                </Text>
+              </Pressable>
+            );
+          })
+        )}
+
+        {invitations.length > 0 && (
+          <View className="mt-5">
+            <Text className="text-xs font-medium text-gray-400 uppercase tracking-wide px-2 mb-1">
+              Invitations
+            </Text>
+            {invitations.map(inv => (
+              <Pressable
+                key={inv.elder_id}
+                onPress={() => router.push('/(intermediary)/')}
+                style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                className="rounded-xl px-3 py-2.5 flex-row items-center justify-between"
+              >
+                <Text className="text-sm text-gray-700 flex-1" numberOfLines={1}>
+                  {inv.elder_name}
+                </Text>
+                <View className="bg-accent-100 rounded-full px-2 py-0.5 ml-2">
+                  <Text className="text-accent-700 text-[10px] font-semibold">NEW</Text>
+                </View>
+              </Pressable>
+            ))}
+          </View>
+        )}
+      </ScrollView>
+
+      <View className="gap-1 pt-4 border-t border-gray-100">
+        <Pressable
+          onPress={() => router.push('/(intermediary)/elders/new')}
+          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+          className="rounded-xl px-3 py-2.5"
+        >
+          <Text className="text-sm font-medium text-accent-700">+ Add elder</Text>
+        </Pressable>
+        <Pressable
+          onPress={handleSignOut}
+          style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+          className="rounded-xl px-3 py-2"
+        >
+          <Text className="text-sm text-gray-400">Sign out</Text>
+        </Pressable>
+      </View>
+    </View>
   );
 }
