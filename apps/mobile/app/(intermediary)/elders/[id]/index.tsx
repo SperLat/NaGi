@@ -11,6 +11,7 @@ import {
   type ElderIntermediary,
 } from '@/features/elders';
 import { generateDigest, type DigestResult } from '@/features/digest';
+import { TeamChatPanel } from '@/features/team-chat';
 import { useSession } from '@/state';
 
 export default function ElderOverview() {
@@ -24,7 +25,7 @@ export default function ElderOverview() {
   const [inviteNote, setInviteNote] = useState<
     { kind: 'info' | 'success'; text: string } | null
   >(null);
-  const { setActiveElder } = useSession();
+  const { setActiveElder, activeOrgId, userId } = useSession();
 
   // Weekly digest — stateless, regenerated each click. Lives in a modal
   // because it's a heavy block of text and the rest of the screen still
@@ -199,6 +200,13 @@ export default function ElderOverview() {
             </View>
             <Text className="text-gray-300 text-xl">›</Text>
           </Pressable>
+        </View>
+
+        <Text className="text-xs font-medium text-gray-500 mb-2 ml-1 uppercase tracking-wide">
+          Care team
+        </Text>
+        <View className="mb-6">
+          <TeamChatPanel elderId={id} organizationId={activeOrgId} userId={userId} />
         </View>
 
         <Text className="text-xs font-medium text-gray-500 mb-2 ml-1 uppercase tracking-wide">
