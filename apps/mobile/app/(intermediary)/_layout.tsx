@@ -3,12 +3,18 @@ import { Platform, Pressable, ScrollView, Text, useWindowDimensions, View } from
 import { Stack, router, usePathname } from 'expo-router';
 import {
   listElders,
+  listElderStatuses,
   listMyPendingInvitations,
   type Elder,
+  type ElderStatus,
   type PendingInvitation,
 } from '@/features/elders';
 import { signOut } from '@/features/auth';
 import { useSession } from '@/state';
+import { relativeTime } from '@/lib/time';
+
+/** "active" if the elder used the app in the last hour. Beyond that, hide. */
+const ACTIVE_WINDOW_MS = 60 * 60_000;
 
 const WIDE_BREAKPOINT = 1024;
 
@@ -23,6 +29,7 @@ export default function IntermediaryLayout() {
       <Stack.Screen name="elders/[id]/index" />
       <Stack.Screen name="elders/[id]/configure" />
       <Stack.Screen name="elders/[id]/activity" />
+      <Stack.Screen name="elders/[id]/conversations" />
     </Stack>
   );
 
@@ -56,20 +63,24 @@ function Sidebar() {
   const { activeOrgId, userId, clearSession } = useSession();
   const pathname = usePathname();
   const [elders, setElders] = useState<Elder[]>([]);
+  const [statuses, setStatuses] = useState<Record<string, ElderStatus>>({});
   const [invitations, setInvitations] = useState<PendingInvitation[]>([]);
 
   // Refetch elders whenever the active org changes OR the route changes.
   // Cheap on a hackathon scale and keeps the sidebar in sync after the user
   // accepts an invitation on the dashboard (which switches activeOrgId and/or
-  // changes the URL).
+  // changes the URL). Statuses come along on the same trigger so badges
+  // stay roughly fresh as the user navigates.
   useEffect(() => {
     if (!activeOrgId) {
       setElders([]);
+      setStatuses({});
       return;
     }
     listElders(activeOrgId).then(({ data }) => {
       if (data) setElders(data);
     });
+    listElderStatuses(activeOrgId).then(setStatuses);
   }, [activeOrgId, pathname]);
 
   useEffect(() => {
@@ -103,21 +114,40 @@ function Sidebar() {
           elders.map(elder => {
             const target = `/(intermediary)/elders/${elder.id}`;
             const active = isActive(`/elders/${elder.id}`);
+            const status = statuses[elder.id];
+            const pendingCount = status?.pending_requests_count ?? 0;
+            const lastActive = status?.last_active_at;
+            const isRecentlyActive =
+              lastActive !== null &&
+              lastActive !== undefined &&
+              Date.now() - new Date(lastActive).getTime() < ACTIVE_WINDOW_MS;
             return (
               <Pressable
                 key={elder.id}
                 onPress={() => router.push(target)}
                 style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-                className={`rounded-xl px-3 py-2.5 ${active ? 'bg-accent-100' : ''}`}
+                className={`rounded-xl px-3 py-2 ${active ? 'bg-accent-100' : ''}`}
               >
-                <Text
-                  className={`text-sm font-medium ${
-                    active ? 'text-accent-700' : 'text-gray-700'
-                  }`}
-                  numberOfLines={1}
-                >
-                  {elder.display_name}
-                </Text>
+                <View className="flex-row items-center">
+                  <Text
+                    className={`text-sm font-medium flex-1 ${
+                      active ? 'text-accent-700' : 'text-gray-700'
+                    }`}
+                    numberOfLines={1}
+                  >
+                    {elder.display_name}
+                  </Text>
+                  {pendingCount > 0 ? (
+                    <View className="ml-2 bg-red-500 rounded-full min-w-[20px] h-5 px-1.5 items-center justify-center">
+                      <Text className="text-white text-[10px] font-bold">{pendingCount}</Text>
+                    </View>
+                  ) : null}
+                </View>
+                {isRecentlyActive && lastActive ? (
+                  <Text className="text-[11px] text-gray-400 mt-0.5">
+                    active {relativeTime(lastActive)}
+                  </Text>
+                ) : null}
               </Pressable>
             );
           })

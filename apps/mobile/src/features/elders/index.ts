@@ -8,8 +8,10 @@ export type {
   InviteIntermediaryResult,
   PendingInvitation,
 } from './types';
+export type { ElderStatus } from './api';
 export {
   listElders,
+  listElderStatuses,
   getElder,
   createElder,
   updateElder,

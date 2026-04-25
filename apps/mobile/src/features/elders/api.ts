@@ -160,6 +160,66 @@ export async function updateElder(
   return { data: updated, error: null };
 }
 
+// ── Per-elder status (sidebar badges, dashboard counts) ─────────────────────
+
+/** Lightweight per-elder status used by the sidebar and dashboard cards. */
+export interface ElderStatus {
+  pending_requests_count: number;
+  last_active_at: string | null;
+}
+
+/**
+ * Pull a status snapshot for every elder in the org.
+ *
+ * Two narrow queries grouped in JS, returned as a map. We keep this
+ * separate from `listElders` because:
+ *   1. `listElders` is consumed in many places — most don't need the
+ *      counts and would pay the query cost for nothing.
+ *   2. Both source tables are joined to `elder_id` already, so a
+ *      true SQL join would need a view or RPC that we don't have yet.
+ *      JS-side grouping is correct enough at hackathon scale.
+ *
+ * Mock mode returns an empty map — the sidebar just shows no badges.
+ */
+export async function listElderStatuses(
+  organizationId: string,
+): Promise<Record<string, ElderStatus>> {
+  if (isMock) return {};
+
+  const lastActiveCutoff = new Date(Date.now() - 24 * 3600_000).toISOString();
+
+  const [helpRes, activityRes] = await Promise.all([
+    supabase
+      .from('help_requests')
+      .select('elder_id')
+      .eq('organization_id', organizationId)
+      .eq('status', 'pending'),
+    // Only need recent rows — last_active_at is "active in the last hour"
+    // territory anyway, and 24h is a generous upper bound.
+    supabase
+      .from('activity_log')
+      .select('elder_id, client_ts')
+      .eq('organization_id', organizationId)
+      .gte('client_ts', lastActiveCutoff)
+      .order('client_ts', { ascending: false }),
+  ]);
+
+  const out: Record<string, ElderStatus> = {};
+
+  for (const row of (helpRes.data ?? []) as Array<{ elder_id: string }>) {
+    const e = (out[row.elder_id] ??= { pending_requests_count: 0, last_active_at: null });
+    e.pending_requests_count += 1;
+  }
+
+  for (const row of (activityRes.data ?? []) as Array<{ elder_id: string; client_ts: string }>) {
+    const e = (out[row.elder_id] ??= { pending_requests_count: 0, last_active_at: null });
+    // Activity rows arrive newest-first — first hit per elder is the latest.
+    if (!e.last_active_at) e.last_active_at = row.client_ts;
+  }
+
+  return out;
+}
+
 // ── Intermediary membership ──────────────────────────────────────────────────
 // These go through SECURITY DEFINER RPCs (0009) because auth.users is not
 // visible to the anon client. In mock mode we read/write the in-memory store
