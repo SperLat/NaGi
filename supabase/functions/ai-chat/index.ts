@@ -70,7 +70,7 @@ Deno.serve(async (req: Request) => {
   const systemBlocks: Array<{
     type: 'text';
     text: string;
-    cache_control: { type: 'ephemeral' };
+    cache_control?: { type: 'ephemeral' };
   }> = [
     { type: 'text', text: STATIC_SYSTEM, cache_control: { type: 'ephemeral' } },
   ];
@@ -86,6 +86,54 @@ Deno.serve(async (req: Request) => {
     text: buildElderSystemBlock(elder),
     cache_control: { type: 'ephemeral' },
   });
+
+  // ── Long-context recall (Opus 4.7's 1M context window) ────────────────
+  // Opt-in via profile.long_context_recall. Loads up to ~200 prior ai_turn
+  // rows so Nagi can recall what the elder said weeks ago without RAG.
+  // Goes AFTER the cached per-elder block — uncached itself, but does not
+  // invalidate the prefix cache. Cost scales with history size, hence opt-in.
+  let recallTurns = 0;
+  if (profileObj.long_context_recall === true) {
+    const { data: history } = await db
+      .from('activity_log')
+      .select('payload, client_ts')
+      .eq('elder_id', elder_id)
+      .eq('kind', 'ai_turn')
+      .order('server_ts', { ascending: false })
+      .limit(200);
+
+    if (history && history.length > 0) {
+      const lines: string[] = [];
+      // Reverse so oldest-first reads chronologically; cap total chars at
+      // ~600K (≈150K tokens) to leave room for response + new turn.
+      const ordered = [...history].reverse();
+      let charBudget = 600_000;
+      for (const row of ordered) {
+        const p = row.payload as { message?: string; response?: string };
+        const day = String(row.client_ts).slice(0, 10);
+        const entry =
+          `[${day}] elder: ${(p.message ?? '').slice(0, 1500)}\n` +
+          `[${day}] you: ${(p.response ?? '').slice(0, 1500)}\n`;
+        if (entry.length > charBudget) break;
+        lines.push(entry);
+        charBudget -= entry.length;
+        recallTurns++;
+      }
+      if (lines.length > 0) {
+        systemBlocks.push({
+          type: 'text',
+          text:
+            `RECENT CONVERSATION HISTORY with this elder, oldest first. ` +
+            `Use it the way a friend would — recall something specific only if ` +
+            `it's genuinely relevant to what they're asking now. Do not ` +
+            `summarize the history unprompted.\n\n` +
+            lines.join('\n'),
+          // No cache_control — this segment changes every turn. The cached
+          // prefix above (static + skills + per-elder) is unaffected.
+        });
+      }
+    }
+  }
 
   const startTs = Date.now();
   let inputTokens = 0;
@@ -156,6 +204,7 @@ Deno.serve(async (req: Request) => {
         output_tokens: outputTokens,
         cache_read_tokens: cacheReadTokens,
         cache_write_tokens: cacheWriteTokens,
+        recall_turns: recallTurns,
         latency_ms: Date.now() - startTs,
         error: aiError,
       });
