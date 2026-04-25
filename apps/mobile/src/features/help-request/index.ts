@@ -1,2 +1,7 @@
 export type { HelpRequest } from './types';
-export { createHelpRequest, acknowledgeHelpRequest, listPendingRequests } from './api';
+export {
+  createHelpRequest,
+  acknowledgeHelpRequest,
+  listPendingRequests,
+  listRecentRequests,
+} from './api';

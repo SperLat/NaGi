@@ -63,3 +63,34 @@ export async function listPendingRequests(organizationId: string): Promise<HelpR
     elder_name: row.elders?.display_name ?? 'Elder',
   }));
 }
+
+/**
+ * Recent help requests for an org — both pending and acknowledged — within
+ * the last `sinceHours`. Powers the dashboard "Handled today" history so
+ * acknowledged requests don't vanish from the UI the moment they're handled.
+ *
+ * acknowledged_by is left as a raw user_id; the UI compares it against the
+ * caller's userId to render "you" vs "another caregiver" without needing
+ * a SECURITY DEFINER lookup into auth.users (which would require a new
+ * migration). Email surfacing can come later.
+ */
+export async function listRecentRequests(
+  organizationId: string,
+  sinceHours: number = 24,
+): Promise<HelpRequest[]> {
+  if (isMock) return [];
+  const sinceIso = new Date(Date.now() - sinceHours * 3600_000).toISOString();
+  const { data, error } = await supabase
+    .from('help_requests')
+    .select('*, elders(display_name)')
+    .eq('organization_id', organizationId)
+    .gte('created_at', sinceIso)
+    .order('created_at', { ascending: false });
+
+  if (error || !data) return [];
+
+  return data.map((row: any) => ({
+    ...row,
+    elder_name: row.elders?.display_name ?? 'Elder',
+  }));
+}

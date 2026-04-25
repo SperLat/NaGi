@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { View, Text, ScrollView, Pressable, ActivityIndicator, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -13,11 +13,14 @@ import {
 import { getActiveOrg } from '@/features/auth';
 import {
   listPendingRequests,
+  listRecentRequests,
   acknowledgeHelpRequest,
   type HelpRequest,
 } from '@/features/help-request';
+import { summarizeRecentActivity, type ActivitySummary } from '@/features/activity-log';
 import { signOut } from '@/features/auth';
 import { supabase } from '@/lib/supabase';
+import { relativeTime } from '@/lib/time';
 import { isMock } from '@/config/mode';
 import { useSession } from '@/state';
 
@@ -101,14 +104,48 @@ export default function IntermediaryDashboard() {
     await refreshInvitations();
   };
 
-  // ── Elder list ────────────────────────────────────────────────────────────
+  // ── Elder list + per-elder activity summaries ────────────────────────────
+  const [summaries, setSummaries] = useState<Record<string, ActivitySummary>>({});
+
+  // Fetch per-elder summaries whenever the elder set changes. Parallel fan-out;
+  // each call hits the activity_log table once with a 24h window. Cheap on the
+  // hackathon scale (a handful of elders per org). Re-runs on alert refresh
+  // too, so the dashboard updates when an elder uses Nagi while the caregiver
+  // is watching.
+  const refreshSummaries = useCallback(async (forElders: Elder[]) => {
+    if (forElders.length === 0) {
+      setSummaries({});
+      return;
+    }
+    const entries = await Promise.all(
+      forElders.map(async (e) => [e.id, await summarizeRecentActivity(e.id, 24)] as const),
+    );
+    setSummaries(Object.fromEntries(entries));
+  }, []);
+
   useEffect(() => {
     if (!activeOrgId) { setLoading(false); return; }
     listElders(activeOrgId).then(({ data }) => {
-      if (data) setElders(data);
+      if (data) {
+        setElders(data);
+        refreshSummaries(data);
+      }
       setLoading(false);
     });
+  }, [activeOrgId, refreshSummaries]);
+
+  // ── Recent (handled + pending) help-request history ──────────────────────
+  // The realtime subscription below already keeps `alerts` (pending only)
+  // fresh. `recent` carries the same window but includes acknowledged ones,
+  // so the "Handled today" section persists after the badge clears.
+  const [recent, setRecent] = useState<HelpRequest[]>([]);
+
+  const refreshRecent = useCallback(() => {
+    if (!activeOrgId) return;
+    listRecentRequests(activeOrgId, 24).then(setRecent);
   }, [activeOrgId]);
+
+  useEffect(() => { refreshRecent(); }, [refreshRecent]);
 
   // ── Help-request Realtime subscription ───────────────────────────────────
   useEffect(() => {
@@ -128,6 +165,11 @@ export default function IntermediaryDashboard() {
         () => {
           // Payload does not carry elder_name — refetch the full pending list instead
           listPendingRequests(activeOrgId).then(setAlerts);
+          // Also refresh the recent history + per-elder summaries so the new
+          // event surfaces in both the "Handled today" section and the elder
+          // card's question count without a manual reload.
+          refreshRecent();
+          refreshSummaries(elders);
           // Shake the banner to grab attention
           Animated.sequence([
             Animated.timing(shakeAnim, { toValue: 8,  duration: 60, useNativeDriver: true }),
@@ -147,6 +189,17 @@ export default function IntermediaryDashboard() {
     if (!userId) return;
     await acknowledgeHelpRequest(req.id, userId);
     setAlerts(prev => prev.filter(a => a.id !== req.id));
+    // Move the request to the "Handled today" section. Optimistic local
+    // patch first so the UI doesn't flicker, then refetch to pick up the
+    // server-stamped acknowledged_at.
+    setRecent(prev =>
+      prev.map(r =>
+        r.id === req.id
+          ? { ...r, status: 'acknowledged', acknowledged_by: userId, acknowledged_at: new Date().toISOString() }
+          : r,
+      ),
+    );
+    refreshRecent();
   };
 
   const handleSignOut = async () => {
@@ -270,48 +323,112 @@ export default function IntermediaryDashboard() {
             </Text>
           </View>
         ) : (
-          elders.map(elder => (
-            <Pressable
-              key={elder.id}
-              onPress={() => router.push(`/(intermediary)/elders/${elder.id}`)}
-              className="bg-white rounded-2xl p-5 border border-gray-100 mb-3"
-              style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-            >
-              <View className="flex-row items-center justify-between">
-                <View className="flex-1">
-                  <View className="flex-row items-center gap-2">
-                    <Text className="text-lg font-semibold text-gray-900">{elder.display_name}</Text>
-                    {/* Red dot if this elder has a pending alert */}
-                    {alertedElderIds.has(elder.id) && (
-                      <View className="w-2.5 h-2.5 rounded-full bg-safety-critical" />
-                    )}
-                  </View>
-                  <View className="flex-row items-center mt-1.5 gap-2">
-                    <View className="bg-accent-100 rounded-full px-2.5 py-0.5">
-                      <Text className="text-accent-700 text-xs font-medium">
-                        {elder.preferred_lang.toUpperCase()}
-                      </Text>
+          elders.map(elder => {
+            const summary = summaries[elder.id];
+            const aiCount = summary?.counts.ai_turn ?? 0;
+            const stuckCount = (summary?.counts.error ?? 0) + (summary?.counts.offline_ai_unavailable ?? 0);
+            const helpCount = recent.filter(r => r.elder_id === elder.id).length;
+            return (
+              <Pressable
+                key={elder.id}
+                onPress={() => router.push(`/(intermediary)/elders/${elder.id}`)}
+                className="bg-white rounded-2xl p-5 border border-gray-100 mb-3"
+                style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+              >
+                <View className="flex-row items-center justify-between">
+                  <View className="flex-1 pr-2">
+                    <View className="flex-row items-center gap-2">
+                      <Text className="text-lg font-semibold text-gray-900">{elder.display_name}</Text>
+                      {/* Red dot if this elder has a pending alert */}
+                      {alertedElderIds.has(elder.id) && (
+                        <View className="w-2.5 h-2.5 rounded-full bg-safety-critical" />
+                      )}
                     </View>
-                    <View
-                      className={`rounded-full px-2.5 py-0.5 ${
-                        elder.status === 'active' ? 'bg-green-100' : 'bg-gray-100'
-                      }`}
-                    >
-                      <Text
-                        className={`text-xs font-medium ${
-                          elder.status === 'active' ? 'text-green-700' : 'text-gray-500'
-                        }`}
-                      >
-                        {elder.status}
-                      </Text>
+                    <View className="flex-row items-center mt-1.5 gap-2">
+                      <View className="bg-accent-100 rounded-full px-2.5 py-0.5">
+                        <Text className="text-accent-700 text-xs font-medium">
+                          {elder.preferred_lang.toUpperCase()}
+                        </Text>
+                      </View>
+                      {summary?.lastActiveAt ? (
+                        <Text className="text-gray-400 text-xs">
+                          active {relativeTime(summary.lastActiveAt)}
+                        </Text>
+                      ) : (
+                        <Text className="text-gray-400 text-xs">no activity yet</Text>
+                      )}
                     </View>
                   </View>
+                  <Text className="text-gray-300 text-2xl">›</Text>
                 </View>
-                <Text className="text-gray-300 text-2xl">›</Text>
-              </View>
-            </Pressable>
-          ))
+
+                {/* Today's stats */}
+                {summary && (aiCount > 0 || stuckCount > 0 || helpCount > 0) ? (
+                  <View className="flex-row gap-4 mt-3 pt-3 border-t border-gray-100">
+                    <View>
+                      <Text className="text-xs text-gray-400">Questions</Text>
+                      <Text className="text-base font-semibold text-gray-800">{aiCount}</Text>
+                    </View>
+                    {stuckCount > 0 ? (
+                      <View>
+                        <Text className="text-xs text-gray-400">Got stuck</Text>
+                        <Text className="text-base font-semibold text-amber-600">{stuckCount}</Text>
+                      </View>
+                    ) : null}
+                    {helpCount > 0 ? (
+                      <View>
+                        <Text className="text-xs text-gray-400">Help asks</Text>
+                        <Text className="text-base font-semibold text-safety-critical">{helpCount}</Text>
+                      </View>
+                    ) : null}
+                  </View>
+                ) : null}
+
+                {/* Last few snippets — what's on her mind today */}
+                {summary && summary.lastSnippets.length > 0 ? (
+                  <View className="mt-3 gap-1">
+                    {summary.lastSnippets.map((snip, i) => (
+                      <Text key={i} className="text-gray-600 text-sm" numberOfLines={1}>
+                        <Text className="text-gray-400">Asked: </Text>
+                        “{snip}”
+                      </Text>
+                    ))}
+                  </View>
+                ) : null}
+              </Pressable>
+            );
+          })
         )}
+
+        {/* ── Handled today ────────────────────────────────────────────── */}
+        {recent.filter(r => r.status === 'acknowledged').length > 0 ? (
+          <View className="mt-2 mb-4">
+            <Text className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2 ml-1">
+              Handled today
+            </Text>
+            <View className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+              {recent
+                .filter(r => r.status === 'acknowledged')
+                .slice(0, 5)
+                .map((req, i, arr) => {
+                  const handler = req.acknowledged_by === userId ? 'you' : 'another caregiver';
+                  const when = req.acknowledged_at ? relativeTime(req.acknowledged_at) : '';
+                  return (
+                    <View
+                      key={req.id}
+                      className={`px-4 py-3 ${i < arr.length - 1 ? 'border-b border-gray-100' : ''}`}
+                    >
+                      <Text className="text-sm text-gray-800">
+                        <Text className="font-semibold">{req.elder_name}</Text>
+                        <Text className="text-gray-500">{` — handled by ${handler}`}</Text>
+                      </Text>
+                      <Text className="text-gray-400 text-xs mt-0.5">{when}</Text>
+                    </View>
+                  );
+                })}
+            </View>
+          </View>
+        ) : null}
       </ScrollView>
 
       <View className="px-6 pb-6 pt-3">

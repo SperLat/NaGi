@@ -3,6 +3,7 @@ import { View, Text, FlatList, Pressable, ActivityIndicator, RefreshControl } fr
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
 import { safeBack } from '@/lib/nav';
+import { relativeTime } from '@/lib/time';
 import { listActivity, type ActivityLog } from '@/features/activity-log';
 import { pullActivityLog } from '@/lib/sync';
 import { useSession } from '@/state';
@@ -14,16 +15,6 @@ const KIND_ICON: Record<string, string> = {
   error: '⚠️',
   offline_ai_unavailable: '📵',
 };
-
-function relativeTime(iso: string): string {
-  const diff = Date.now() - new Date(iso).getTime();
-  const mins = Math.floor(diff / 60_000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  return `${Math.floor(hrs / 24)}d ago`;
-}
 
 function summaryText(entry: ActivityLog): string {
   const p = entry.payload;
