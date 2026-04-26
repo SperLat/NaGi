@@ -588,7 +588,7 @@ function SlideComplete() {
           'Activity log — what they did, where they got stuck',
           'Conversations — the full transcript, with private moments shown as placeholders',
           'Notes — shared journal between caregivers',
-          'Team chat — for multiple family members coordinating',
+          'Care circle — notes and voice notes between family members',
           'Generate weekly digest — Claude-written summary, forwardable to siblings',
         ].map((s, i) => (
           <Text key={i} style={{ fontSize: 13, color: '#545454', lineHeight: 20 }}>

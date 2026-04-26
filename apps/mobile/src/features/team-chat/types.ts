@@ -8,6 +8,10 @@
 export interface TeamMessage {
   id: string;
   body: string;
+  /** Storage key in the team-voice-notes bucket for voice notes. NULL
+   *  for text-only messages. body is set to a placeholder ('🎙️') for
+   *  voice-only inserts; UI checks audio_path to decide rendering. */
+  audio_path: string | null;
   created_at: string;
   author_id: string;
   author_email: string;

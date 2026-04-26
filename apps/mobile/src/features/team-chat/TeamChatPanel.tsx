@@ -6,9 +6,22 @@ import { relativeTime } from '@/lib/time';
 import {
   listTeamMessages,
   postTeamMessage,
+  postTeamVoiceNote,
+  getTeamVoiceNoteUrl,
   resolveTeamMessageAuthor,
   type TeamMessage,
 } from '.';
+import {
+  startRecording,
+  isSupported as recordingSupported,
+  pickedExtension,
+  type AudioRecorderHandle,
+} from '@/lib/audio-recorder';
+import {
+  playAudioUrl,
+  isPlaybackSupported,
+  type PlaybackHandle,
+} from '@/lib/audio-recorder/player';
 
 interface TeamChatPanelProps {
   elderId: string;
@@ -40,6 +53,10 @@ export function TeamChatPanel({ elderId, organizationId, userId }: TeamChatPanel
   const [body, setBody] = useState('');
   const [posting, setPosting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [recording, setRecording] = useState(false);
+  const [playingId, setPlayingId] = useState<string | null>(null);
+  const recorderRef = useRef<AudioRecorderHandle | null>(null);
+  const playbackRef = useRef<PlaybackHandle | null>(null);
   const scrollRef = useRef<ScrollView>(null);
 
   const refresh = useCallback(async () => {
@@ -77,6 +94,7 @@ export function TeamChatPanel({ elderId, organizationId, userId }: TeamChatPanel
             {
               id: row.id!,
               body: row.body!,
+              audio_path: row.audio_path ?? null,
               created_at: row.created_at!,
               author_id: row.author_id!,
               author_email: '',
@@ -122,13 +140,78 @@ export function TeamChatPanel({ elderId, organizationId, userId }: TeamChatPanel
     await refresh();
   }, [body, elderId, organizationId, refresh, userId]);
 
+  const onStartVoice = useCallback(async () => {
+    setError(null);
+    try {
+      recorderRef.current = await startRecording();
+      setRecording(true);
+    } catch (err) {
+      setError(String((err as Error).message ?? err));
+    }
+  }, []);
+
+  const onStopAndSendVoice = useCallback(async () => {
+    if (!recorderRef.current) return;
+    const handle = recorderRef.current;
+    recorderRef.current = null;
+    setRecording(false);
+    setPosting(true);
+    try {
+      const blob = await handle.stop();
+      const ext  = pickedExtension(blob);
+      const result = await postTeamVoiceNote(elderId, blob, `voice.${ext}`);
+      if (!result.ok) {
+        setError(result.message);
+        return;
+      }
+      await refresh();
+    } catch (err) {
+      setError(String((err as Error).message ?? err));
+    } finally {
+      setPosting(false);
+    }
+  }, [elderId, refresh]);
+
+  const onCancelVoice = useCallback(() => {
+    recorderRef.current?.cancel();
+    recorderRef.current = null;
+    setRecording(false);
+  }, []);
+
+  const onPlayVoiceNote = useCallback(async (messageId: string) => {
+    playbackRef.current?.stop();
+    setPlayingId(messageId);
+    const url = await getTeamVoiceNoteUrl(messageId);
+    if (!url) {
+      setPlayingId(null);
+      return;
+    }
+    try {
+      playbackRef.current = await playAudioUrl(url, () => {
+        playbackRef.current = null;
+        setPlayingId(null);
+      });
+    } catch {
+      setPlayingId(null);
+    }
+  }, []);
+
+  // Cleanup on unmount — release mic, stop playback. Same shape as
+  // the elder messages screen.
+  useEffect(() => {
+    return () => {
+      recorderRef.current?.cancel();
+      playbackRef.current?.stop();
+    };
+  }, []);
+
   return (
     <View className="bg-surface-intermediary-raised rounded-2xl border border-gray-100 overflow-hidden">
       <View className="px-4 py-3 border-b border-gray-100 flex-row items-center">
         <Text className="text-2xl mr-2">👥</Text>
         <View className="flex-1">
-          <Text className="font-semibold text-gray-900">Team chat</Text>
-          <Text className="text-gray-500 text-xs">Between you and the rest of the care team</Text>
+          <Text className="font-semibold text-gray-900">Care circle</Text>
+          <Text className="text-gray-500 text-xs">Notes between you and the family</Text>
         </View>
       </View>
 
@@ -160,9 +243,20 @@ export function TeamChatPanel({ elderId, organizationId, userId }: TeamChatPanel
                   className={`rounded-2xl px-3 py-2 ${isYou ? 'bg-accent-100 self-end' : 'bg-gray-100 self-start'}`}
                   style={{ maxWidth: '85%' }}
                 >
-                  <Text className="text-gray-900 text-sm leading-snug" selectable>
-                    {m.body}
-                  </Text>
+                  {m.audio_path && isPlaybackSupported() ? (
+                    <Pressable
+                      onPress={() => onPlayVoiceNote(m.id)}
+                      style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1, flexDirection: 'row', alignItems: 'center' })}
+                    >
+                      <Text className="text-gray-900 text-sm">
+                        {playingId === m.id ? '⏸ Playing…' : '▶ 🎙️ Voice note'}
+                      </Text>
+                    </Pressable>
+                  ) : (
+                    <Text className="text-gray-900 text-sm leading-snug" selectable>
+                      {m.body}
+                    </Text>
+                  )}
                 </View>
               </View>
             );
@@ -172,25 +266,63 @@ export function TeamChatPanel({ elderId, organizationId, userId }: TeamChatPanel
 
       <View className="px-3 py-3 border-t border-gray-100">
         {error ? <Text className="text-red-600 text-xs mb-1.5">{error}</Text> : null}
+        {recording && (
+          <View className="flex-row items-center mb-2">
+            <View className="w-2 h-2 rounded-full bg-red-500 mr-2" />
+            <Text className="text-gray-700 text-xs">Recording voice note…</Text>
+          </View>
+        )}
         <View className="flex-row gap-2 items-end">
           <TextInput
             className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-gray-900 text-sm bg-gray-50 min-h-[40px] max-h-[120px]"
-            placeholder="Message the care team…"
+            placeholder="Note for the family…"
             placeholderTextColor="#9ca3af"
             value={body}
             onChangeText={setBody}
             multiline
-            editable={!posting}
+            editable={!posting && !recording}
           />
+          {recordingSupported() && (
+            recording ? (
+              <>
+                <Pressable
+                  className="rounded-xl px-3 py-2 bg-gray-200"
+                  onPress={onCancelVoice}
+                  disabled={posting}
+                >
+                  <Text className="text-gray-600 text-sm font-medium">✕</Text>
+                </Pressable>
+                <Pressable
+                  className="rounded-xl px-3 py-2 bg-red-600"
+                  onPress={onStopAndSendVoice}
+                  disabled={posting}
+                >
+                  {posting ? (
+                    <ActivityIndicator color="white" />
+                  ) : (
+                    <Text className="text-paper text-sm font-medium">■</Text>
+                  )}
+                </Pressable>
+              </>
+            ) : (
+              <Pressable
+                className="rounded-xl px-3 py-2 bg-accent-100"
+                onPress={onStartVoice}
+                disabled={posting}
+              >
+                <Text className="text-accent-ink text-sm font-medium">🎙️</Text>
+              </Pressable>
+            )
+          )}
           <Pressable
-            className={`rounded-xl px-4 py-2 ${body.trim() ? 'bg-accent-600' : 'bg-gray-200'}`}
+            className={`rounded-xl px-4 py-2 ${body.trim() && !recording ? 'bg-accent-600' : 'bg-gray-200'}`}
             onPress={onSend}
-            disabled={posting || !body.trim()}
+            disabled={posting || recording || !body.trim()}
           >
-            {posting ? (
+            {posting && !recording ? (
               <ActivityIndicator color="white" />
             ) : (
-              <Text className={`font-medium text-sm ${body.trim() ? 'text-paper' : 'text-gray-400'}`}>
+              <Text className={`font-medium text-sm ${body.trim() && !recording ? 'text-paper' : 'text-gray-400'}`}>
                 Send
               </Text>
             )}

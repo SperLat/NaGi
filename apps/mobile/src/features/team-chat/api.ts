@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { isMock } from '@/config/mode';
+import { env } from '@/config/env';
 import type { TeamMessage } from './types';
 
 /**
@@ -47,4 +48,64 @@ export async function postTeamMessage(
   });
   if (error) return { ok: false, message: error.message };
   return { ok: true };
+}
+
+/**
+ * Post a voice note to the care circle for one elder. Posts the audio
+ * blob to send-team-voice-note which uploads + inserts. No translation
+ * or transcription — team coordination is heard, not read.
+ */
+export async function postTeamVoiceNote(
+  elderId: string,
+  audio: Blob,
+  filename: string,
+): Promise<{ ok: true; messageId: string } | { ok: false; message: string }> {
+  if (isMock) return { ok: true, messageId: 'mock-team-voice' };
+
+  const session = (await supabase.auth.getSession()).data.session;
+  if (!session?.access_token) return { ok: false, message: 'Not authenticated' };
+
+  const form = new FormData();
+  form.append('elder_id', elderId);
+  form.append('audio_file', audio, filename);
+
+  try {
+    const res = await fetch(`${env.supabaseUrl}/functions/v1/send-team-voice-note`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${session.access_token}` },
+      body: form,
+    });
+    const data = (await res.json().catch(() => ({}))) as { ok?: boolean; message_id?: string; error?: string };
+    if (!res.ok || !data.ok || !data.message_id) {
+      return { ok: false, message: data.error ?? `send-team-voice-note ${res.status}` };
+    }
+    return { ok: true, messageId: data.message_id };
+  } catch (err) {
+    return { ok: false, message: String(err) };
+  }
+}
+
+/**
+ * Get a short-lived signed URL for a team voice-note's audio. Returns
+ * null if the message has no audio or the call fails.
+ */
+export async function getTeamVoiceNoteUrl(messageId: string): Promise<string | null> {
+  if (isMock) return null;
+  const session = (await supabase.auth.getSession()).data.session;
+  if (!session?.access_token) return null;
+  try {
+    const res = await fetch(`${env.supabaseUrl}/functions/v1/team-voice-note-url`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ message_id: messageId }),
+    });
+    if (!res.ok) return null;
+    const data = (await res.json().catch(() => ({}))) as { url?: string };
+    return data.url ?? null;
+  } catch {
+    return null;
+  }
 }
