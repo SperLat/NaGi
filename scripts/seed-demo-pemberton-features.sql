@@ -233,3 +233,158 @@ BEGIN
 
   RAISE NOTICE 'Pemberton features seed complete: 4 reminders, ~30 events, 15 moments across 3 elders.';
 END $$;
+
+-- ══════════════════════════════════════════════════════════════════════
+-- CROSS-FAMILY FRIENDSHIPS — at least one mutual friend from another family
+-- ══════════════════════════════════════════════════════════════════════
+-- Each block is independent and only fires if the partner family's
+-- elder exists in the database. Re-running is safe — connections are
+-- upserted via the unique (elder_a_id, elder_b_id) pair, and seeded
+-- messages carry a marker for deletion.
+
+-- ── Eleanor (Pemberton) ↔ Maggie (Whitmore) — bilingual EN/ES ────────
+DO $eleanor_maggie$
+DECLARE
+  v_eleanor_id  uuid;
+  v_maggie_id   uuid;
+  v_pemb_user   uuid;
+  v_whit_user   uuid;
+  v_pemb_org    uuid;
+  v_whit_org    uuid;
+  v_a uuid; v_b uuid;
+  v_conn_id uuid;
+  v_marker text := 'pemberton-features-bridge-em';
+  v_now timestamptz := now();
+BEGIN
+  SELECT id, organization_id INTO v_eleanor_id, v_pemb_org
+    FROM elders WHERE display_name = 'Eleanor Pemberton' LIMIT 1;
+  SELECT id, organization_id INTO v_maggie_id, v_whit_org
+    FROM elders WHERE display_name = 'Margaret Whitmore' LIMIT 1;
+
+  IF v_eleanor_id IS NULL OR v_maggie_id IS NULL THEN
+    RAISE NOTICE 'Eleanor↔Maggie bridge skipped (Whitmore not seeded yet).';
+    RETURN;
+  END IF;
+
+  SELECT user_id INTO v_pemb_user FROM organization_members
+   WHERE organization_id = v_pemb_org ORDER BY created_at LIMIT 1;
+  SELECT user_id INTO v_whit_user FROM organization_members
+   WHERE organization_id = v_whit_org ORDER BY created_at LIMIT 1;
+
+  IF v_pemb_user IS NULL OR v_whit_user IS NULL THEN
+    RAISE NOTICE 'Eleanor↔Maggie bridge skipped (no caregivers).';
+    RETURN;
+  END IF;
+
+  IF v_eleanor_id < v_maggie_id THEN v_a := v_eleanor_id; v_b := v_maggie_id;
+  ELSE v_a := v_maggie_id; v_b := v_eleanor_id; END IF;
+
+  INSERT INTO elder_connections (
+    elder_a_id, elder_b_id, proposed_by, proposed_at, accepted_by, accepted_at, status
+  ) VALUES (
+    v_a, v_b, v_pemb_user, v_now - interval '14 days',
+    v_whit_user, v_now - interval '14 days', 'active'
+  )
+  ON CONFLICT (elder_a_id, elder_b_id) DO UPDATE
+     SET status='active', proposed_at=EXCLUDED.proposed_at, accepted_at=EXCLUDED.accepted_at
+  RETURNING id INTO v_conn_id;
+
+  DELETE FROM elder_messages WHERE connection_id = v_conn_id AND body LIKE '%' || v_marker || '%';
+
+  -- Maggie → Eleanor (EN → ES cached). Read.
+  INSERT INTO elder_messages (connection_id, from_elder_id, body, body_translated, created_at, read_at)
+  VALUES (v_conn_id, v_maggie_id,
+    'Eleanor — my hip is finally letting me walk Biscuit around the whole block. Thinking of you and the river path. (' || v_marker || ')',
+    jsonb_build_object('es','Eleanor — la cadera por fin me deja caminar a Biscuit alrededor de toda la cuadra. Pensando en ti y en el camino del río.'),
+    v_now - interval '11 days', v_now - interval '11 days');
+
+  -- Eleanor → Maggie (ES → EN cached). Read.
+  INSERT INTO elder_messages (connection_id, from_elder_id, body, body_translated, created_at, read_at)
+  VALUES (v_conn_id, v_eleanor_id,
+    'Maggie, qué buena noticia lo de la cadera. Aquí los rosales de Charles ya están dando flor — me acordé de ti cuando salió el primero. (' || v_marker || ')',
+    jsonb_build_object('en','Maggie, that''s such good news about the hip. Charles''s rose bushes are blooming here — I thought of you when the first one opened.'),
+    v_now - interval '8 days', v_now - interval '8 days');
+
+  -- Eleanor → Maggie. Most recent. UNREAD — drives the kiosk pill.
+  INSERT INTO elder_messages (connection_id, from_elder_id, body, body_translated, created_at, read_at)
+  VALUES (v_conn_id, v_eleanor_id,
+    'Maggie querida — el secreto del fideo es tostarlo en el comal antes de echarle el caldo. Dile a Emma que la espero cuando puedan venir. (' || v_marker || ')',
+    jsonb_build_object('en','Maggie dear — the secret to the fideo is toasting it in the dry pan before adding the broth. Tell Emma I''ll be waiting whenever you two can come visit.'),
+    v_now - interval '6 hours', NULL);
+
+  RAISE NOTICE 'Eleanor↔Maggie bridge ready: connection %, 3 messages (1 unread).', v_conn_id;
+END $eleanor_maggie$;
+
+-- ── Bill (Pemberton) ↔ Roberto (García) — EN/ES, two handworkers ────
+DO $bill_roberto$
+DECLARE
+  v_bill_id     uuid;
+  v_roberto_id  uuid;
+  v_pemb_user   uuid;
+  v_garcia_user uuid;
+  v_pemb_org    uuid;
+  v_garcia_org  uuid;
+  v_a uuid; v_b uuid;
+  v_conn_id uuid;
+  v_marker text := 'pemberton-features-bridge-br';
+  v_now timestamptz := now();
+BEGIN
+  SELECT id, organization_id INTO v_bill_id, v_pemb_org
+    FROM elders WHERE display_name = 'William Pemberton' LIMIT 1;
+  SELECT id, organization_id INTO v_roberto_id, v_garcia_org
+    FROM elders WHERE display_name = 'Don Roberto García' LIMIT 1;
+
+  IF v_bill_id IS NULL OR v_roberto_id IS NULL THEN
+    RAISE NOTICE 'Bill↔Roberto bridge skipped (García not seeded yet).';
+    RETURN;
+  END IF;
+
+  SELECT user_id INTO v_pemb_user FROM organization_members
+   WHERE organization_id = v_pemb_org ORDER BY created_at LIMIT 1;
+  SELECT user_id INTO v_garcia_user FROM organization_members
+   WHERE organization_id = v_garcia_org ORDER BY created_at LIMIT 1;
+
+  IF v_pemb_user IS NULL OR v_garcia_user IS NULL THEN
+    RAISE NOTICE 'Bill↔Roberto bridge skipped (no caregivers).';
+    RETURN;
+  END IF;
+
+  IF v_bill_id < v_roberto_id THEN v_a := v_bill_id; v_b := v_roberto_id;
+  ELSE v_a := v_roberto_id; v_b := v_bill_id; END IF;
+
+  INSERT INTO elder_connections (
+    elder_a_id, elder_b_id, proposed_by, proposed_at, accepted_by, accepted_at, status
+  ) VALUES (
+    v_a, v_b, v_pemb_user, v_now - interval '21 days',
+    v_garcia_user, v_now - interval '20 days', 'active'
+  )
+  ON CONFLICT (elder_a_id, elder_b_id) DO UPDATE
+     SET status='active', proposed_at=EXCLUDED.proposed_at, accepted_at=EXCLUDED.accepted_at
+  RETURNING id INTO v_conn_id;
+
+  DELETE FROM elder_messages WHERE connection_id = v_conn_id AND body LIKE '%' || v_marker || '%';
+
+  -- Bill → Roberto (EN → ES cached). Read.
+  INSERT INTO elder_messages (connection_id, from_elder_id, body, body_translated, created_at, read_at)
+  VALUES (v_conn_id, v_bill_id,
+    'Roberto — finished the wing on the B-17 today. Thought of your father''s shop. (' || v_marker || ')',
+    jsonb_build_object('es','Roberto — terminé el ala del B-17 hoy. Me acordé del taller de tu padre.'),
+    v_now - interval '12 days', v_now - interval '12 days');
+
+  -- Roberto → Bill (ES → EN cached). Read.
+  INSERT INTO elder_messages (connection_id, from_elder_id, body, body_translated, created_at, read_at)
+  VALUES (v_conn_id, v_roberto_id,
+    'Bill, qué bueno saber del avión. Yo terminé la mesita del balcón — el cedro huele igual que en el ''60. (' || v_marker || ')',
+    jsonb_build_object('en','Bill, glad to hear about the plane. I finished the little balcony table — cedar smells just like it did in ''60.'),
+    v_now - interval '9 days', v_now - interval '9 days');
+
+  -- Roberto → Bill. Most recent. UNREAD — drives the kiosk pill on Bill''s side.
+  INSERT INTO elder_messages (connection_id, from_elder_id, body, body_translated, created_at, read_at)
+  VALUES (v_conn_id, v_roberto_id,
+    'Bill, hoy fui hasta la esquina y volví. La rodilla aguantó. Cuéntame del próximo modelo. (' || v_marker || ')',
+    jsonb_build_object('en','Bill, walked to the corner and back today. The knee held. Tell me about the next model.'),
+    v_now - interval '4 hours', NULL);
+
+  RAISE NOTICE 'Bill↔Roberto bridge ready: connection %, 3 messages (1 unread).', v_conn_id;
+END $bill_roberto$;
+
