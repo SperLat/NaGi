@@ -77,7 +77,13 @@ BEGIN
      (v_today - 28)::timestamptz, (v_today - 22)::timestamptz, (v_today - 22),
      E'## This week with Eleanor\n\nA brisk, productive week. Eleanor finished the chapter she''d been on for two weeks and said the ending was kinder than she expected. The garden is mostly put up for the season — she''s pleased about that.\n\nShe asked Nagi a handful of small things, mostly logistics. No private moments this week, no flags.\n\nA gentle observation: she''s reading more lately. If you have a book she might like, this is a good time to bring it.',
      '{"questions_asked": 9, "errors": 0, "offline_unavailable": 0, "help_requests_total": 0, "help_requests_acknowledged": 0, "help_requests_pending": 0, "pill_taken": 7, "pill_skipped": 0, "pill_pending": 0}'::jsonb,
-     (v_today - 22)::timestamptz);
+     (v_today - 22)::timestamptz)
+  ON CONFLICT (elder_id, period_end_day) DO UPDATE
+     SET period_start    = EXCLUDED.period_start,
+         period_end      = EXCLUDED.period_end,
+         digest_markdown = EXCLUDED.digest_markdown,
+         stats_json      = EXCLUDED.stats_json,
+         created_at      = EXCLUDED.created_at;
 
   -- Frances — mild dementia, retired schoolteacher, Pearl the cat
   INSERT INTO weekly_digests (organization_id, elder_id, period_start, period_end, period_end_day, digest_markdown, stats_json, created_at) VALUES
@@ -100,7 +106,13 @@ BEGIN
      (v_today - 28)::timestamptz, (v_today - 22)::timestamptz, (v_today - 22),
      E'## This week with Frances\n\nFrances had a harder Sunday — confused about which day it was, asked twice if her sister was visiting. By Monday she was steady again. The aide noted the pattern; nothing acute.\n\nThe rest of the week was Pearl, the cardinal, and a long afternoon of looking at old photographs. She named everyone in the 1957 reunion picture.\n\nIf you''re calling, she remembers Tuesday afternoons more reliably than mornings.',
      '{"questions_asked": 14, "errors": 0, "offline_unavailable": 0, "help_requests_total": 1, "help_requests_acknowledged": 1, "help_requests_pending": 0, "pill_taken": 12, "pill_skipped": 2, "pill_pending": 0}'::jsonb,
-     (v_today - 22)::timestamptz);
+     (v_today - 22)::timestamptz)
+  ON CONFLICT (elder_id, period_end_day) DO UPDATE
+     SET period_start    = EXCLUDED.period_start,
+         period_end      = EXCLUDED.period_end,
+         digest_markdown = EXCLUDED.digest_markdown,
+         stats_json      = EXCLUDED.stats_json,
+         created_at      = EXCLUDED.created_at;
 
   -- Bill — ex-Army Korea, model planes, daily walker
   INSERT INTO weekly_digests (organization_id, elder_id, period_start, period_end, period_end_day, digest_markdown, stats_json, created_at) VALUES
@@ -123,7 +135,13 @@ BEGIN
      (v_today - 28)::timestamptz, (v_today - 22)::timestamptz, (v_today - 22),
      E'## This week with Bill\n\nBill walked the loop every day this week. New personal best for the month — to the bench past the post office and back without resting. The COPD was kind to him.\n\nHe started a new model: a P-51 Mustang. Said the canopy work is going to be the patience test.\n\nEvening inhaler skipped once. Veteran sensibility on the meds: he takes them when the day''s pace lets him; doesn''t fuss when it doesn''t.',
      '{"questions_asked": 5, "errors": 0, "offline_unavailable": 0, "help_requests_total": 0, "help_requests_acknowledged": 0, "help_requests_pending": 0, "pill_taken": 13, "pill_skipped": 1, "pill_pending": 0}'::jsonb,
-     (v_today - 22)::timestamptz);
+     (v_today - 22)::timestamptz)
+  ON CONFLICT (elder_id, period_end_day) DO UPDATE
+     SET period_start    = EXCLUDED.period_start,
+         period_end      = EXCLUDED.period_end,
+         digest_markdown = EXCLUDED.digest_markdown,
+         stats_json      = EXCLUDED.stats_json,
+         created_at      = EXCLUDED.created_at;
 
   -- ══════════════════════════════════════════════════════════════════
   -- EXTENDED MOMENTS — going back ~10 weeks, lighter density
