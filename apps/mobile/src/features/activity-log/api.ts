@@ -172,11 +172,22 @@ export async function isDayShared(elderId: string, date: Date): Promise<boolean>
 }
 
 function parseRow(row: Record<string, unknown>): ActivityLog {
+  // Privacy must fail closed. SQLite's column is NOT NULL DEFAULT 0, so
+  // we shouldn't see undefined/null in practice — but if a future sync
+  // path or schema change ever does drop the flag (Finding 1 from the
+  // 2026-04-26 QA audit was exactly this kind of bug), treating an
+  // unknown privacy state as PRIVATE is the right direction to round
+  // off. The elder can always re-share via the daily-share toggle;
+  // there is no recovery from "the family already saw it."
+  const rawPriv = row.is_private;
+  const isPrivate =
+    rawPriv === undefined || rawPriv === null
+      ? true
+      : (rawPriv as number | boolean) === 1 || rawPriv === true;
   return {
     ...(row as unknown as ActivityLog),
     payload: JSON.parse((row.payload as string) || '{}'),
-    // SQLite returns 0/1; widen to boolean for the rest of the code.
-    is_private: (row.is_private as number | boolean) === 1 || row.is_private === true,
+    is_private: isPrivate,
   };
 }
 

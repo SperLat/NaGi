@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { View, Text, ScrollView, Pressable, ActivityIndicator, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import {
   listElders,
   listMyPendingInvitations,
@@ -81,6 +81,20 @@ export default function IntermediaryDashboard() {
       if (!seen) setWalkthroughOpen(true);
     });
   }, [isPembertonOrg]);
+
+  // "Replay tour" entry path. The sidebar button does
+  //   router.replace('/(intermediary)/?replay=1')
+  // after wiping the seen-flag. We open the walkthrough on that signal
+  // and immediately strip the param so a future navigation away and back
+  // doesn't re-trigger. Same-route `replace` doesn't remount, but the
+  // params object DOES change identity, so this effect fires.
+  const params = useLocalSearchParams<{ replay?: string }>();
+  useEffect(() => {
+    if (params.replay === '1' && isPembertonOrg) {
+      setWalkthroughOpen(true);
+      router.replace('/(intermediary)/');
+    }
+  }, [params.replay, isPembertonOrg]);
 
   const refreshInvitations = async () => {
     const { data, error } = await listMyPendingInvitations();

@@ -2,21 +2,55 @@
 # Copied verbatim into dist/ by `npx expo export -p web` because anything
 # under apps/mobile/public/ is treated as a static asset.
 #
-# Without this, deep links like nagi.kas.vu/elders/abc 404 — the server
-# only has index.html and the JS bundle, so it has to hand every
-# unknown path to the SPA and let React Router decide.
+# Two jobs:
+#   1. SPA fallback so deep links like nagi.kas.vu/elders/abc don't 404.
+#      The server only has index.html + the JS bundle, so we hand every
+#      unknown path to the SPA and let expo-router decide client-side.
+#   2. Correct cache headers per asset class. The previous version
+#      cached index.html for an hour — that's the cause of the
+#      "app spins forever after a deploy" symptom: stale index.html
+#      points at chunk filenames that no longer exist on disk, the
+#      404'd chunk falls through the SPA rewrite to index.html, the
+#      browser tries to parse HTML as JS, and nothing recovers.
 RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.html [L]
 
-# Serve gzipped/brotli pre-compressed assets if the client accepts them.
-# LiteSpeed Cache will respect these — no extra plugin config needed.
 <IfModule mod_headers.c>
-  <FilesMatch "\.(html|css|js|json|svg|woff2?)$">
-    Header set Cache-Control "public, max-age=3600, must-revalidate"
+  # index.html is the entry point that names every other chunk by hash.
+  # MUST never be cached — otherwise a freshly-deployed build is
+  # invisible until each user's cache expires, and during the window
+  # they 404 on missing chunks and the app spins.
+  <Files "index.html">
+    Header set Cache-Control "no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </Files>
+
+  # Hashed assets (JS, CSS, fonts) are content-addressed by filename —
+  # /_expo/static/js/web/AppEntry-<hash>.js changes on every build.
+  # Safe to cache forever; the new build references new filenames.
+  <FilesMatch "\.(js|css|woff2?|ttf|otf)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
   </FilesMatch>
-  <FilesMatch "\.(png|jpg|jpeg|gif|ico|webp|avif)$">
+
+  # Images are the same — Expo hashes them too. Long cache is fine.
+  <FilesMatch "\.(png|jpg|jpeg|gif|ico|webp|avif|svg)$">
     Header set Cache-Control "public, max-age=2592000, immutable"
   </FilesMatch>
+
+  # JSON manifests (e.g. asset maps) — short cache so updates propagate.
+  <FilesMatch "\.json$">
+    Header set Cache-Control "public, max-age=300, must-revalidate"
+  </FilesMatch>
+
+  # Cheap security hardening — won't break anything.
+  Header set X-Content-Type-Options "nosniff"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Compression — LiteSpeed honors this; cuts bundle size ~70% on the wire.
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json image/svg+xml
 </IfModule>

@@ -190,9 +190,15 @@ function Sidebar() {
         <Pressable
           onPress={async () => {
             await resetWalkthrough();
-            // Navigate to the dashboard so the walkthrough trigger fires.
-            // If we're already there, replace forces the effect to re-run.
-            router.replace('/(intermediary)/');
+            // Pass `replay=1` as a query param. The dashboard reads it
+            // via useLocalSearchParams and opens the walkthrough when
+            // present. The previous code replaced to the same route
+            // hoping the trigger effect would re-run, but expo-router
+            // does NOT remount on same-route replace, so the effect
+            // never re-fired and the user landed on the dashboard with
+            // no tour. The query param changes the route signature so
+            // the dashboard sees a new render and reacts.
+            router.replace('/(intermediary)/?replay=1');
           }}
           style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
           className="rounded-xl px-3 py-2"

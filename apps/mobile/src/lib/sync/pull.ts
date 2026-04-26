@@ -85,10 +85,17 @@ export async function pullActivityLog(organizationId: string): Promise<void> {
   if (error || !rows) return;
 
   for (const row of rows as Array<Record<string, unknown>>) {
+    // is_private MUST be carried into the local cache. Dropping it here
+    // would silently mark every pulled row public (the SQLite column
+    // defaults to 0), which would defeat the privacy boundary set by
+    // migration 0015 the moment any local-cache reader rendered the
+    // payload to the family. Fail closed: anything other than an
+    // explicit `true` from the server stays public — but `true` MUST
+    // round-trip.
     localDb.runSync(
       `INSERT OR IGNORE INTO activity_log
-       (id, elder_id, organization_id, kind, payload, client_ts, server_ts, device_id)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+       (id, elder_id, organization_id, kind, payload, client_ts, server_ts, device_id, is_private)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         String(row.id ?? ''),
         String(row.elder_id ?? ''),
@@ -98,6 +105,7 @@ export async function pullActivityLog(organizationId: string): Promise<void> {
         String(row.client_ts ?? ''),
         String(row.server_ts ?? ''),
         String(row.device_id ?? ''),
+        row.is_private === true ? 1 : 0,
       ],
     );
   }

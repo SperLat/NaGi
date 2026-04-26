@@ -34,15 +34,36 @@ export default function RootLayout() {
 
     let cancelled = false;
 
-    const applySession = async (session: { user?: { id: string } } | null) => {
+    // Hard fallback — never leave the user staring at a blank-white
+    // spinner. Only fires if `getSession` itself hangs (genuine
+    // network-dead case). 8s = past any reasonable mobile cold-start;
+    // shorter would race against `getSession` on slow networks and
+    // flicker the user to sign-in just because the request was slow,
+    // not because they're logged out.
+    const fallbackTimer = setTimeout(() => {
+      if (!cancelled) setHydrated();
+    }, 8000);
+
+    const applySession = (session: { user?: { id: string } } | null) => {
       if (cancelled) return;
       if (session?.user) {
-        const orgId = await getActiveOrg(session.user.id);
-        if (cancelled) return;
-        setSession(session.user.id, orgId ?? '');
+        // Set the session immediately with no org so the router can
+        // route based on auth state alone. Org resolution (which can
+        // be slow on cold cache or hang on RLS misfires) happens in
+        // the background — the home screen tolerates an empty orgId
+        // for a beat, then re-renders when the org effect populates.
+        setSession(session.user.id, '');
+        getActiveOrg(session.user.id)
+          .then(orgId => {
+            if (cancelled) return;
+            if (orgId) setSession(session.user!.id, orgId);
+          })
+          .catch(() => { /* leave orgId empty — sign-in screens handle this */ });
       } else {
         clearSession();
       }
+      // Hydration completes the moment we know the auth state,
+      // independent of whether org resolution has finished.
       setHydrated();
     };
 
@@ -53,9 +74,6 @@ export default function RootLayout() {
       .getSession()
       .then(({ data }: { data: { session: { user?: { id: string } } | null } }) => applySession(data.session))
       .catch(() => {
-        // Never leave the UI hanging on the hydration gate. If we can't
-        // read the session, treat it as "no session" and let the router
-        // send us to sign-in.
         if (!cancelled) {
           clearSession();
           setHydrated();
@@ -73,6 +91,7 @@ export default function RootLayout() {
 
     return () => {
       cancelled = true;
+      clearTimeout(fallbackTimer);
       subscription.unsubscribe();
     };
   }, [setSession, clearSession, setHydrated]);

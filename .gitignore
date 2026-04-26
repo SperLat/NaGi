@@ -35,3 +35,10 @@ Thumbs.db
 
 # Internal docs (snapshots, strategy, working notes)
 docs/internal/
+
+# Demo reel — generated/exported artifacts. Keep script.json, cards/,
+# scripts/, README.md tracked; everything below is a local export that
+# regenerates from those sources.
+reel/captions.srt
+reel/audio/
+reel/assets/

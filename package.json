@@ -7,7 +7,8 @@
     "verify-rls": "tsx scripts/verify-rls.ts",
     "seed": "tsx scripts/seed-mock.ts",
     "db:backup": "bash scripts/db-backup.sh",
-    "db:safe-stop": "bash scripts/db-safe-stop.sh"
+    "db:safe-stop": "bash scripts/db-safe-stop.sh",
+    "reel:srt": "tsx reel/scripts/render-srt.ts"
   },
   "devDependencies": {
     "supabase": "^2.93.0",

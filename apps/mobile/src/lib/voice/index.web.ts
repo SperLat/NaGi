@@ -30,6 +30,9 @@ export function startListening(
   recognition.interimResults = true;
 
   let lastTranscript = '';
+  let userStopped = false;        // set true by the returned stop() — distinguishes intentional stop from browser auto-end
+  let restartAttempts = 0;        // how many times we've silently restarted recognition
+  const MAX_RESTARTS = 3;         // beyond this, treat as genuine end (most likely the network is down)
 
   recognition.onresult = (e: any) => {
     let transcript = '';
@@ -37,18 +40,59 @@ export function startListening(
       transcript += e.results[i][0].transcript;
     }
     lastTranscript = transcript;
+    // Real speech detected — reset the restart budget so a long pause
+    // mid-utterance doesn't get conflated with the cold-start case.
+    if (transcript.trim()) restartAttempts = 0;
   };
 
-  // Single exit point — fires after our stop() call or any error
+  // Chrome's SpeechRecognition fires `onend` even with `continuous: true`
+  // when the user hasn't started speaking yet (the "no-speech" cold-start
+  // race). Tearing down on that empty end is what made the wave appear
+  // and immediately die. So: if we ended without any transcript AND the
+  // user didn't tap stop, silently restart recognition. The volume meter
+  // (Web Audio path below) keeps running independently — the wave stays
+  // visible across restarts.
   recognition.onend = () => {
     if (lastTranscript.trim()) {
       onResult(lastTranscript.trim());
-    } else {
-      onEnd();
+      return;
     }
+    if (userStopped) {
+      onEnd();
+      return;
+    }
+    if (restartAttempts < MAX_RESTARTS) {
+      restartAttempts += 1;
+      try {
+        recognition.start();
+        return;
+      } catch {
+        // start() can throw "InvalidStateError" if the engine is mid-teardown.
+        // Fall through to onEnd — the user can tap mic again.
+      }
+    }
+    onEnd();
   };
 
-  recognition.onerror = () => onEnd();
+  // Surface the actual reason so the elder (or us, in dev) can tell
+  // a network problem apart from a permission issue or a no-speech race.
+  // Common error codes seen in the wild:
+  //   no-speech       → cold-start race; we restart above
+  //   network         → Chrome routes audio through Google STT; offline / blocked googleapis.com
+  //   not-allowed     → mic permission denied (user or system)
+  //   audio-capture   → no mic, or another tab holds it
+  //   service-not-allowed → page is on http:// (Web Speech requires https or localhost)
+  recognition.onerror = (e: any) => {
+    const code = (e?.error as string | undefined) ?? 'unknown';
+    if (typeof console !== 'undefined') {
+      console.warn(`[voice] SpeechRecognition error: ${code}`);
+    }
+    // For `no-speech` we let onend handle the silent restart. Other errors
+    // are real — tear down so the user can retry.
+    if (code !== 'no-speech') {
+      userStopped = true; // signal onend to NOT restart
+    }
+  };
 
   try { recognition.start(); } catch { onEnd(); return () => {}; }
 
@@ -99,6 +143,7 @@ export function startListening(
     });
 
   return () => {
+    userStopped = true; // mark intentional stop so onend doesn't restart
     if (animFrame !== null) cancelAnimationFrame(animFrame);
     stream?.getTracks().forEach(t => t.stop());
     audioCtx?.close().catch(() => {});

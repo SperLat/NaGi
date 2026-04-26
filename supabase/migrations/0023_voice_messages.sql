@@ -41,6 +41,8 @@ INSERT INTO storage.buckets (id, name, public)
 
 -- No client-side INSERT/UPDATE policy on storage.objects for this bucket.
 -- All writes go through service_role in the edge function. Reads are
--- gated through a separate signed-URL flow (TODO: voice-message-url
--- function in a follow-up; until then, recipients see the transcript
--- only — no audio replay yet).
+-- gated through the voice-message-url edge function: it RLS-checks the
+-- caller against elder_messages first (caller must be in either elder's
+-- org of the connection), then mints a 5-minute signed URL via
+-- service_role. Short TTL keeps the audio behind the auth gate rather
+-- than scattering long-lived URLs across logs and caches.

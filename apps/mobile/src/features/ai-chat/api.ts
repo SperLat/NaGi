@@ -133,17 +133,39 @@ export async function sendChatMessage(
     return;
   }
 
-  const session = (await supabase.auth.getSession()).data.session;
+  // Resolve a fresh access token. Supabase auto-refreshes in the
+  // background, but on long-idle sessions (chat tab left open between
+  // turns, app backgrounded on mobile) the token in memory can be the
+  // expired one — the next request comes back 401. We try once with
+  // whatever's cached, and if the server rejects with 401 we force
+  // `refreshSession()` and retry. Anything other than 401 throws as
+  // before so the offline fallback fires.
+  const callOnce = async (token: string): Promise<Response> =>
+    fetch(`${env.supabaseUrl}/functions/v1/ai-chat`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ elder_id: elderId, messages }),
+    });
+
+  let session = (await supabase.auth.getSession()).data.session;
   if (!session?.access_token) throw new Error('Not authenticated');
 
-  const res = await fetch(`${env.supabaseUrl}/functions/v1/ai-chat`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${session.access_token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ elder_id: elderId, messages }),
-  });
+  let res = await callOnce(session.access_token);
+
+  if (res.status === 401) {
+    // Force-refresh and retry exactly once. If refresh itself fails,
+    // surface the original 401 so the caller's offline-fallback fires
+    // rather than a confusing refresh error.
+    const refresh = await supabase.auth.refreshSession().catch(() => null);
+    const fresh = refresh?.data?.session;
+    if (fresh?.access_token) {
+      session = fresh;
+      res = await callOnce(fresh.access_token);
+    }
+  }
 
   if (!res.ok) {
     const err = await res.text().catch(() => res.statusText);
