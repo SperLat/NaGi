@@ -33,6 +33,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Debug — confirm secrets reached the runner
+        env:
+          URL_VAL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
+          KEY_VAL: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          echo "EXPO_PUBLIC_SUPABASE_URL length: ${#URL_VAL}"
+          echo "EXPO_PUBLIC_SUPABASE_ANON_KEY length: ${#KEY_VAL}"
+          if [ -z "$URL_VAL" ]; then echo "::error::EXPO_PUBLIC_SUPABASE_URL is empty in this run"; exit 1; fi
+          if [ -z "$KEY_VAL" ]; then echo "::error::EXPO_PUBLIC_SUPABASE_ANON_KEY is empty in this run"; exit 1; fi
+          echo "Both secrets present."
+
       - name: Build Expo Web
         working-directory: apps/mobile
         env:
