@@ -111,9 +111,10 @@ export async function createElder(
 export async function updateElder(
   id: string,
   patch: UpdateElderInput,
-): Promise<{ data: Elder | null; error: null }> {
-  const { data: existing } = await getElder(id);
-  if (!existing) return { data: null, error: null };
+): Promise<{ data: Elder | null; error: string | null }> {
+  const { data: existing, error: getErr } = await getElder(id);
+  if (getErr) return { data: null, error: getErr };
+  if (!existing) return { data: null, error: 'Elder not found' };
 
   const bumpVersion =
     patch.profile !== undefined && patch.profile !== existing.profile;
@@ -128,33 +129,43 @@ export async function updateElder(
   };
 
   if (isMock || !localDb) {
-    await db
+    // Capture the supabase error rather than dropping it — caller wants
+    // to surface "couldn't save" instead of navigating away on a silent
+    // failure. The previous version always returned error: null which
+    // forced every caller to assume success.
+    const result = await db
       .from('elders')
       .update({ ...(updated as unknown as Record<string, unknown>) })
       .eq('id', id);
+    const updateErr = (result as unknown as { error: { message: string } | null }).error;
+    if (updateErr) return { data: null, error: updateErr.message };
   } else {
-    localDb.runSync(
-      `UPDATE elders SET
-         display_name    = ?,
-         preferred_lang  = ?,
-         profile         = ?,
-         profile_version = ?,
-         ui_config       = ?,
-         status          = ?,
-         updated_at      = ?
-       WHERE id = ?`,
-      [
-        updated.display_name,
-        updated.preferred_lang,
-        JSON.stringify(updated.profile),
-        updated.profile_version,
-        JSON.stringify(updated.ui_config),
-        updated.status,
-        updated.updated_at,
-        id,
-      ],
-    );
-    enqueueOutbox('elders', 'update', updated as unknown as Record<string, unknown>);
+    try {
+      localDb.runSync(
+        `UPDATE elders SET
+           display_name    = ?,
+           preferred_lang  = ?,
+           profile         = ?,
+           profile_version = ?,
+           ui_config       = ?,
+           status          = ?,
+           updated_at      = ?
+         WHERE id = ?`,
+        [
+          updated.display_name,
+          updated.preferred_lang,
+          JSON.stringify(updated.profile),
+          updated.profile_version,
+          JSON.stringify(updated.ui_config),
+          updated.status,
+          updated.updated_at,
+          id,
+        ],
+      );
+      enqueueOutbox('elders', 'update', updated as unknown as Record<string, unknown>);
+    } catch (err) {
+      return { data: null, error: String((err as Error).message ?? err) };
+    }
   }
 
   return { data: updated, error: null };

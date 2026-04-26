@@ -34,6 +34,8 @@ const TEXT_SIZES = [
 export default function ElderConfigure() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [elder, setElder] = useState<Elder | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [lang, setLang] = useState('es');
   const [textSize, setTextSize] = useState<'lg' | 'xl' | '2xl'>('xl');
@@ -64,9 +66,18 @@ export default function ElderConfigure() {
   const [voiceGuardrails, setVoiceGuardrails] = useState('');
 
   useEffect(() => {
-    getElder(id).then(({ data }) => {
-      if (!data) return;
-      setElder(data);
+    let cancelled = false;
+    getElder(id)
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (error || !data) {
+          // Surface a real error state rather than sitting at the spinner
+          // forever. Caregivers configuring privacy boundaries deserve
+          // explicit "couldn't load" feedback when fetch fails.
+          setLoadError(error ?? 'Could not load this elder.');
+          return;
+        }
+        setElder(data);
       setName(data.display_name);
       setLang(data.preferred_lang);
       setTextSize((data.ui_config.text_size as 'lg' | 'xl' | '2xl') ?? 'xl');
@@ -94,16 +105,24 @@ export default function ElderConfigure() {
       // Voice guardrails are line-separated (one rule per line) — caregivers
       // write them like a list, not comma-separated like topic strings.
       setVoiceGuardrails((p.voice_guardrails ?? []).join('\n'));
-    });
+      })
+      .catch(err => {
+        if (!cancelled) setLoadError(String((err as Error).message ?? err));
+      });
+    return () => { cancelled = true; };
   }, [id]);
 
   const handleSave = async () => {
     if (!elder) return;
     setSaving(true);
+    setSaveError(null);
 
     // Merge new structured fields over the existing profile so we keep any
     // legacy keys (bio/interests/common_tasks) the prompt builder still
-    // reads. Only include emergency_contact when at least a name exists.
+    // reads. Drift risk: unknown keys persist invisibly. If we add a new
+    // typed field that conflicts with a legacy key, prefer to migrate the
+    // legacy data into the typed shape rather than silently overwriting
+    // here. Only include emergency_contact when at least a name exists.
     const nextProfile: Record<string, unknown> = {
       ...(elder.profile ?? {}),
       preferred_name: preferredName.trim() || undefined,
@@ -136,7 +155,7 @@ export default function ElderConfigure() {
       if (nextProfile[k] === undefined) delete nextProfile[k];
     }
 
-    await updateElder(id, {
+    const result = await updateElder(id, {
       display_name: name.trim() || elder.display_name,
       preferred_lang: lang,
       profile: nextProfile,
@@ -149,8 +168,32 @@ export default function ElderConfigure() {
       },
     });
     setSaving(false);
+    if (result?.error) {
+      // Don't navigate away — caregiver thinks save succeeded if we do.
+      // Privacy boundary fields would silently revert. Keep the screen,
+      // surface the error, let them retry.
+      setSaveError(result.error);
+      return;
+    }
     safeBack(`/(intermediary)/elders/${id}`);
   };
+
+  if (loadError) {
+    return (
+      <SafeAreaView className="flex-1 bg-surface-intermediary-raised items-center justify-center px-8">
+        <Text className="text-2xl mb-3">⚠️</Text>
+        <Text className="text-gray-900 text-base font-medium mb-2 text-center">Couldn't load this elder</Text>
+        <Text className="text-gray-500 text-sm text-center mb-6">{loadError}</Text>
+        <Pressable
+          onPress={() => { setLoadError(null); safeBack(`/(intermediary)/elders/${id}`); }}
+          className="bg-accent-600 rounded-2xl py-3 px-6"
+          style={({ pressed }) => ({ opacity: pressed ? 0.82 : 1 })}
+        >
+          <Text className="text-paper font-semibold">Go back</Text>
+        </Pressable>
+      </SafeAreaView>
+    );
+  }
 
   if (!elder) {
     return (
@@ -509,6 +552,12 @@ export default function ElderConfigure() {
       </ScrollView>
 
       <View className="px-6 pb-6 pt-3 bg-gray-50">
+        {saveError ? (
+          <View className="mb-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+            <Text className="text-red-700 text-sm font-medium">Couldn't save</Text>
+            <Text className="text-red-600 text-xs mt-0.5">{saveError}</Text>
+          </View>
+        ) : null}
         <Pressable
           className="bg-accent-600 rounded-2xl py-4 items-center"
           style={({ pressed }) => ({ opacity: pressed ? 0.82 : 1 })}

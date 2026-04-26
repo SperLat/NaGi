@@ -10,6 +10,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { createClient } from '@supabase/supabase-js';
 import { verifyAndCheckMembership } from '../_shared/auth.ts';
+import { checkRateLimit } from '../_shared/rate-limit.ts';
 
 // deno-lint-ignore no-explicit-any
 const env = (Deno as any).env;
@@ -53,6 +54,11 @@ Deno.serve(async (req: Request) => {
 
   const auth = await verifyAndCheckMembership(req, elder_id);
   if ('error' in auth) return jsonError(auth.error, 401);
+
+  // Rate limit — generate-digest hits Opus 4.7 with up to 800 max_tokens
+  // and a 25s timeout. Without this, a buggy retry loop or bad actor can
+  // burn the Anthropic budget. Same limiter pattern as translate-message.
+  if (!checkRateLimit(auth.userId)) return jsonError('Rate limit exceeded', 429);
 
   const db = createClient(
     env.get('SUPABASE_URL') ?? '',
@@ -105,6 +111,19 @@ Deno.serve(async (req: Request) => {
 
   if (!elderRes.data) return jsonError('Elder not found', 404);
 
+  // Surface any data-fetch failure rather than silently digesting on a
+  // partial picture. A transient error on pillRes that returns no rows
+  // would otherwise become "no reminders set" in the digest copy — a
+  // load-bearing falsehood. Bail with 502 so the client retries cleanly.
+  for (const [name, res] of [
+    ['activity', activityRes],
+    ['ai_interactions', aiRes],
+    ['help_requests', helpRes],
+    ['pill_reminder_events', pillRes],
+  ] as const) {
+    if (res.error) return jsonError(`Source query failed: ${name}: ${res.error.message}`, 502);
+  }
+
   const elder = elderRes.data as {
     display_name: string;
     preferred_lang: string;
@@ -127,14 +146,20 @@ Deno.serve(async (req: Request) => {
   // "questions_asked" stat. The activity[] array above is already
   // filtered to public-only; we run a separate head-only count to
   // get the true total without re-fetching payloads.
+  //
+  // Bail rather than fall back to the public-filtered activity array —
+  // that fallback would silently undercount by the number of private
+  // turns, defeating the whole point of this separate count.
   const totalAiTurnsRes = await db
     .from('activity_log')
     .select('id', { count: 'exact', head: true })
     .eq('elder_id', elder_id)
     .eq('kind', 'ai_turn')
     .gte('client_ts', periodStartIso);
-  const totalAiTurns =
-    (totalAiTurnsRes as unknown as { count: number | null }).count ?? activity.filter(a => a.kind === 'ai_turn').length;
+  if (totalAiTurnsRes.error) {
+    return jsonError(`Source query failed: ai_turn count: ${totalAiTurnsRes.error.message}`, 502);
+  }
+  const totalAiTurns = (totalAiTurnsRes as unknown as { count: number | null }).count ?? 0;
   const aiRows = (aiRes.data ?? []) as Array<{
     input_tokens: number | null;
     output_tokens: number | null;
