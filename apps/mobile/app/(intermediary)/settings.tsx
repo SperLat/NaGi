@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
-import { View, Text, TextInput, Pressable, ActivityIndicator, ScrollView } from 'react-native';
+import { View, Text, TextInput, Pressable, ActivityIndicator, ScrollView, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
 import { safeBack } from '@/lib/nav';
 import { getMyProfile, setMyDisplayName } from '@/features/user-profile';
 import { setDevicePin, isDevicePinSet, clearDevicePin } from '@/lib/kiosk';
+import { deleteMyAccount, exportMyData } from '@/features/account';
 import { supabase } from '@/lib/supabase';
 
 /**
@@ -28,6 +30,14 @@ export default function CaregiverSettings() {
   const [pinSaving, setPinSaving] = useState(false);
   const [pinSavedAt, setPinSavedAt] = useState<number | null>(null);
   const [pinError, setPinError] = useState<string | null>(null);
+
+  // GDPR controls — Art. 17 erasure, Art. 20 portability.
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
 
   useEffect(() => {
     let cancelled = false;
@@ -89,6 +99,31 @@ export default function CaregiverSettings() {
     } finally {
       setPinSaving(false);
     }
+  };
+
+  const handleExport = async () => {
+    setExportError(null);
+    setExporting(true);
+    const result = await exportMyData();
+    setExporting(false);
+    if (!result.ok) setExportError(result.error ?? 'Could not export.');
+  };
+
+  const handleDelete = async () => {
+    setDeleteError(null);
+    if (deleteConfirmText.toLowerCase().trim() !== 'delete my account') {
+      setDeleteError('Type "delete my account" exactly to confirm.');
+      return;
+    }
+    setDeleting(true);
+    const result = await deleteMyAccount();
+    setDeleting(false);
+    if (!result.ok) {
+      setDeleteError(result.error ?? 'Could not delete just now.');
+      return;
+    }
+    // Account is gone + we're signed out. Route to auth.
+    router.replace('/(auth)/sign-in');
   };
 
   if (loading) {
@@ -198,7 +233,94 @@ export default function CaregiverSettings() {
             </Pressable>
           ) : null}
         </View>
+
+        {/* ── Privacy controls (GDPR Art. 17 / Art. 20) ──────────── */}
+        <View className="mt-10 pt-6 border-t border-gray-200">
+          <Text className="text-xs font-medium text-gray-500 mb-1.5 ml-1">
+            Your data
+          </Text>
+          <Text className="text-gray-400 text-xs mb-4 ml-1">
+            Export everything Nagi has about you, or delete your account.
+          </Text>
+
+          <Pressable
+            onPress={handleExport}
+            disabled={exporting}
+            className="bg-surface-intermediary-raised border border-gray-200 rounded-2xl py-3.5 items-center mb-2"
+            style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+          >
+            {exporting ? (
+              <ActivityIndicator color="#34503E" />
+            ) : (
+              <Text className="text-gray-800 font-semibold">Download my data</Text>
+            )}
+          </Pressable>
+          {exportError ? (
+            <Text className="text-red-600 text-xs mb-3 ml-1">{exportError}</Text>
+          ) : null}
+
+          <Pressable
+            onPress={() => setDeleteOpen(true)}
+            className="mt-2 ml-1"
+            style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+          >
+            <Text className="text-red-600 text-xs">Delete my account</Text>
+          </Pressable>
+        </View>
       </ScrollView>
+
+      <Modal visible={deleteOpen} transparent animationType="fade" onRequestClose={() => setDeleteOpen(false)}>
+        <View className="flex-1 items-center justify-center px-6" style={{ backgroundColor: 'rgba(26,23,20,0.6)' }}>
+          <View className="bg-white rounded-3xl p-6 w-full max-w-md">
+            <Text className="text-lg font-bold text-gray-900 mb-2">Delete your account?</Text>
+            <Text className="text-gray-600 text-sm mb-2">
+              This removes your profile, your device PIN, your care-circle posts,
+              and unlinks you from every elder you care for. Other caregivers
+              keep access to those elders.
+            </Text>
+            <Text className="text-gray-600 text-sm mb-4">
+              Elders for whom you were the only caregiver remain in the database
+              under the org's ownership. Contact support if you also need them
+              removed.
+            </Text>
+            <Text className="text-xs font-medium text-gray-500 mb-1.5">
+              Type <Text className="font-semibold">delete my account</Text> to confirm:
+            </Text>
+            <TextInput
+              className="border border-gray-200 rounded-xl px-4 py-3 text-gray-900 bg-gray-50 mb-3"
+              value={deleteConfirmText}
+              onChangeText={setDeleteConfirmText}
+              autoCapitalize="none"
+              autoCorrect={false}
+              placeholder="delete my account"
+              placeholderTextColor="#9ca3af"
+            />
+            {deleteError ? (
+              <Text className="text-red-600 text-xs mb-2">{deleteError}</Text>
+            ) : null}
+            <View className="flex-row gap-2 mt-2">
+              <Pressable
+                onPress={() => { setDeleteOpen(false); setDeleteConfirmText(''); setDeleteError(null); }}
+                disabled={deleting}
+                className="flex-1 bg-gray-100 rounded-xl py-3 items-center"
+              >
+                <Text className="text-gray-700 font-medium">Cancel</Text>
+              </Pressable>
+              <Pressable
+                onPress={handleDelete}
+                disabled={deleting}
+                className="flex-1 bg-red-600 rounded-xl py-3 items-center"
+              >
+                {deleting ? (
+                  <ActivityIndicator color="white" />
+                ) : (
+                  <Text className="text-paper font-semibold">Delete forever</Text>
+                )}
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
