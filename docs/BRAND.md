@@ -102,10 +102,11 @@ These are non-negotiable. Catching one is grounds to revise.
 The full manual will define tokens. This section defines **intent**, which the tokens must serve.
 
 ### Color
-- **Background dominance.** The dominant color on every surface is a soft, warm off-white or a deep, warm near-black. Saturated color is a guest.
-- **One accent per screen.** Pick one warm accent for the primary action. Everything else is neutral.
-- **Never red for "no" on the elder surface.** Red is reserved for safety-critical signals (e.g., "Necesito ayuda" — the help button). Routine "cancel" is gray, not red.
-- **High-contrast mode is not optional.** Every color pair must pass WCAG AA at minimum, AAA for body text on the elder surface.
+- **Background dominance.** The dominant color on every surface is a quiet near-neutral (Fog White — slightly warm, never pure white) or a deep charcoal. Saturated color is a guest, never the host.
+- **One structural accent per screen.** The primary action color is **Pine Deep** — drawn from the Penjing pine of the brand mythology (see [PHILOSOPHY.md](./PHILOSOPHY.md)). Sea Lull (the still water of 凪) and Aged Cream play subordinate semantic roles. Three families maximum on any single screen.
+- **Never red for "no" on the elder surface.** Red is reserved for one named exception: the elder's emergency button ("Necesito ayuda / I Need Help"). Routine "cancel" is gray, not red. Routine "delete confirm" uses Pine Deep on a neutral background, never red.
+- **Warm Ochre, not red, for non-emergency alerts.** The brand's alert color is a warm gold; red is preserved for the moment that warrants real arousal.
+- **High-contrast mode is not optional.** Every color pair must pass WCAG AA at minimum, AAA for body text on the elder surface. The full contrast table lives in [BRAND_MANUAL.md §3.6](./BRAND_MANUAL.md).
 
 ### Type
 - **Two families maximum.** A humanist sans-serif for UI, optionally one serif for editorial moments (about page, principles).

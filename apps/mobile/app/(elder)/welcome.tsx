@@ -31,7 +31,7 @@ export default function ElderWelcome() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-surface-elder" style={{ backgroundColor: '#FBF7F0' }}>
+    <SafeAreaView className="flex-1 bg-surface-elder" style={{ backgroundColor: '#F7F5F2' }}>
       <View className="flex-1 items-center justify-center px-8">
         {/* Single decorative kanji per BRAND_MANUAL §1.2 */}
         <Text style={{ fontSize: 64 }} className="text-accent-600 mb-6">

@@ -47,7 +47,7 @@ export default function ElderHome() {
   if (!elder) {
     return (
       <SafeAreaView className="flex-1 bg-white items-center justify-center">
-        <ActivityIndicator color="#B8552B" />
+        <ActivityIndicator color="#34503E" />
       </SafeAreaView>
     );
   }

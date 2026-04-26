@@ -11,7 +11,7 @@ export default function Index() {
   if (!hydrated) {
     return (
       <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator color="#B8552B" size="large" />
+        <ActivityIndicator color="#34503E" size="large" />
       </SafeAreaView>
     );
   }

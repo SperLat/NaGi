@@ -52,12 +52,12 @@ export function DailyShareToggle({ elderId, lang, highContrast }: Props) {
   // Calm visual: rounded pill, neutral when shared (the default), warm
   // accent when private (the elder is actively holding a boundary).
   const bg = shared
-    ? highContrast ? '#26221E' : '#F0EDE7'
-    : highContrast ? '#5A2810' : '#F2D9C9';
+    ? highContrast ? '#2A2A2A' : '#F0F0EE'
+    : highContrast ? '#1A2E25' : '#DDE5DF';
   const fg = shared
-    ? highContrast ? '#9C9485' : '#736B5C'
-    : highContrast ? '#FBF7F0' : '#5A2810';
-  const dotColor = shared ? '#7A8C4F' : '#B8552B';
+    ? highContrast ? '#9A9A95' : '#727270'
+    : highContrast ? '#F7F5F2' : '#1A2E25';
+  const dotColor = shared ? '#7A8C4F' : '#34503E';
 
   return (
     <>
@@ -105,7 +105,7 @@ export function DailyShareToggle({ elderId, lang, highContrast }: Props) {
         >
           <View
             style={{
-              backgroundColor: '#FBF7F0',
+              backgroundColor: '#F7F5F2',
               borderRadius: 24,
               padding: 24,
               maxWidth: 380,
@@ -117,13 +117,13 @@ export function DailyShareToggle({ elderId, lang, highContrast }: Props) {
               style={{
                 fontSize: 20,
                 fontWeight: '600',
-                color: '#3D372F',
+                color: '#1E1E1E',
               }}
             >
               {shared ? s.privacyHideTitle : s.privacyShareMessage}
             </Text>
             {shared ? (
-              <Text style={{ fontSize: 15, color: '#544D42', lineHeight: 22 }}>
+              <Text style={{ fontSize: 15, color: '#545454', lineHeight: 22 }}>
                 {s.privacyHideMessage}
               </Text>
             ) : null}
@@ -134,7 +134,7 @@ export function DailyShareToggle({ elderId, lang, highContrast }: Props) {
                 onPress={() => setConfirmOpen(false)}
                 style={{ flex: 1, paddingVertical: 14, alignItems: 'center' }}
               >
-                <Text style={{ color: '#736B5C', fontSize: 16 }}>{s.privacyCancel}</Text>
+                <Text style={{ color: '#727270', fontSize: 16 }}>{s.privacyCancel}</Text>
               </Pressable>
               <Pressable
                 disabled={busy}
@@ -143,7 +143,7 @@ export function DailyShareToggle({ elderId, lang, highContrast }: Props) {
                   flex: 1.4,
                   paddingVertical: 14,
                   borderRadius: 16,
-                  backgroundColor: '#B8552B',
+                  backgroundColor: '#34503E',
                   alignItems: 'center',
                   opacity: pressed || busy ? 0.7 : 1,
                 })}

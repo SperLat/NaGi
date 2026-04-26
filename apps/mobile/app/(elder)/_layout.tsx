@@ -155,7 +155,7 @@ export default function ElderLayout() {
           }}
           hitSlop={8}
         >
-          <Text style={{ fontSize: 22, color: '#9C9485', includeFontPadding: false }}>
+          <Text style={{ fontSize: 22, color: '#9A9A95', includeFontPadding: false }}>
             凪
           </Text>
         </Pressable>
@@ -178,7 +178,7 @@ export default function ElderLayout() {
         >
           <View
             style={{
-              backgroundColor: '#FBF7F0',
+              backgroundColor: '#F7F5F2',
               borderRadius: 24,
               padding: 28,
               maxWidth: 360,
@@ -187,16 +187,16 @@ export default function ElderLayout() {
             }}
           >
             <View style={{ alignItems: 'center', gap: 8 }}>
-              <Text style={{ fontSize: 40, color: '#3D372F', includeFontPadding: false }}>
+              <Text style={{ fontSize: 40, color: '#1E1E1E', includeFontPadding: false }}>
                 凪
               </Text>
               {/* No "exit" or "intermediary" wording — calm and ambiguous. */}
-              <Text style={{ color: '#736B5C', fontSize: 14 }}>Enter PIN</Text>
+              <Text style={{ color: '#727270', fontSize: 14 }}>Enter PIN</Text>
             </View>
             <PinEntry onVerify={verifyForLayout} onSuccess={handlePinSuccess}
               onFailure={() => setPinOpen(false)} />
             <Pressable onPress={() => setPinOpen(false)} hitSlop={8}>
-              <Text style={{ color: '#9C9485', fontSize: 13, textAlign: 'center' }}>
+              <Text style={{ color: '#9A9A95', fontSize: 13, textAlign: 'center' }}>
                 Cancel
               </Text>
             </Pressable>

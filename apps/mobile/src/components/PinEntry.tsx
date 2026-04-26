@@ -133,8 +133,8 @@ export function PinEntry({
               height: 16,
               borderRadius: 8,
               borderWidth: 1.5,
-              borderColor: filled ? '#B8552B' : '#C8C1B3',
-              backgroundColor: filled ? '#B8552B' : 'transparent',
+              borderColor: filled ? '#34503E' : '#C2C0BC',
+              backgroundColor: filled ? '#34503E' : 'transparent',
             }}
           />
         ))}
@@ -166,9 +166,9 @@ export function PinEntry({
                     flex: 1,
                     height: 64,
                     borderRadius: 16,
-                    backgroundColor: pressed ? '#F0EDE7' : '#FFFFFF',
+                    backgroundColor: pressed ? '#F0F0EE' : '#FFFFFF',
                     borderWidth: 1,
-                    borderColor: '#E2DDD3',
+                    borderColor: '#E0DFDC',
                     alignItems: 'center',
                     justifyContent: 'center',
                     opacity: busy || inCooldown ? 0.4 : 1,
@@ -177,7 +177,7 @@ export function PinEntry({
                   <Text
                     style={{
                       fontSize: isErase ? 22 : 26,
-                      color: isErase ? '#736B5C' : '#3D372F',
+                      color: isErase ? '#727270' : '#1E1E1E',
                       fontWeight: isErase ? '400' : '500',
                     }}
                   >

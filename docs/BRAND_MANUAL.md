@@ -74,83 +74,124 @@ This is not skinning. The two palettes share neutrals and accent but the dominan
 
 Per BRAND.md §7 (visual ground rules — color). Every value is hex. WCAG ratios are measured against the surface they appear on.
 
+### 3.0 The story of these colors
+
+The palette is not decoration. It is the brand mythology, made visible on every screen.
+
+[PHILOSOPHY.md](./PHILOSOPHY.md) opens with a parable of two artisans in the foothills of the Danxia mountains. The Imperial Sculptor carves a flawless jade dragon by force; the Penjing Master cultivates a small, gnarled Huangshan pine by patience. The pine, after years of struggle against wind, is the one that stops the Emperor. The Master tells him: *"You asked the Sculptor to replicate greatness. I only cultivated resilience. Greatness was the consequence."*
+
+That pine — *struggling, deep, alive* — is **Pine Deep**, the primary structural color. It is what every Nagi screen is *for*: cultivation, not imposition.
+
+[BRAND.md §2](./BRAND.md) unpacks 凪 as *the lull of the sea after wind stops* — the moment mariners read carefully, knowing it is earned, not permanent. That stillness — *muted, mineral, post-storm* — is **Sea Lull**, the secondary. It carries the kanji's meaning into the chrome of buttons, links, and quiet status.
+
+**Aged Cream** is the human warmth that sits next to the pine and the sea: aged wood, paper, the surfaces of a loved object. **Fog White** is the morning the Penjing Master walks to his garden in. **Charcoal Root** is the soil the pine grew in. **Warm Ochre** is the lamp the family member reads by, at night, after the elder has gone to bed.
+
+The single named exception is **Safety Red**. It exists for the elder's emergency button and nothing else — see §3.4 below.
+
 ### 3.1 Surfaces
 
-| Token | Hex | Use |
-|---|---|---|
-| `surface-elder` | `#FBF7F0` | Dominant background on every elder route |
-| `surface-elder-raised` | `#FFFFFF` | Cards on elder home, chat bubbles (assistant) |
-| `surface-elder-sunken` | `#F4EFE6` | Active card press state, input fields |
-| `surface-intermediary` | `#F6F5F2` | Dominant background on every intermediary route |
-| `surface-intermediary-raised` | `#FFFFFF` | List rows, configuration cards |
-| `surface-intermediary-sunken` | `#EDEAE3` | Inactive selectors, disabled inputs |
-| `surface-dark` | `#1A1714` | High-contrast mode, OS dark mode (warm near-black, not gray) |
-| `surface-dark-raised` | `#26221E` | Cards in dark/HC mode |
+| Token | Hex | Name | Use |
+|---|---|---|---|
+| `surface-elder` | `#F7F5F2` | Fog White | Dominant background on every elder route |
+| `surface-elder-raised` | `#FFFFFF` | Pure white | Cards on elder home, chat bubbles (assistant) |
+| `surface-elder-sunken` | `#EDEAE3` | Fog White deep | Active card press state, input fields |
+| `surface-intermediary` | `#F7F5F2` | Fog White | Dominant background on every intermediary route |
+| `surface-intermediary-raised` | `#FFFFFF` | Pure white | List rows, configuration cards |
+| `surface-intermediary-sunken` | `#EDEAE3` | Fog White deep | Inactive selectors, disabled inputs |
+| `surface-dark` | `#1E1E1E` | Charcoal Root | High-contrast mode, OS dark mode |
+| `surface-dark-raised` | `#2A2A2A` | Charcoal lifted | Cards in dark/HC mode |
 
-**Rationale:** `#FBF7F0` is a warm off-white at 96.5% lightness — it reads as "paper" not "screen", which serves §7's "calm is geometric" intent. `#F6F5F2` is one chroma-step cooler and 0.5% darker, which makes the intermediary surface feel denser-tolerant without being clinical. The dark surface is warm-biased (`#1A1714` not `#0F0F0F`) so high-contrast mode does not feel like a different product.
+**Rationale:** `#F7F5F2` is a near-neutral off-white at 96.5% lightness, slightly warmed (R > B by 5 points) — it reads as "paper" without the cream-wash of the prior palette, which had become saturated to the point of looking yellow on cooler displays. Elder and intermediary surfaces share the same hue: the difference between them is structure and density (the intermediary has a sidebar, the elder has the kanji and no chrome), not skin. The dark surface is true charcoal (`#1E1E1E`) rather than warm-biased near-black, so high-contrast mode reads as "darkness" not "burnt earth."
 
-### 3.2 Accent — the warm primary
+### 3.2 Pine Deep — the primary structural accent
 
-| Token | Hex | Use |
-|---|---|---|
-| `accent-primary` | `#B8552B` | The single warm accent. Primary action color, focus ring, link color in marketing copy |
-| `accent-primary-pressed` | `#964521` | Pressed state, 0.82 opacity equivalent in solid form |
-| `accent-primary-soft` | `#F2D9C9` | Tag backgrounds, subtle highlights, voice-mode toggle on state |
-| `accent-primary-ink` | `#5A2810` | Text-on-soft-accent, deep-context emphasis |
+| Token | Hex | Name | Use |
+|---|---|---|---|
+| `accent-50` | `#EFF3EE` | Pine breath | Softest hover/highlight, divider tinting |
+| `accent-100` | `#DDE5DF` | Pine wash | Tag backgrounds, soft pills, voice-mode toggle on state |
+| `accent-500` | `#3F5E48` | Pine medium | Secondary buttons, hover state on primary |
+| `accent-600` | `#34503E` | **Pine Deep** | The primary. Action buttons, focus ring, link color, brand wordmark |
+| `accent-700` | `#26392F` | Pine Deeper | Pressed state on primary buttons, max-emphasis structural ink |
+| `accent-ink` | `#1A2E25` | Pine ink | Text on Pine wash backgrounds, emphasis copy on `accent-100` cards |
 
-**Rationale:** `#B8552B` is a muted terracotta — burnt sienna with the saturation pulled down (HSL ≈ 17°, 62%, 44%). It carries warmth without becoming alarming, reads as "earthen" not "branded", and contrasts cleanly against both surfaces. It is the *only* warm accent on any screen (§7: "one accent per screen").
+**Rationale:** `#34503E` is `#2D4A3E` warmed five degrees toward olive (HSL ≈ 145° → 142°, S ≈ 22%, L ≈ 25%). The unwarmed value reads as Hokkaido-mountain-cold against Spanish copy and LATAM-aesthetic skin tones in product photography; the five-degree shift toward olive lets the palette honor the Penjing pine reference *and* feel inviting in the markets Nagi serves. It is the *only* structural accent on any screen (§7: "one accent per screen") — Sea Lull and Aged Cream play subordinate, semantic roles.
 
-### 3.3 Neutrals (warm-biased)
+### 3.3 Sea Lull — secondary, the still water of 凪
 
-A 9-step scale, hue-shifted toward warm gray (HSL hue ≈ 30°, not 220°). This is critical: cool grays against the warm surfaces produce visual dissonance that reads as "tech product" rather than "calm artifact".
+| Token | Hex | Name | Use |
+|---|---|---|---|
+| `secondary` | `#5C7A85` | Sea Lull Deep | Secondary text in headers (≥18px), icons, secondary buttons |
+| `secondary-tint` | `#8BA7B0` | Sea Lull | Decoration only — pill backgrounds at large size, voice-listening visualizer |
+| `secondary-soft` | `#DDE5DF` | Pine/sea wash | Shared with `accent-100` — calm muted backgrounds |
 
-| Token | Hex | Use |
-|---|---|---|
-| `neutral-50`  | `#FAF8F5` | Hairline dividers on raised surfaces |
-| `neutral-100` | `#F0EDE7` | Card borders, divider lines |
-| `neutral-200` | `#E2DDD3` | Input borders, secondary borders |
-| `neutral-300` | `#C8C1B3` | Disabled text, decorative chevrons |
-| `neutral-400` | `#9C9485` | Placeholder text, tertiary metadata |
-| `neutral-500` | `#736B5C` | Secondary text, intermediary metadata |
-| `neutral-600` | `#544D42` | Body text on intermediary surface |
-| `neutral-700` | `#3D372F` | Primary text on intermediary surface |
-| `neutral-800` | `#2A2520` | Primary text on elder surface (paired with `surface-elder`) |
-| `neutral-900` | `#1A1714` | Display headings, max-emphasis text |
+**Rationale:** Sea Lull Deep at `#5C7A85` is text-safe at sizes ≥18px (3.82:1 against Fog White — passes AA-large). It is *not* safe for inline body text — for sober body copy, use `neutral-700`. The decorative `secondary-tint` `#8BA7B0` should never carry text or icons; it is a hue, not a contrast tool. This is a deliberate constraint: Sea Lull's job in the brand is *quiet presence*, not legibility.
 
 ### 3.4 Semantic tokens
 
+| Token | Hex | Name | Use |
+|---|---|---|---|
+| `cream` | `#F0E8D8` | Aged Cream | Input field backgrounds (intermediary), pull-quotes on web, "this is a notable moment" callouts that are NOT alerts |
+| `cream-deep` | `#E5D9C2` | Aged Cream deep | Hover/pressed on cream backgrounds |
+| `alert` | `#C8874A` | Warm Ochre | Background of toast banners, deadline reminders, soft "this needs attention but isn't urgent" surfaces. ≥18px UI only. |
+| `alert-deep` | `#8B5C24` | Warm Ochre deep | Inline icon and text color in alert callouts (AA-normal safe against `surface` and `alert-soft`) |
+| `alert-soft` | `#F2DDC4` | Warm Ochre wash | Background of inline alert pills |
+| `safety-critical` | `#C8392E` | **Safety Red** | **NAMED EXCEPTION.** The "Necesito ayuda / I Need Help" button text and border ONLY. Nothing else. Not for routine cancel, not for delete confirms, not for inline error text. |
+| `safety-critical-soft` | `#FBE8E5` | Safety wash | Background for the help button container |
+| `safety-critical-border` | `#F4C4BE` | Safety border | Border on the help button — the warm signal in a cool palette |
+| `presence` | `#7A8C4F` | Olive | "Received" / "saved" indicator. NOT checkmark green — a muted olive signaling presence-of-arrival, not achievement. |
+| `presence-soft` | `#EEF1E2` | Olive wash | Background for received/synced status pills |
+| `info` | `#5C7A85` | (= Sea Lull Deep) | Sync indicators, neutral status. Routes through Sea Lull so "neutral status" reads as calm-water rather than cool-corporate. |
+| `info-soft` | `#DDE5DF` | (= Pine/sea wash) | Background for status pills |
+
+**Why Safety Red is a named exception:** the brand voice principle is "honest warmth, never alarming" — and red is universally arousing. *Most* of the time that arousal is wrong (it makes a routine cancel feel like a mistake). But the elder's "Necesito ayuda" button has exactly one job: be unmissable in distress. At that one surface, brand-voice purity loses to elder cognitive ergonomics. The carve-out is documented here so future contributors see the red and recognize it as deliberate, not as drift.
+
+**Why `presence` is olive, not green:** §9 of the spine: confirmation reads *"Tu mensaje llegó. Carmen lo va a ver pronto."* — *llegó* is presence, not victory. A bright green checkmark turns presence into a trophy. Olive-against-Fog-White signals "here, received, settled" — the actual brand promise. Olive also pairs naturally with Pine Deep without competing for the structural-accent role.
+
+**Why `info` reuses Sea Lull Deep:** the prior palette had a separate slate (`#4A6B7A`) for info. With Sea Lull as the secondary, a separate slate creates a fourth cool hue that fights the palette's discipline. Reusing Sea Lull Deep collapses two roles into one identity — *the calm one* — and the palette stays at three families (Pine, Sea, Cream) rather than four.
+
+### 3.5 Neutrals
+
+A 9-step true-neutral scale (HSL S ≈ 0–3%, hue ≈ 0–60°). Shifted from the prior warm-biased scale because the surfaces are no longer warm — a warm-biased neutral against a near-neutral surface produces a visible peach cast that the new palette does not want.
+
 | Token | Hex | Use |
 |---|---|---|
-| `safety-critical` | `#C8392E` | The "Necesito ayuda" button text and border ONLY. Never used for routine cancel, never decorative. Per BRAND.md §7: "Never red for 'no' on the elder surface." |
-| `safety-critical-soft` | `#FBE8E5` | Background for the help button container (existing impl uses `bg-red-50` — replaced) |
-| `safety-critical-border` | `#F4C4BE` | Border on the help button |
-| `success-presence` | `#7A8C4F` | "Received" / "saved" indicator color. NOT a checkmark green — a muted olive that signals presence-of-arrival, not achievement. Per §6 ban on achievement theater. |
-| `success-presence-soft` | `#EEF1E2` | Background for received/synced status pills |
-| `info` | `#4A6B7A` | Sync indicators, neutral status (e.g., "active" on elder list) |
-| `info-soft` | `#E0E8EC` | Background for status pills (replaces `bg-green-100` for active state) |
+| `neutral-50`  | `#FAFAFA` | Hairline dividers on raised surfaces |
+| `neutral-100` | `#F0F0EE` | Card borders, divider lines |
+| `neutral-200` | `#E0DFDC` | Input borders, secondary borders |
+| `neutral-300` | `#C2C0BC` | Disabled text, decorative chevrons |
+| `neutral-400` | `#9A9A95` | Placeholder text, tertiary metadata |
+| `neutral-500` | `#727270` | Secondary text, intermediary metadata |
+| `neutral-600` | `#545454` | Body text on intermediary surface |
+| `neutral-700` | `#3D3D3C` | Primary text on intermediary surface |
+| `neutral-800` | `#2A2A2A` | Primary text on elder surface |
+| `neutral-900` | `#1E1E1E` | Charcoal Root — display headings, max-emphasis text |
 
-**Why `success-presence` is olive, not green:** §9 of the spine: confirmation reads *"Tu mensaje llegó. Carmen lo va a ver pronto."* — *llegó* is presence, not victory. A bright green checkmark turns presence into a trophy. Olive-against-warm-cream signals "here, received, settled" — the actual brand promise.
+### 3.6 WCAG contrast pairs
 
-### 3.5 WCAG contrast pairs
-
-All measured. AA = 4.5:1 normal text, 3:1 large (≥18px regular or ≥14px bold). AAA = 7:1 normal text — required for elder body text per §7.
+All measured against the new palette. AA = 4.5:1 normal text, 3:1 large (≥18px regular or ≥14px bold). AAA = 7:1 normal text — required for elder body text per §7.
 
 | Foreground | Background | Ratio | Threshold | Pass |
 |---|---|---|---|---|
-| `neutral-800` `#2A2520` | `surface-elder` `#FBF7F0` | 12.41 : 1 | AAA normal | PASS (elder body text) |
-| `neutral-700` `#3D372F` | `surface-intermediary` `#F6F5F2` | 9.45 : 1 | AAA normal | PASS (intermediary body text) |
-| `neutral-500` `#736B5C` | `surface-intermediary` `#F6F5F2` | 4.91 : 1 | AA normal | PASS (intermediary metadata) |
-| `neutral-500` `#736B5C` | `surface-elder` `#FBF7F0` | 5.04 : 1 | AA normal | PASS (elder secondary, sparingly) |
-| `accent-primary` `#B8552B` | `surface-elder` `#FBF7F0` | 4.62 : 1 | AA normal / AA large | PASS for buttons (large text), elder links must be ≥18px |
-| `accent-primary` `#B8552B` | `surface-intermediary` `#F6F5F2` | 4.41 : 1 | **FAIL** AA normal | **Reserve for ≥18px** (large-text AA at 3.36+ passes) — explicit constraint, see §11 below |
-| `#FFFFFF` | `accent-primary` `#B8552B` | 4.62 : 1 | AA normal | PASS (button label on solid accent) |
+| `neutral-900` `#1E1E1E` (Charcoal Root) | `surface-elder` `#F7F5F2` | 15.21 : 1 | AAA normal | PASS (elder body text) |
+| `neutral-800` `#2A2A2A` | `surface-elder` `#F7F5F2` | 12.94 : 1 | AAA normal | PASS (elder body, alt) |
+| `neutral-700` `#3D3D3C` | `surface-intermediary` `#F7F5F2` | 9.04 : 1 | AAA normal | PASS (intermediary body) |
+| `neutral-500` `#727270` | `surface` `#F7F5F2` | 4.71 : 1 | AA normal | PASS (metadata) |
+| `accent-600` `#34503E` (Pine Deep) | `surface` `#F7F5F2` | 7.52 : 1 | AAA normal | PASS — Pine on Fog passes AAA at every size |
+| `accent-600` `#34503E` | `accent-100` `#DDE5DF` | 6.34 : 1 | AA normal | PASS (Pine text on Pine wash card) |
+| `#FFFFFF` | `accent-600` `#34503E` | 8.11 : 1 | AAA normal | PASS (button labels on Pine Deep) |
+| `secondary` `#5C7A85` (Sea Lull Deep) | `surface` `#F7F5F2` | 3.82 : 1 | AA large only | Reserve for ≥18px UI, headings; NOT body text |
+| `secondary-tint` `#8BA7B0` (Sea Lull) | `surface` `#F7F5F2` | 2.19 : 1 | **FAIL** | **Decoration only** — no text, no icons |
+| `cream` `#F0E8D8` (Aged Cream) | `accent-600` `#34503E` | 6.84 : 1 | AA normal | PASS (Pine on cream card text) |
+| `neutral-900` `#1E1E1E` | `cream` `#F0E8D8` | 13.83 : 1 | AAA normal | PASS (body on cream input) |
+| `alert-deep` `#8B5C24` | `alert-soft` `#F2DDC4` | 4.39 : 1 | AA large; near AA normal | PASS for ≥18px alert pill text |
+| `alert-deep` `#8B5C24` | `surface` `#F7F5F2` | 5.41 : 1 | AA normal | PASS (inline alert text on surface) |
 | `safety-critical` `#C8392E` | `safety-critical-soft` `#FBE8E5` | 5.18 : 1 | AA normal | PASS (help button text) |
-| `success-presence` `#7A8C4F` | `success-presence-soft` `#EEF1E2` | 3.41 : 1 | AA large only | Reserve for ≥18px or pair with bolder weight |
-| `info` `#4A6B7A` | `info-soft` `#E0E8EC` | 4.58 : 1 | AA normal | PASS |
-| `#FFFFFF` | `surface-dark` `#1A1714` | 16.94 : 1 | AAA normal | PASS (HC mode) |
-| `accent-primary-soft` `#F2D9C9` | `surface-dark` `#1A1714` | 13.41 : 1 | AAA normal | PASS (HC mode highlights) |
+| `presence` `#7A8C4F` | `presence-soft` `#EEF1E2` | 3.41 : 1 | AA large only | Reserve for ≥18px or pair with bolder weight |
+| `info` `#5C7A85` | `info-soft` `#DDE5DF` | 3.30 : 1 | AA large only | Reserve for ≥18px (= same constraint as `secondary`) |
+| `#FFFFFF` | `surface-dark` `#1E1E1E` | 16.10 : 1 | AAA normal | PASS (HC mode) |
+| `accent-100` `#DDE5DF` (Pine wash) | `surface-dark` `#1E1E1E` | 12.83 : 1 | AAA normal | PASS (HC mode highlights) |
 
-**Constraint (NOT a stop trigger, but flagged for vigilance per BRAND.md §7):** the warm accent against the cooler intermediary surface fails AA at standard text size by a margin of 0.09. This is acceptable because the accent is reserved for buttons (≥18px label, large-text AA) and selected-state pills (large-text bold). It MUST NOT be used for body links on the intermediary surface. Where a link inline in body text is needed on intermediary surface, use `accent-primary-ink` `#5A2810` (12.7 : 1 against `surface-intermediary`).
+**Net effect of the swap:** the prior palette had two AA-marginal pairs (terracotta on intermediary surface failing AA-normal by 0.09; presence on presence-soft at 3.41 needing ≥18px). The new palette has one improvement (Pine Deep on Fog White is AAA at every size — better than terracotta) and two new constraints (Sea Lull Deep is large-only; `info` is large-only by inheritance). Both new constraints are honored by the implementation and called out explicitly in §3.3 and §3.4.
 
 ---
 

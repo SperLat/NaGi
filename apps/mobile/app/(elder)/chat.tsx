@@ -299,7 +299,7 @@ export default function ElderChat() {
   if (!elder) {
     return (
       <SafeAreaView className="flex-1 bg-white items-center justify-center">
-        <ActivityIndicator color="#B8552B" />
+        <ActivityIndicator color="#34503E" />
       </SafeAreaView>
     );
   }
@@ -402,7 +402,7 @@ export default function ElderChat() {
                   style={{
                     width: 5,
                     borderRadius: 3,
-                    backgroundColor: volume > 0.05 ? '#B8552B' : '#F2D9C9',
+                    backgroundColor: volume > 0.05 ? '#34503E' : '#DDE5DF',
                     height: Math.max(6, Math.min(44, volume * 44 * seed + 6)),
                   }}
                 />

@@ -101,7 +101,7 @@ export default function ElderOverview() {
   if (!elder) {
     return (
       <SafeAreaView className="flex-1 bg-white items-center justify-center">
-        <ActivityIndicator color="#B8552B" />
+        <ActivityIndicator color="#34503E" />
       </SafeAreaView>
     );
   }
@@ -383,7 +383,7 @@ function DigestModal({ visible, busy, digest, error, elderName, onClose, onRegen
           <ScrollView className="flex-1" contentContainerStyle={{ padding: 20 }}>
             {busy ? (
               <View className="items-center py-12">
-                <ActivityIndicator color="#B8552B" />
+                <ActivityIndicator color="#34503E" />
                 <Text className="text-gray-500 text-sm mt-3">Reading the past 7 days…</Text>
               </View>
             ) : error ? (

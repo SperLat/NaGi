@@ -321,7 +321,7 @@ export default function IntermediaryDashboard() {
       <ScrollView className="flex-1 px-6">
         {loading ? (
           <View className="items-center pt-12">
-            <ActivityIndicator color="#B8552B" />
+            <ActivityIndicator color="#34503E" />
           </View>
         ) : elders.length === 0 ? (
           <View className="bg-white rounded-2xl p-6 border border-gray-100 items-center">

@@ -127,7 +127,7 @@ export default function ElderConfigure() {
   if (!elder) {
     return (
       <SafeAreaView className="flex-1 bg-white items-center justify-center">
-        <ActivityIndicator color="#B8552B" />
+        <ActivityIndicator color="#34503E" />
       </SafeAreaView>
     );
   }
@@ -203,7 +203,7 @@ export default function ElderConfigure() {
               <Switch
                 value={highContrast}
                 onValueChange={setHighContrast}
-                trackColor={{ true: '#B8552B' }}
+                trackColor={{ true: '#34503E' }}
               />
             </View>
             <View className="flex-row items-center justify-between px-4 py-4">
@@ -214,7 +214,7 @@ export default function ElderConfigure() {
               <Switch
                 value={voiceInput}
                 onValueChange={setVoiceInput}
-                trackColor={{ true: '#B8552B' }}
+                trackColor={{ true: '#34503E' }}
               />
             </View>
           </View>

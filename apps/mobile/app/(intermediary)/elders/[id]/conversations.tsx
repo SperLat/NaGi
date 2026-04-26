@@ -110,7 +110,7 @@ export default function ElderConversations() {
 
       {loading ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator color="#B8552B" />
+          <ActivityIndicator color="#34503E" />
         </View>
       ) : (
         <FlatList
@@ -131,7 +131,7 @@ export default function ElderConversations() {
           ListFooterComponent={
             loadingMore ? (
               <View className="py-4 items-center">
-                <ActivityIndicator color="#B8552B" />
+                <ActivityIndicator color="#34503E" />
               </View>
             ) : null
           }

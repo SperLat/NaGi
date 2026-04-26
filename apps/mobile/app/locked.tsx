@@ -23,7 +23,7 @@ export default function LockedScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#F6F5F2' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F7F5F2' }}>
       <View
         style={{
           flex: 1,
@@ -33,7 +33,7 @@ export default function LockedScreen() {
           gap: 48,
         }}
       >
-        <Text style={{ fontSize: 96, color: '#3D372F', includeFontPadding: false }}>
+        <Text style={{ fontSize: 96, color: '#1E1E1E', includeFontPadding: false }}>
           凪
         </Text>
         <PinEntry

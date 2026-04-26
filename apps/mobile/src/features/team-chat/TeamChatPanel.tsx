@@ -139,7 +139,7 @@ export function TeamChatPanel({ elderId, organizationId, userId }: TeamChatPanel
       >
         {loading ? (
           <View className="items-center py-6">
-            <ActivityIndicator color="#B8552B" />
+            <ActivityIndicator color="#34503E" />
           </View>
         ) : messages.length === 0 ? (
           <Text className="text-gray-400 text-sm text-center py-6">

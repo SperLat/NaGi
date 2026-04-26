@@ -140,7 +140,7 @@ export default function ElderNotes() {
 
       {loading ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator color="#B8552B" />
+          <ActivityIndicator color="#34503E" />
         </View>
       ) : (
         <FlatList
