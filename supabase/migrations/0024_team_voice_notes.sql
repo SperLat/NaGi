@@ -39,6 +39,12 @@ INSERT INTO storage.buckets (id, name, public)
   ON CONFLICT (id) DO NOTHING;
 
 -- ── Replace list RPC to include audio_path ─────────────────────────
+-- DROP first because CREATE OR REPLACE refuses to change the return
+-- type (TABLE shape) of an existing function — Postgres treats that
+-- as a breaking signature change. Same function body, just one extra
+-- column in the row type.
+DROP FUNCTION IF EXISTS list_elder_team_messages(uuid);
+
 CREATE OR REPLACE FUNCTION list_elder_team_messages(elder uuid)
 RETURNS TABLE (
   id           uuid,
