@@ -18,6 +18,9 @@ export interface DigestStats {
   help_requests_pending: number;
   ai_input_tokens: number;
   ai_output_tokens: number;
+  pill_taken: number;
+  pill_skipped: number;
+  pill_pending: number;
 }
 
 export interface DigestResult {
@@ -36,6 +39,9 @@ const EMPTY_STATS: DigestStats = {
   help_requests_pending: 0,
   ai_input_tokens: 0,
   ai_output_tokens: 0,
+  pill_taken: 0,
+  pill_skipped: 0,
+  pill_pending: 0,
 };
 
 /**

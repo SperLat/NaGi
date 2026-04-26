@@ -33,6 +33,9 @@ interface DigestStats {
   help_requests_pending: number;
   ai_input_tokens: number;
   ai_output_tokens: number;
+  pill_taken: number;
+  pill_skipped: number;
+  pill_pending: number;
 }
 
 Deno.serve(async (req: Request) => {
@@ -66,7 +69,7 @@ Deno.serve(async (req: Request) => {
   // for usage + errors; help_requests for the support pipeline. Each is a
   // narrow select — the digest prompt doesn't need raw payloads, just
   // counts and snippets.
-  const [elderRes, activityRes, aiRes, helpRes] = await Promise.all([
+  const [elderRes, activityRes, aiRes, helpRes, pillRes] = await Promise.all([
     db.from('elders').select('display_name, preferred_lang, profile').eq('id', elder_id).single(),
     // is_private = false: private turns the elder marked never reach
     // the digest LLM. The count of those turns IS still counted (via the
@@ -90,6 +93,14 @@ Deno.serve(async (req: Request) => {
       .select('id, message, status, created_at, acknowledged_at, acknowledged_by')
       .eq('elder_id', elder_id)
       .gte('created_at', periodStartIso),
+    // Pill reminder events for the past 7 days. Each row is one slot —
+    // taken / skipped / pending. The digest reports counts only; no PHI
+    // beyond the label that the family wrote themselves.
+    db
+      .from('pill_reminder_events')
+      .select('reminder_id, status, fired_at')
+      .eq('elder_id', elder_id)
+      .gte('fired_at', periodStartIso),
   ]);
 
   if (!elderRes.data) return jsonError('Elder not found', 404);
@@ -134,6 +145,11 @@ Deno.serve(async (req: Request) => {
     status: string;
     acknowledged_at: string | null;
   }>;
+  const pillEvents = (pillRes.data ?? []) as Array<{
+    reminder_id: string;
+    status: 'pending' | 'taken' | 'skipped';
+    fired_at: string;
+  }>;
 
   const stats: DigestStats = {
     questions_asked: totalAiTurns,
@@ -144,6 +160,9 @@ Deno.serve(async (req: Request) => {
     help_requests_pending: help.filter(h => h.status === 'pending').length,
     ai_input_tokens: aiRows.reduce((s, r) => s + (r.input_tokens ?? 0), 0),
     ai_output_tokens: aiRows.reduce((s, r) => s + (r.output_tokens ?? 0), 0),
+    pill_taken: pillEvents.filter(e => e.status === 'taken').length,
+    pill_skipped: pillEvents.filter(e => e.status === 'skipped').length,
+    pill_pending: pillEvents.filter(e => e.status === 'pending').length,
   };
 
   // ── No-data short-circuit ────────────────────────────────────────────
@@ -153,7 +172,10 @@ Deno.serve(async (req: Request) => {
     stats.questions_asked === 0 &&
     stats.help_requests_total === 0 &&
     stats.errors === 0 &&
-    stats.offline_unavailable === 0
+    stats.offline_unavailable === 0 &&
+    stats.pill_taken === 0 &&
+    stats.pill_skipped === 0 &&
+    stats.pill_pending === 0
   ) {
     return new Response(
       JSON.stringify({
@@ -206,6 +228,7 @@ Numbers from the past 7 days:
 - Errors / things that broke: ${stats.errors}
 - Times Nagi was offline: ${stats.offline_unavailable}
 - Help requests sent to family: ${stats.help_requests_total} (${stats.help_requests_acknowledged} handled, ${stats.help_requests_pending} still pending)
+- Pill reminders this week: ${stats.pill_taken} taken, ${stats.pill_skipped} skipped, ${stats.pill_pending} unconfirmed${stats.pill_taken + stats.pill_skipped + stats.pill_pending === 0 ? ' (no reminders set)' : ''}
 
 What ${callName} actually asked Nagi about (most recent first):
 ${recentTurns || '(no questions this week)'}

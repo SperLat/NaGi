@@ -13,10 +13,12 @@ export interface ElderStrings {
   needHelp:       string;
   urgentHelpPrime: string;
   cards: {
-    call_family: { label: string; prime: string };
-    get_help:    { label: string; prime: string };
-    my_day:      { label: string; prime: string };
-    one_task:    { label: string; prime: string };
+    call_family:   { label: string; prime: string };
+    get_help:      { label: string; prime: string };
+    my_day:        { label: string; prime: string };
+    one_task:      { label: string; prime: string };
+    pastimes:      { label: string; prime: string };
+    proud_moments: { label: string; prime: string };
   };
   // Welcome screen
   welcomePrepared: (name: string | undefined) => string;
@@ -45,6 +47,15 @@ export interface ElderStrings {
   privacyConfirmHide:   string;
   privacyConfirmShare:  string;
   privacyCancel:        string;
+  // Pill reminders — kiosk pill on home and the reminder event screen.
+  // Brand stance: invitation, not nag. "Did you take it?" not "Don't forget!".
+  pillReminderHome:     (label: string) => string;
+  pillReminderTitle:    string;          // screen heading: "Hora de tu pastilla"
+  pillReminderQuestion: string;          // "¿Tomaste tu pastilla?"
+  pillTookIt:           string;          // primary green button — "Tomé"
+  pillLater:            string;          // snooze 10m button — "Más tarde"
+  pillSkipped:          string;          // accept-warmly button — "Salté hoy"
+  pillSnoozed:          (mins: number) => string;
 }
 
 const strings: Record<Lang, ElderStrings> = {
@@ -60,6 +71,8 @@ const strings: Record<Lang, ElderStrings> = {
       get_help:    { label: 'Necesito ayuda',  prime: 'Necesito ayuda, por favor.' },
       my_day:      { label: 'Mi día',          prime: '¿Qué hay hoy?' },
       one_task:    { label: 'Una tarea',        prime: 'Ayúdame con una tarea.' },
+      pastimes:    { label: 'Para disfrutar',  prime: 'Quiero hacer algo agradable. Mira mis topics_they_enjoy y propón con calidez una o dos opciones, en tono de invitación: "¿Te gustaría...?". Si digo que no, acéptalo con cariño y sin insistir.' },
+      proud_moments: { label: 'Cuéntame', prime: 'Estoy aquí cuando quieras contarme algo lindo del día. Abre con calidez, sin interrogar — algo como "Estoy aquí cuando quieras contarme algo. ¿Cómo va el día?". Escucha. Si surge un momento concreto que valga la pena recordar (un paseo, una visita, una comida, un recuerdo), llama a la herramienta record_moment con un body en mis palabras y un kind sensato. Si no surge nada, eso también está bien — acepta el silencio con calidez, sin presionar.' },
     },
     welcomePrepared: (n) => n ? `${n} preparó esto para ti.` : 'Alguien preparó esto para ti.',
     start:           'Empezar',
@@ -84,6 +97,13 @@ const strings: Record<Lang, ElderStrings> = {
     privacyConfirmHide:   'Sí, mantener privado',
     privacyConfirmShare:  'Sí, compartir',
     privacyCancel:        'Cancelar',
+    pillReminderHome:     (label) => `💊 Hora de tu pastilla: ${label}`,
+    pillReminderTitle:    'Hora de tu pastilla',
+    pillReminderQuestion: '¿La tomaste?',
+    pillTookIt:           'Sí, la tomé',
+    pillLater:            'En un ratito',
+    pillSkipped:          'Hoy no',
+    pillSnoozed:          (m) => `Te recuerdo en ${m} minutos.`,
   },
 
   pt: {
@@ -98,6 +118,8 @@ const strings: Record<Lang, ElderStrings> = {
       get_help:    { label: 'Preciso de ajuda', prime: 'Preciso de ajuda, por favor.' },
       my_day:      { label: 'Meu dia',          prime: 'O que tem hoje?' },
       one_task:    { label: 'Uma tarefa',        prime: 'Me ajude com uma tarefa.' },
+      pastimes:    { label: 'Para desfrutar',   prime: 'Quero fazer algo agradável. Olhe meus topics_they_enjoy e proponha com carinho uma ou duas opções, em tom de convite: "Você gostaria...?". Se eu disser não, aceite com carinho e sem insistir.' },
+      proud_moments: { label: 'Me conta', prime: 'Estou aqui quando você quiser me contar algo bonito do dia. Abra com carinho, sem interrogar — algo como "Estou aqui quando você quiser me contar algo. Como está o dia?". Escute. Se surgir um momento concreto que valha a pena lembrar (um passeio, uma visita, uma refeição, uma memória), chame a ferramenta record_moment com um body nas minhas palavras e um kind sensato. Se nada surgir, tudo bem — aceite o silêncio com carinho, sem pressionar.' },
     },
     welcomePrepared: (n) => n ? `${n} preparou isso para você.` : 'Alguém preparou isso para você.',
     start:           'Começar',
@@ -122,6 +144,13 @@ const strings: Record<Lang, ElderStrings> = {
     privacyConfirmHide:   'Sim, manter privado',
     privacyConfirmShare:  'Sim, compartilhar',
     privacyCancel:        'Cancelar',
+    pillReminderHome:     (label) => `💊 Hora do seu remédio: ${label}`,
+    pillReminderTitle:    'Hora do seu remédio',
+    pillReminderQuestion: 'Você tomou?',
+    pillTookIt:           'Sim, tomei',
+    pillLater:            'Daqui a pouco',
+    pillSkipped:          'Hoje não',
+    pillSnoozed:          (m) => `Te lembro em ${m} minutos.`,
   },
 
   en: {
@@ -136,6 +165,8 @@ const strings: Record<Lang, ElderStrings> = {
       get_help:    { label: 'I need help',  prime: 'I need help, please.' },
       my_day:      { label: 'My day',       prime: 'What is going on today?' },
       one_task:    { label: 'A task',       prime: 'Help me with a task.' },
+      pastimes:    { label: 'To enjoy',     prime: 'I would like to do something pleasant. Look at my topics_they_enjoy and warmly propose one or two options, as an invitation: "Would you like to...?". If I say no, accept it warmly and do not insist.' },
+      proud_moments: { label: 'Tell me', prime: "I'm here whenever you'd like to share something lovely from your day. Open warmly, without interrogating — something like \"I'm here when you want to tell me something. How is the day?\". Listen. If a concrete moment worth remembering surfaces (a walk, a visit, a meal, a memory), call the record_moment tool with a body in my own words and a sensible kind. If nothing surfaces, that's fine too — accept silence warmly, without pressing." },
     },
     welcomePrepared: (n) => n ? `${n} set this up for you.` : 'Someone set this up for you.',
     start:           'Start',
@@ -160,6 +191,13 @@ const strings: Record<Lang, ElderStrings> = {
     privacyConfirmHide:   "Yes, keep private",
     privacyConfirmShare:  "Yes, share",
     privacyCancel:        "Cancel",
+    pillReminderHome:     (label) => `💊 Time for your pill: ${label}`,
+    pillReminderTitle:    'Time for your pill',
+    pillReminderQuestion: 'Did you take it?',
+    pillTookIt:           'Yes, I took it',
+    pillLater:            'In a little while',
+    pillSkipped:          'Not today',
+    pillSnoozed:          (m) => `I'll remind you in ${m} minutes.`,
   },
 };
 

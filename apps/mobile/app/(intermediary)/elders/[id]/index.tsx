@@ -219,6 +219,32 @@ export default function ElderOverview() {
           <Pressable
             className="bg-surface-intermediary-raised rounded-2xl p-4 border border-gray-100 flex-row items-center"
             style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+            onPress={() => router.push(`/(intermediary)/elders/${id}/reminders`)}
+          >
+            <Text className="text-2xl mr-3">💊</Text>
+            <View className="flex-1">
+              <Text className="font-semibold text-gray-900">Pill reminders</Text>
+              <Text className="text-gray-500 text-sm">Gentle nudges at the times you set</Text>
+            </View>
+            <Text className="text-gray-300 text-xl">›</Text>
+          </Pressable>
+
+          <Pressable
+            className="bg-surface-intermediary-raised rounded-2xl p-4 border border-gray-100 flex-row items-center"
+            style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+            onPress={() => router.push(`/(intermediary)/elders/${id}/moments`)}
+          >
+            <Text className="text-2xl mr-3">✨</Text>
+            <View className="flex-1">
+              <Text className="font-semibold text-gray-900">Proud moments</Text>
+              <Text className="text-gray-500 text-sm">What they did, noticed, shared</Text>
+            </View>
+            <Text className="text-gray-300 text-xl">›</Text>
+          </Pressable>
+
+          <Pressable
+            className="bg-surface-intermediary-raised rounded-2xl p-4 border border-gray-100 flex-row items-center"
+            style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
             onPress={handleGenerateDigest}
           >
             <Text className="text-2xl mr-3">📰</Text>

@@ -7,15 +7,18 @@ import { safeBack } from '@/lib/nav';
 import { logActivity } from '@/features/activity-log';
 import { DailyShareToggle } from '@/features/privacy/DailyShareToggle';
 import { listUnreadForElder } from '@/features/messages';
+import { useDueReminder } from '@/features/reminders';
 import { useStrings } from '@/lib/i18n';
 import { useElderCtx } from './_layout';
 import { WELCOME_SEEN_KEY } from './welcome';
 
 const CARD_EMOJIS = {
-  call_family: '📞',
-  get_help:    '🙋',
-  my_day:      '☀️',
-  one_task:    '✅',
+  call_family:   '📞',
+  get_help:      '🙋',
+  my_day:        '☀️',
+  one_task:      '✅',
+  pastimes:      '🌿',
+  proud_moments: '✨',
 } as const;
 
 type CardKey = keyof typeof CARD_EMOJIS;
@@ -53,6 +56,7 @@ export default function ElderHome() {
   const canGoBack = navigation.canGoBack();
   const [unreadCount, setUnreadCount] = useState(0);
   const [unreadFromName, setUnreadFromName] = useState<string | null>(null);
+  const dueReminder = useDueReminder(elder?.id);
 
   // First-open gate: redirect to welcome if not yet seen on this device.
   // Single AsyncStorage key, no schema change. See app/(elder)/welcome.tsx.
@@ -170,6 +174,21 @@ export default function ElderHome() {
             );
           })}
         </View>
+
+        {dueReminder && (
+          <Pressable
+            onPress={() => router.push({
+              pathname: '/(elder)/reminder/[eventId]',
+              params: { eventId: dueReminder.event.id },
+            })}
+            className="mt-4 bg-accent-100 rounded-2xl py-4 items-center border-2 border-accent-500"
+            style={({ pressed }) => ({ opacity: pressed ? 0.82 : 1 })}
+          >
+            <Text className={`text-accent-ink font-bold ${tc.card}`}>
+              {s.pillReminderHome(dueReminder.reminder.label)}
+            </Text>
+          </Pressable>
+        )}
 
         {unreadCount > 0 && (
           <Pressable

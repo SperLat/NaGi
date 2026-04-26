@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import { getMockAiResponse } from '@/lib/mock/ai-stubs';
 import { logActivity } from '@/features/activity-log';
+import { recordNagiMoment } from '@/features/moments';
 import { env } from '@/config/env';
 import { isMock } from '@/config/mode';
 import type { ChatMessage } from './types';
@@ -70,6 +71,42 @@ function stripPrivateMarker(text: string): { text: string; markerPresent: boolea
   return { text, markerPresent: false };
 }
 
+interface MomentPayload {
+  body: string;
+  kind: string | null;
+  is_private: boolean;
+}
+
+/**
+ * Sentinel block: [moment]{...json...}[/moment] anywhere in the
+ * response (typically at the end). Mirrors the privacy pattern.
+ *
+ * Returns the response stripped of the block (so the elder doesn't
+ * see the JSON) plus the parsed moment, when present.
+ */
+function stripMomentMarker(text: string): { text: string; moment: MomentPayload | null } {
+  const match = text.match(/\[moment\]([\s\S]*?)\[\/moment\]/i);
+  if (!match) return { text, moment: null };
+  const cleaned = (text.slice(0, match.index) + text.slice(match.index! + match[0].length)).trimEnd();
+  try {
+    const parsed = JSON.parse(match[1].trim()) as Partial<MomentPayload>;
+    if (typeof parsed.body !== 'string' || !parsed.body.trim()) {
+      return { text: cleaned, moment: null };
+    }
+    return {
+      text: cleaned,
+      moment: {
+        body: parsed.body.trim(),
+        kind: typeof parsed.kind === 'string' ? parsed.kind.trim() || null : null,
+        is_private: parsed.is_private === true,
+      },
+    };
+  } catch {
+    // Malformed JSON — drop the block silently rather than confuse the elder.
+    return { text: cleaned, moment: null };
+  }
+}
+
 export async function sendChatMessage(
   elderId: string,
   organizationId: string,
@@ -120,6 +157,69 @@ export async function sendChatMessage(
   let buffer = '';
   let done = false;
 
+  // Streaming-aware moment-marker filter. We hold back chunks that are
+  // (or could become) part of a `[moment]...[/moment]` block so the
+  // elder never sees the JSON flash on screen and the TTS engine never
+  // reads it aloud. Stripping post-stream is still done by stripMomentMarker
+  // so the API contract (logActivity / recordNagiMoment) is unaffected.
+  const MOMENT_OPEN = '[moment]';
+  const MOMENT_CLOSE = '[/moment]';
+  let emittedCursor = 0;
+  let inMoment = false;
+
+  const flushSafely = () => {
+    // Iteratively process the buffer: emit safe text, transit in/out of
+    // moment mode when full open/close markers appear, withhold partial
+    // prefix at the tail.
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      if (inMoment) {
+        const closeIdx = fullResponse.indexOf(MOMENT_CLOSE, emittedCursor);
+        if (closeIdx === -1) {
+          // Closer not yet here. Advance cursor to the end, but hold
+          // back any partial-prefix of `[/moment]` at the tail — without
+          // this, a closer split across SSE chunks (`[/mo` then `ment]`)
+          // would be lost and the filter would stay stuck in inMoment.
+          let safeEnd = fullResponse.length;
+          for (let k = MOMENT_CLOSE.length - 1; k >= 1; k--) {
+            if (fullResponse.endsWith(MOMENT_CLOSE.slice(0, k), safeEnd)) {
+              safeEnd -= k;
+              break;
+            }
+          }
+          emittedCursor = safeEnd;
+          return;
+        }
+        emittedCursor = closeIdx + MOMENT_CLOSE.length;
+        inMoment = false;
+        continue;
+      }
+      const openIdx = fullResponse.indexOf(MOMENT_OPEN, emittedCursor);
+      if (openIdx === -1) {
+        // No opener seen. Emit up to safe end (exclude any partial-prefix
+        // of `[moment]` that might be the start of a real opener).
+        let safeEnd = fullResponse.length;
+        for (let k = MOMENT_OPEN.length - 1; k >= 1; k--) {
+          if (fullResponse.endsWith(MOMENT_OPEN.slice(0, k), safeEnd)) {
+            safeEnd -= k;
+            break;
+          }
+        }
+        if (safeEnd > emittedCursor) {
+          onChunk(fullResponse.slice(emittedCursor, safeEnd));
+          emittedCursor = safeEnd;
+        }
+        return;
+      }
+      // Opener present at openIdx. Emit text before it, enter moment mode.
+      if (openIdx > emittedCursor) {
+        onChunk(fullResponse.slice(emittedCursor, openIdx));
+      }
+      emittedCursor = openIdx;
+      inMoment = true;
+    }
+  };
+
   const timeout = setTimeout(() => {
     reader.cancel().catch(() => {});
   }, 30_000);
@@ -140,8 +240,8 @@ export async function sendChatMessage(
       try {
         const parsed = JSON.parse(data) as { type: string; text?: string; error?: string };
         if (parsed.type === 'text' && parsed.text) {
-          onChunk(parsed.text);
           fullResponse += parsed.text;
+          flushSafely();
         }
         if (parsed.type === 'error') throw new Error(parsed.error ?? 'AI error');
       } catch (e) {
@@ -149,6 +249,12 @@ export async function sendChatMessage(
         if (e instanceof Error && !e.message.includes('JSON')) throw e;
       }
     }
+  }
+  // Final flush — emit any held-back partial prefix that turned out NOT
+  // to be a moment marker (stream ended before completion).
+  if (!inMoment && emittedCursor < fullResponse.length) {
+    onChunk(fullResponse.slice(emittedCursor));
+    emittedCursor = fullResponse.length;
   }
 
   clearTimeout(timeout);
@@ -159,7 +265,10 @@ export async function sendChatMessage(
   // tail because the conversation drifted into a topic on their profile
   // private-topics list.
   const triggered = detectPrivateTrigger(lastMsg, lang);
-  const stripped = stripPrivateMarker(fullResponse);
+
+  // Strip moment first (anywhere in text), then privacy (trailing).
+  const momentResult = stripMomentMarker(fullResponse);
+  const stripped = stripPrivateMarker(momentResult.text);
   const isPrivate = triggered || stripped.markerPresent;
 
   await logActivity(
@@ -174,4 +283,15 @@ export async function sendChatMessage(
     },
     { isPrivate },
   );
+
+  if (momentResult.moment) {
+    // Best-effort: failures don't block the chat. If the elder's turn
+    // was marked private overall, force the moment private too — the
+    // model may have set is_private=false but the privacy boundary
+    // applies to the entire turn.
+    void recordNagiMoment(elderId, momentResult.moment.body, {
+      kind: momentResult.moment.kind,
+      isPrivate: momentResult.moment.is_private || isPrivate,
+    });
+  }
 }
