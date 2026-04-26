@@ -6,6 +6,13 @@ export interface ElderMessage {
   /** Map of language code -> translated body. Populated lazily by the
    *  translate-message edge function on first read in a non-source lang. */
   body_translated: Record<string, string>;
+  /** Storage key in the elder-voice-messages bucket for voice messages.
+   *  Null for text-only messages. */
+  audio_path: string | null;
+  /** Whisper-detected language for voice, sender's preferred_lang for
+   *  text. Drives the source side of translate-message. May be null on
+   *  legacy rows from before migration 0023. */
+  source_lang: 'en' | 'es' | 'pt' | null;
   created_at: string;
   read_at: string | null;
 }

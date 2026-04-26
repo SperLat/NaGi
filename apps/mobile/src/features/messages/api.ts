@@ -90,6 +90,62 @@ export async function sendMessage(
   return { ok: true, error: null, messageId: (data as { id: string }).id };
 }
 
+/**
+ * Send a voice message: posts the audio blob to send-voice-message,
+ * which transcribes via Whisper, stores the original audio in the
+ * private elder-voice-messages bucket, and inserts the elder_messages
+ * row with body=transcript and source_lang detected. The recipient's
+ * existing flow (translate-message → expo-speech) handles the rest.
+ *
+ * Audio file: typically m4a (mobile) or webm (web). The function
+ * accepts whatever MIME the client sends; Whisper handles it.
+ *
+ * Returns the new message id and transcript on success. The recipient's
+ * realtime subscription on elder_messages picks up the new row
+ * automatically.
+ */
+export async function sendVoiceMessage(
+  connectionId: string,
+  fromElderId: string,
+  audio: Blob,
+  filename: string,
+): Promise<{
+  ok: boolean;
+  error: string | null;
+  messageId?: string;
+  transcript?: string;
+}> {
+  if (isMock) return { ok: true, error: null, messageId: 'mock-voice', transcript: '(mock)' };
+
+  const session = (await supabase.auth.getSession()).data.session;
+  if (!session?.access_token) return { ok: false, error: 'Not authenticated' };
+
+  const form = new FormData();
+  form.append('connection_id', connectionId);
+  form.append('from_elder_id', fromElderId);
+  form.append('audio_file', audio, filename);
+
+  try {
+    const res = await fetch(`${env.supabaseUrl}/functions/v1/send-voice-message`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${session.access_token}` },
+      body: form,
+    });
+    const data = await res.json().catch(() => ({})) as {
+      ok?: boolean;
+      message_id?: string;
+      transcript?: string;
+      error?: string;
+    };
+    if (!res.ok || !data.ok) {
+      return { ok: false, error: data.error ?? `send-voice-message ${res.status}` };
+    }
+    return { ok: true, error: null, messageId: data.message_id, transcript: data.transcript };
+  } catch (err) {
+    return { ok: false, error: String(err) };
+  }
+}
+
 export async function markMessageRead(messageId: string): Promise<void> {
   if (isMock) return;
   await supabase
