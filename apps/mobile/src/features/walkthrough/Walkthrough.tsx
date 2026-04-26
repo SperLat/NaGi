@@ -210,8 +210,14 @@ export function Walkthrough({ visible, onClose, elderIds }: Props) {
                   <Text style={{ color: '#727270', fontSize: 14, fontWeight: '500' }}>← Back</Text>
                 </Pressable>
               )}
-              {/* device-pin advances on PIN entry, handoff has its own CTA, complete dismisses */}
-              {slide !== 'device-pin' && slide !== 'handoff' && slide !== 'complete' && (
+              {/* device-pin advances on PIN entry; handoff has its own CTA
+                  WHEN Eleanor exists. On non-Pemberton orgs there's no
+                  handoff to make, so we still show Next on handoff so
+                  the user can advance to complete instead of getting
+                  stuck with only Skip/Back. */}
+              {slide !== 'device-pin' &&
+                slide !== 'complete' &&
+                !(slide === 'handoff' && elderIds.eleanor) && (
                 <Pressable
                   onPress={next}
                   style={({ pressed }) => ({

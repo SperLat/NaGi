@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Redirect } from 'expo-router';
+import { Redirect, useLocalSearchParams } from 'expo-router';
 import { safeBack } from '@/lib/nav';
 import { useSession, selectActiveElderId } from '@/state';
 import * as Speech from 'expo-speech';
@@ -33,6 +33,12 @@ interface DisplayMsg {
   content: string;
 }
 
+type CardKey = keyof ReturnType<typeof useStrings>['cards'];
+
+const KNOWN_CARDS: ReadonlyArray<CardKey> = [
+  'call_family', 'get_help', 'my_day', 'one_task', 'pastimes', 'proud_moments',
+];
+
 export default function ElderChat() {
   const { elder, textSize, highContrast, orgId } = useElderCtx();
   // Use the centralized selector — chat used to read activeElderId
@@ -40,6 +46,15 @@ export default function ElderChat() {
   // because their elder id lives on deviceMode, not activeElderId.
   const elderId = useSession(selectActiveElderId);
   const s = useStrings(elder?.preferred_lang);
+  // The home tile that opened this chat passes its key. We use it to
+  // render the per-tile welcome banner ("Share with me something
+  // lovely…") so the elder lands with explicit framing instead of a
+  // blank chat. Untyped param so we narrow against the known set.
+  const params = useLocalSearchParams<{ cardKey?: string }>();
+  const cardWelcome =
+    params.cardKey && (KNOWN_CARDS as readonly string[]).includes(params.cardKey)
+      ? s.cards[params.cardKey as CardKey].welcome
+      : null;
   const [messages, setMessages]   = useState<ChatMessage[]>([]);
   const [display, setDisplay]     = useState<DisplayMsg[]>([]);
   const [input, setInput]         = useState('');
@@ -359,7 +374,7 @@ export default function ElderChat() {
                 <Text
                   className={`${tc.body} text-center ${highContrast ? 'text-gray-200' : 'text-gray-500'}`}
                 >
-                  {s.chatEmptySubtitle}
+                  {cardWelcome ?? s.chatEmptySubtitle}
                 </Text>
               </View>
             )

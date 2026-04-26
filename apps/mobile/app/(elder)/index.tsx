@@ -138,7 +138,10 @@ export default function ElderHome() {
   const handleCard = async (key: CardKey) => {
     const cardStr = s.cards[key] ?? s.cards.get_help;
     await logActivity(elder.id, orgId, 'ui_action', { action: key, screen: 'home' });
-    router.push({ pathname: '/(elder)/chat', params: { prime: cardStr.prime } });
+    // Pass cardKey so chat can render the per-tile welcome banner
+    // ("Share with me something lovely…", etc.). All tiles route to the
+    // same chat screen but each one carries its own framing.
+    router.push({ pathname: '/(elder)/chat', params: { prime: cardStr.prime, cardKey: key } });
   };
 
   const handleHelp = async () => {

@@ -13,12 +13,12 @@ export interface ElderStrings {
   needHelp:       string;
   urgentHelpPrime: string;
   cards: {
-    call_family:   { label: string; prime: string };
-    get_help:      { label: string; prime: string };
-    my_day:        { label: string; prime: string };
-    one_task:      { label: string; prime: string };
-    pastimes:      { label: string; prime: string };
-    proud_moments: { label: string; prime: string };
+    call_family:   { label: string; prime: string; welcome: string };
+    get_help:      { label: string; prime: string; welcome: string };
+    my_day:        { label: string; prime: string; welcome: string };
+    one_task:      { label: string; prime: string; welcome: string };
+    pastimes:      { label: string; prime: string; welcome: string };
+    proud_moments: { label: string; prime: string; welcome: string };
   };
   // Welcome screen
   welcomePrepared: (name: string | undefined) => string;
@@ -67,12 +67,12 @@ const strings: Record<Lang, ElderStrings> = {
     needHelp:        'Necesito Ayuda',
     urgentHelpPrime: 'Necesito ayuda urgente.',
     cards: {
-      call_family: { label: 'Llamar familia',  prime: 'Quiero llamar a alguien.' },
-      get_help:    { label: 'Necesito ayuda',  prime: 'Necesito ayuda, por favor.' },
-      my_day:      { label: 'Mi día',          prime: '¿Qué hay hoy?' },
-      one_task:    { label: 'Una tarea',        prime: 'Ayúdame con una tarea.' },
-      pastimes:    { label: 'Para disfrutar',  prime: 'Quiero hacer algo agradable. Mira mis topics_they_enjoy y propón con calidez una o dos opciones, en tono de invitación: "¿Te gustaría...?". Si digo que no, acéptalo con cariño y sin insistir.' },
-      proud_moments: { label: 'Cuéntame', prime: 'Estoy aquí cuando quieras contarme algo lindo del día. Abre con calidez, sin interrogar — algo como "Estoy aquí cuando quieras contarme algo. ¿Cómo va el día?". Escucha. Si surge un momento concreto que valga la pena recordar (un paseo, una visita, una comida, un recuerdo), llama a la herramienta record_moment con un body en mis palabras y un kind sensato. Si no surge nada, eso también está bien — acepta el silencio con calidez, sin presionar.' },
+      call_family: { label: 'Llamar familia',  prime: 'Quiero llamar a alguien.', welcome: 'Cuéntame a quién quieres llamar.' },
+      get_help:    { label: 'Necesito ayuda',  prime: 'Necesito ayuda, por favor.', welcome: '¿En qué te puedo ayudar?' },
+      my_day:      { label: 'Mi día',          prime: '¿Qué hay hoy?', welcome: 'Veamos qué trae el día.' },
+      one_task:    { label: 'Una tarea',        prime: 'Ayúdame con una tarea.', welcome: 'Cuéntame qué tienes en mente.' },
+      pastimes:    { label: 'Para disfrutar',  prime: 'Quiero hacer algo agradable. Mira mis topics_they_enjoy y propón con calidez una o dos opciones, en tono de invitación: "¿Te gustaría...?". Si digo que no, acéptalo con cariño y sin insistir.', welcome: 'Vamos a buscar algo agradable que te apetezca hacer.' },
+      proud_moments: { label: 'Cuéntame', prime: 'Estoy aquí cuando quieras contarme algo lindo del día. Abre con calidez, sin interrogar — algo como "Estoy aquí cuando quieras contarme algo. ¿Cómo va el día?". Escucha. Si surge un momento concreto que valga la pena recordar (un paseo, una visita, una comida, un recuerdo), llama a la herramienta record_moment con un body en mis palabras y un kind sensato. Si no surge nada, eso también está bien — acepta el silencio con calidez, sin presionar.', welcome: 'Comparte conmigo algo lindo de hoy que quieras celebrar.' },
     },
     welcomePrepared: (n) => n ? `${n} preparó esto para ti.` : 'Alguien preparó esto para ti.',
     start:           'Empezar',
@@ -114,12 +114,12 @@ const strings: Record<Lang, ElderStrings> = {
     needHelp:        'Preciso de Ajuda',
     urgentHelpPrime: 'Preciso de ajuda urgente.',
     cards: {
-      call_family: { label: 'Ligar família',   prime: 'Quero ligar para alguém.' },
-      get_help:    { label: 'Preciso de ajuda', prime: 'Preciso de ajuda, por favor.' },
-      my_day:      { label: 'Meu dia',          prime: 'O que tem hoje?' },
-      one_task:    { label: 'Uma tarefa',        prime: 'Me ajude com uma tarefa.' },
-      pastimes:    { label: 'Para desfrutar',   prime: 'Quero fazer algo agradável. Olhe meus topics_they_enjoy e proponha com carinho uma ou duas opções, em tom de convite: "Você gostaria...?". Se eu disser não, aceite com carinho e sem insistir.' },
-      proud_moments: { label: 'Me conta', prime: 'Estou aqui quando você quiser me contar algo bonito do dia. Abra com carinho, sem interrogar — algo como "Estou aqui quando você quiser me contar algo. Como está o dia?". Escute. Se surgir um momento concreto que valha a pena lembrar (um passeio, uma visita, uma refeição, uma memória), chame a ferramenta record_moment com um body nas minhas palavras e um kind sensato. Se nada surgir, tudo bem — aceite o silêncio com carinho, sem pressionar.' },
+      call_family: { label: 'Ligar família',   prime: 'Quero ligar para alguém.', welcome: 'Me conta para quem você quer ligar.' },
+      get_help:    { label: 'Preciso de ajuda', prime: 'Preciso de ajuda, por favor.', welcome: 'Em que posso te ajudar?' },
+      my_day:      { label: 'Meu dia',          prime: 'O que tem hoje?', welcome: 'Vamos ver o que o dia traz.' },
+      one_task:    { label: 'Uma tarefa',        prime: 'Me ajude com uma tarefa.', welcome: 'Me conta o que você tem em mente.' },
+      pastimes:    { label: 'Para desfrutar',   prime: 'Quero fazer algo agradável. Olhe meus topics_they_enjoy e proponha com carinho uma ou duas opções, em tom de convite: "Você gostaria...?". Se eu disser não, aceite com carinho e sem insistir.', welcome: 'Vamos achar algo gostoso para fazer.' },
+      proud_moments: { label: 'Me conta', prime: 'Estou aqui quando você quiser me contar algo bonito do dia. Abra com carinho, sem interrogar — algo como "Estou aqui quando você quiser me contar algo. Como está o dia?". Escute. Se surgir um momento concreto que valha a pena lembrar (um passeio, uma visita, uma refeição, uma memória), chame a ferramenta record_moment com um body nas minhas palavras e um kind sensato. Se nada surgir, tudo bem — aceite o silêncio com carinho, sem pressionar.', welcome: 'Me conta algo bonito de hoje que você queira celebrar.' },
     },
     welcomePrepared: (n) => n ? `${n} preparou isso para você.` : 'Alguém preparou isso para você.',
     start:           'Começar',
@@ -161,12 +161,12 @@ const strings: Record<Lang, ElderStrings> = {
     needHelp:        'I Need Help',
     urgentHelpPrime: 'I need urgent help.',
     cards: {
-      call_family: { label: 'Call family',  prime: 'I want to call someone.' },
-      get_help:    { label: 'I need help',  prime: 'I need help, please.' },
-      my_day:      { label: 'My day',       prime: 'What is going on today?' },
-      one_task:    { label: 'A task',       prime: 'Help me with a task.' },
-      pastimes:    { label: 'To enjoy',     prime: 'I would like to do something pleasant. Look at my topics_they_enjoy and warmly propose one or two options, as an invitation: "Would you like to...?". If I say no, accept it warmly and do not insist.' },
-      proud_moments: { label: 'Tell me', prime: "I'm here whenever you'd like to share something lovely from your day. Open warmly, without interrogating — something like \"I'm here when you want to tell me something. How is the day?\". Listen. If a concrete moment worth remembering surfaces (a walk, a visit, a meal, a memory), call the record_moment tool with a body in my own words and a sensible kind. If nothing surfaces, that's fine too — accept silence warmly, without pressing." },
+      call_family: { label: 'Call family',  prime: 'I want to call someone.', welcome: 'Tell me who you would like to call.' },
+      get_help:    { label: 'I need help',  prime: 'I need help, please.', welcome: 'How can I help you today?' },
+      my_day:      { label: 'My day',       prime: 'What is going on today?', welcome: "Let's see what today brings." },
+      one_task:    { label: 'A task',       prime: 'Help me with a task.', welcome: "Tell me what's on your mind." },
+      pastimes:    { label: 'To enjoy',     prime: 'I would like to do something pleasant. Look at my topics_they_enjoy and warmly propose one or two options, as an invitation: "Would you like to...?". If I say no, accept it warmly and do not insist.', welcome: "Let's find something nice for you to enjoy." },
+      proud_moments: { label: 'Tell me', prime: "I'm here whenever you'd like to share something lovely from your day. Open warmly, without interrogating — something like \"I'm here when you want to tell me something. How is the day?\". Listen. If a concrete moment worth remembering surfaces (a walk, a visit, a meal, a memory), call the record_moment tool with a body in my own words and a sensible kind. If nothing surfaces, that's fine too — accept silence warmly, without pressing.", welcome: "Share with me something lovely from today you'd like to celebrate." },
     },
     welcomePrepared: (n) => n ? `${n} set this up for you.` : 'Someone set this up for you.',
     start:           'Start',
