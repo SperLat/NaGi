@@ -17,6 +17,7 @@ import {
   markMessageRead,
   sendMessage,
   sendVoiceMessage,
+  getVoiceMessageUrl,
   type ElderMessage,
 } from '@/features/messages';
 import { listConnectionsForElder } from '@/features/connections';
@@ -27,6 +28,11 @@ import {
   pickedExtension,
   type AudioRecorderHandle,
 } from '@/lib/audio-recorder';
+import {
+  playAudioUrl,
+  isPlaybackSupported,
+  type PlaybackHandle,
+} from '@/lib/audio-recorder/player';
 import { useElderCtx } from './_layout';
 
 interface DisplayMessage {
@@ -36,6 +42,7 @@ interface DisplayMessage {
   from_elder_name: string;
   resolved_body: string;
   created_at: string;
+  has_audio: boolean;
 }
 
 /**
@@ -107,6 +114,7 @@ export default function ElderMessages() {
         from_elder_name: preferredName,
         resolved_body: body,
         created_at: m.created_at,
+        has_audio: !!(m as ElderMessage).audio_path,
       });
     }
 
@@ -200,6 +208,31 @@ export default function ElderMessages() {
     setRecording(false);
   }, []);
 
+  // "Hear original voice" — fetches a fresh signed URL each time so we
+  // don't cache long-lived URLs in component state. Stops TTS first
+  // (the elder shouldn't hear synthetic translation + original voice
+  // overlapping).
+  const playbackRef = useRef<PlaybackHandle | null>(null);
+  const [playingId, setPlayingId] = useState<string | null>(null);
+  const playOriginal = useCallback(async (messageId: string) => {
+    Speech.stop();
+    playbackRef.current?.stop();
+    setPlayingId(messageId);
+    const url = await getVoiceMessageUrl(messageId);
+    if (!url) {
+      setPlayingId(null);
+      return;
+    }
+    try {
+      playbackRef.current = await playAudioUrl(url, () => {
+        playbackRef.current = null;
+        setPlayingId(null);
+      });
+    } catch {
+      setPlayingId(null);
+    }
+  }, []);
+
   return (
     <SafeAreaView className="flex-1 bg-surface-elder">
       <View className="flex-1 px-6 pt-6">
@@ -240,7 +273,7 @@ export default function ElderMessages() {
                   {m.resolved_body}
                 </Text>
 
-                <View className="flex-row gap-2 mt-4">
+                <View className="flex-row gap-2 mt-4 flex-wrap">
                   <Pressable
                     onPress={() =>
                       Speech.speak(m.resolved_body, {
@@ -256,9 +289,22 @@ export default function ElderMessages() {
                     </Text>
                   </Pressable>
 
+                  {m.has_audio && isPlaybackSupported() && (
+                    <Pressable
+                      onPress={() => playOriginal(m.id)}
+                      className="bg-paper rounded-2xl py-3 px-5 border border-accent-300"
+                      style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                    >
+                      <Text className="text-accent-ink font-semibold text-base">
+                        🎙️ {playingId === m.id ? originalPlayingLabel(targetLang) : originalLabel(targetLang)}
+                      </Text>
+                    </Pressable>
+                  )}
+
                   <Pressable
                     onPress={() => {
                       Speech.stop();
+                      playbackRef.current?.stop();
                       setActiveReplyTarget({
                         connectionId: m.connection_id,
                         fromElderName: m.from_elder_name,
@@ -385,4 +431,6 @@ function sendLabel(c: string)         { return c === 'es' ? 'Enviar'   : c === '
 function recordLabel(c: string)       { return c === 'es' ? 'Hablar'   : c === 'pt' ? 'Falar'    : 'Speak'; }
 function stopLabel(c: string)         { return c === 'es' ? 'Enviar'   : c === 'pt' ? 'Enviar'   : 'Send'; }
 function recordingLabel(c: string)    { return c === 'es' ? 'Grabando…' : c === 'pt' ? 'Gravando…' : 'Recording…'; }
+function originalLabel(c: string)         { return c === 'es' ? 'Su voz'    : c === 'pt' ? 'Sua voz'   : 'Their voice'; }
+function originalPlayingLabel(c: string)  { return c === 'es' ? 'Reproduciendo…' : c === 'pt' ? 'Tocando…' : 'Playing…'; }
 function greetingFor(c: string)       { return c === 'es' ? 'te escribe' : c === 'pt' ? 'te escreve' : 'writes to you'; }

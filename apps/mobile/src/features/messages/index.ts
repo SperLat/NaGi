@@ -5,6 +5,7 @@ export {
   listUnreadForElder,
   sendMessage,
   sendVoiceMessage,
+  getVoiceMessageUrl,
   markMessageRead,
   ensureTranslation,
 } from './api';

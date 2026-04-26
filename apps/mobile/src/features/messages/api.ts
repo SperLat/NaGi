@@ -146,6 +146,33 @@ export async function sendVoiceMessage(
   }
 }
 
+/**
+ * Get a short-lived signed URL for a voice message's original audio.
+ * Returns null if the message has no audio or the call fails. The URL
+ * is valid for 5 min — if the elder taps "Hear voice" again later,
+ * the kiosk re-fetches a fresh one.
+ */
+export async function getVoiceMessageUrl(messageId: string): Promise<string | null> {
+  if (isMock) return null;
+  const session = (await supabase.auth.getSession()).data.session;
+  if (!session?.access_token) return null;
+  try {
+    const res = await fetch(`${env.supabaseUrl}/functions/v1/voice-message-url`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ message_id: messageId }),
+    });
+    if (!res.ok) return null;
+    const data = (await res.json().catch(() => ({}))) as { url?: string };
+    return data.url ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export async function markMessageRead(messageId: string): Promise<void> {
   if (isMock) return;
   await supabase
