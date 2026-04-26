@@ -547,13 +547,21 @@ export default function IntermediaryDashboard() {
         >
           <Text className="text-paper font-semibold text-lg">Add Elder</Text>
         </Pressable>
-        <Pressable
-          className="items-center pt-4 pb-1"
-          style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-          onPress={handleSignOut}
-        >
-          <Text className="text-neutral-400 text-sm">Sign out</Text>
-        </Pressable>
+        <View className="flex-row items-center justify-center gap-4 pt-4 pb-1">
+          <Pressable
+            style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+            onPress={() => router.push('/(intermediary)/settings')}
+          >
+            <Text className="text-neutral-400 text-sm">Settings</Text>
+          </Pressable>
+          <Text className="text-neutral-300">·</Text>
+          <Pressable
+            style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+            onPress={handleSignOut}
+          >
+            <Text className="text-neutral-400 text-sm">Sign out</Text>
+          </Pressable>
+        </View>
       </View>
       <Walkthrough
         visible={walkthroughOpen}

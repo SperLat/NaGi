@@ -15,4 +15,7 @@ export interface TeamMessage {
   created_at: string;
   author_id: string;
   author_email: string;
+  /** Resolved by the RPC: chosen display_name if set, else email-handle
+   *  fallback. Always render-ready — no need to email-split client-side. */
+  author_display_name: string;
 }

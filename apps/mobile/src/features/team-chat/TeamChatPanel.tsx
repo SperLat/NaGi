@@ -29,9 +29,9 @@ interface TeamChatPanelProps {
   userId: string | null;
 }
 
-function shortAuthor(email: string, isYou: boolean): string {
+function shortAuthor(displayName: string, isYou: boolean): string {
   if (isYou) return 'You';
-  return email.split('@')[0] || email;
+  return displayName || 'someone';
 }
 
 /**
@@ -98,15 +98,16 @@ export function TeamChatPanel({ elderId, organizationId, userId }: TeamChatPanel
               created_at: row.created_at!,
               author_id: row.author_id!,
               author_email: '',
+              author_display_name: '',
             },
           ]));
 
-          // Resolve email asynchronously — UI shows a placeholder for
-          // a beat, then patches in the real attribution.
-          const email = await resolveTeamMessageAuthor(row.id!);
-          if (email) {
+          // Resolve display name asynchronously — UI shows a placeholder
+          // for a beat, then patches in the real attribution.
+          const displayName = await resolveTeamMessageAuthor(row.id!);
+          if (displayName) {
             setMessages(prev =>
-              prev.map(m => (m.id === row.id ? { ...m, author_email: email } : m)),
+              prev.map(m => (m.id === row.id ? { ...m, author_display_name: displayName } : m)),
             );
           }
         },
@@ -235,7 +236,7 @@ export function TeamChatPanel({ elderId, organizationId, userId }: TeamChatPanel
               <View key={m.id} className="mb-3">
                 <View className="flex-row items-baseline mb-0.5">
                   <Text className="text-[11px] font-semibold text-gray-700 mr-2">
-                    {shortAuthor(m.author_email, isYou)}
+                    {shortAuthor(m.author_display_name, isYou)}
                   </Text>
                   <Text className="text-[10px] text-gray-400">{relativeTime(m.created_at)}</Text>
                 </View>

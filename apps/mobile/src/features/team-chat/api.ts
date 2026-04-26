@@ -17,16 +17,18 @@ export async function listTeamMessages(elderId: string): Promise<TeamMessage[]> 
 }
 
 /**
- * Resolves author_email for a single message — used after receiving a
- * realtime INSERT (whose payload doesn't include the join).
+ * Resolves a render-ready display name for a single message author —
+ * used after receiving a realtime INSERT (whose payload lacks the join).
+ * Returns the chosen display_name if set, else the email-handle fallback.
  */
 export async function resolveTeamMessageAuthor(messageId: string): Promise<string | null> {
   if (isMock) return null;
   const { data, error } = await supabase.rpc('resolve_team_message_author', {
     message_id: messageId,
   });
-  if (error || !data || (data as Array<{ author_email: string }>).length === 0) return null;
-  return (data as Array<{ author_email: string }>)[0].author_email;
+  if (error || !data) return null;
+  const row = (data as Array<{ author_display_name: string | null }>)[0];
+  return row?.author_display_name ?? null;
 }
 
 export async function postTeamMessage(

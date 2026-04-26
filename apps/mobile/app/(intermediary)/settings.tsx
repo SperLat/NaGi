@@ -1,0 +1,105 @@
+import { useEffect, useState } from 'react';
+import { View, Text, TextInput, Pressable, ActivityIndicator } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
+import { safeBack } from '@/lib/nav';
+import { getMyProfile, setMyDisplayName } from '@/features/user-profile';
+import { supabase } from '@/lib/supabase';
+
+/**
+ * Caregiver-side account settings. v1 surfaces just one field — the
+ * display name — because it's the load-bearing one for brand voice
+ * (care-circle attribution, digest narrative, kiosk preparedBy). More
+ * settings (notifications, default language, etc.) accrete here later.
+ */
+export default function CaregiverSettings() {
+  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [savedAt, setSavedAt] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const { data: userRes } = await supabase.auth.getUser();
+      if (cancelled) return;
+      setEmail(userRes?.user?.email ?? '');
+      const profile = await getMyProfile();
+      if (cancelled) return;
+      setName(profile?.display_name ?? '');
+      setLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const handleSave = async () => {
+    setSaving(true);
+    setError(null);
+    const result = await setMyDisplayName(name);
+    setSaving(false);
+    if (!result.ok) {
+      setError(result.error ?? 'Could not save.');
+      return;
+    }
+    setSavedAt(Date.now());
+  };
+
+  if (loading) {
+    return (
+      <SafeAreaView className="flex-1 bg-gray-50 items-center justify-center">
+        <ActivityIndicator color="#34503E" />
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView className="flex-1 bg-gray-50">
+      <View className="flex-1 px-6 pt-6">
+        <Pressable className="mb-6" onPress={() => safeBack('/(intermediary)/')}>
+          <Text className="text-accent-600 font-medium">← Back</Text>
+        </Pressable>
+
+        <Text className="text-2xl font-bold text-gray-900 mb-1">Settings</Text>
+        <Text className="text-gray-500 text-sm mb-8">{email}</Text>
+
+        <View>
+          <Text className="text-xs font-medium text-gray-500 mb-1.5 ml-1">
+            How others see you
+          </Text>
+          <Text className="text-gray-400 text-xs mb-2 ml-1">
+            Shown in the care circle, the weekly digest, and on the elder's
+            kiosk. Leave blank to fall back to your email handle.
+          </Text>
+          <TextInput
+            className="border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 bg-surface-intermediary-raised"
+            value={name}
+            onChangeText={setName}
+            placeholder={`e.g. Emma, Don Carlos, Mom`}
+            placeholderTextColor="#9ca3af"
+            maxLength={80}
+          />
+          {error ? (
+            <Text className="text-red-600 text-xs mt-2 ml-1">{error}</Text>
+          ) : savedAt ? (
+            <Text className="text-accent-700 text-xs mt-2 ml-1">Saved.</Text>
+          ) : null}
+
+          <Pressable
+            onPress={handleSave}
+            disabled={saving}
+            className="bg-accent-600 rounded-2xl py-3.5 items-center mt-4"
+            style={({ pressed }) => ({ opacity: pressed ? 0.82 : 1 })}
+          >
+            {saving ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <Text className="text-paper font-semibold">Save</Text>
+            )}
+          </Pressable>
+        </View>
+      </View>
+    </SafeAreaView>
+  );
+}
