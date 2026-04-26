@@ -1,10 +1,18 @@
 # Privacy Policy — Nagi
 
-> **DRAFT — Legal review required.** This document is engineering's
-> first pass at articulating what the system actually does with personal
-> data. It is not legal advice. Counsel should review every paragraph,
-> particularly the lawful-basis section, the international-transfer
-> section, and the children's data section.
+> **TEMPLATE for self-hosted deployments.** When you deploy Nagi for
+> your own family or a small circle, this becomes *your* privacy policy
+> after you fill in the `{{PLACEHOLDERS}}` and have local counsel
+> review it. The reference text describes what Nagi as a system does
+> with personal data — your customizations describe what you, the
+> deployer, do with it.
+>
+> Cross-references:
+> - [SELF_HOST_COMPLIANCE.md](./SELF_HOST_COMPLIANCE.md) — overall
+>   deployment compliance kit.
+> - `apps/mobile/src/features/privacy/policy-text.ts` — the constant
+>   the in-app `/privacy` route renders. Edit to match your published
+>   policy here.
 
 **Last updated:** {{DATE_TO_FILL}}
 **Effective date:** {{DATE_TO_FILL}}
@@ -48,8 +56,7 @@ audiences and what choices each has.
 
 ## What we do NOT collect
 
-- Payment information (the demo is free; if a paid tier launches, this
-  list updates).
+- Payment information (the demo is free; and software is open source. We encourage you to build it at your own home/server to keep full control of data. if a paid tier ever launches, this list updates).
 - Location, beyond what an IP address implies for routing.
 - Social-network identifiers.
 - Audio/video that wasn't deliberately recorded by the elder or caregiver.
@@ -84,7 +91,8 @@ will reflect concrete numbers.
 ## Who else sees the data (sub-processors)
 
 See [SUB_PROCESSORS.md](./SUB_PROCESSORS.md) for the full list with
-contracts, locations, and lawful-transfer mechanisms. In summary:
+contracts, locations, and lawful-transfer mechanisms. This applies for ongoing demo
+but could serve as guidelines for non self hosted builds. In summary:
 
 - **Supabase** (US, EU options) — database + auth + storage + edge functions.
 - **Anthropic** (US) — the Claude model that powers Nagi's responses.

@@ -1,9 +1,14 @@
 # Personal Data Breach — Notification Runbook
 
-> **DRAFT — Legal review required.** Operational procedure for
-> responding to a personal-data breach under GDPR Art. 33 (notify
-> supervisory authority within 72 hours) and Art. 34 (notify affected
-> data subjects without undue delay if high risk).
+> **TEMPLATE for self-hosted deployments.** When you deploy Nagi, this
+> becomes *your* breach-response procedure. Fill in the
+> `{{PLACEHOLDERS}}` for your incident channel, lead supervisory
+> authority, internal docs, and DPO contact. Even if you're "just" a
+> family-scale deployer, run one tabletop drill before going live —
+> the runbook is what saves you when stress is high and clock is
+> ticking.
+>
+> Cross-reference: [SELF_HOST_COMPLIANCE.md](./SELF_HOST_COMPLIANCE.md)
 
 **Last updated:** {{DATE_TO_FILL}}
 **Owner:** {{NAME}} ({{ROLE}})

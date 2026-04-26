@@ -1,9 +1,16 @@
 # Sub-processors
 
-> **DRAFT — Legal review required.** Public-facing list of every third
-> party that processes personal data on behalf of {{LEGAL_ENTITY_NAME}}.
-> Mirrored in the Privacy Policy. Update whenever a new processor is
-> added or a region changes.
+> **TEMPLATE for self-hosted deployments.** When you deploy Nagi, this
+> becomes *your* sub-processor disclosure — public, mirrored in your
+> privacy policy, kept honest with what your deployment actually uses.
+>
+> The first section below documents the **reference deployment** at
+> nagi.kas.vu. The second documents what changes if you self-host with
+> different stack choices. Pick the entries that match your reality
+> and delete the rest before publishing.
+>
+> Cross-reference: [SELF_HOST_COMPLIANCE.md](./SELF_HOST_COMPLIANCE.md)
+> for the deployment-choice menu that drives this list.
 
 **Last updated:** {{DATE_TO_FILL}}
 **Notice channel:** caregivers signed up to {{NOTIFICATION_LIST_OR_EMAIL_LIST}}
@@ -11,7 +18,11 @@ get email notice at least 30 days before a new sub-processor is engaged.
 
 ---
 
-## Active sub-processors
+## Reference deployment (nagi.kas.vu)
+
+This section describes what the public reference deployment uses. If
+you self-host, your real list lives in the next section — adjust there
+and delete what doesn't apply to you.
 
 ### Supabase (Inc.)
 
@@ -72,6 +83,43 @@ get email notice at least 30 days before a new sub-processor is engaged.
 
 For example: email delivery (if Postmark / Resend is added),
 analytics (if PostHog is added), error monitoring (if Sentry is added).
+
+---
+
+## Self-hosted deployment — your choices
+
+If you're running your own Nagi instance, your sub-processor list
+depends on which stack pieces you outsource vs run yourself. Each
+choice in [SELF_HOST_COMPLIANCE.md → "Choices you'll make at deploy
+time"](./SELF_HOST_COMPLIANCE.md) drives an entry here.
+
+**Common paths:**
+
+- **All-in-EEA, mostly-self-hosted.** You run Supabase yourself,
+  Anthropic stays on the list (or you swap for self-hosted LLM and
+  remove it), Cloudflare optional, Whisper self-hosted. Result: 0–2
+  external sub-processors.
+- **Hosted-Supabase EU + Anthropic.** Quickest deploy, two
+  sub-processors (Supabase EU region + Anthropic US). Both have SCCs
+  in their DPAs.
+- **Local-only.** No external network. Useful for testing or single-
+  family deployment with full data sovereignty. Empty sub-processor
+  list. The privacy policy still applies, just with no transfer
+  section.
+
+For each entry you keep:
+
+- Confirm the region.
+- Sign the DPA + ensure SCCs are included if data leaves your
+  jurisdiction.
+- Document any sub-sub-processors (e.g. AWS underneath Supabase) if
+  your jurisdiction's regulator expects that level of detail.
+- Note the retention practices the sub-processor enforces (Anthropic's
+  no-training-on-inputs commitment, Supabase log retention windows,
+  etc.).
+
+When you change a sub-processor, your existing users get 30 days'
+notice via the channel established in your privacy policy.
 
 ---
 

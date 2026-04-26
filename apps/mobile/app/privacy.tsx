@@ -52,6 +52,12 @@ export default function PrivacyScreen() {
             sub-processor agreements, see docs/PRIVACY_POLICY.md in the
             project repository.
           </Text>
+          <Text className="text-xs text-gray-400 mt-2">
+            Running your own copy of Nagi? See
+            docs/SELF_HOST_COMPLIANCE.md for the deployment compliance
+            kit and customize this page via
+            apps/mobile/src/features/privacy/policy-text.ts.
+          </Text>
         </View>
       </ScrollView>
     </SafeAreaView>

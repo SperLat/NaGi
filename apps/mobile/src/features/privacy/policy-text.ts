@@ -1,18 +1,30 @@
 // In-app privacy policy text. Sourced from docs/PRIVACY_POLICY.md but
 // hardcoded here so the route can render without a network fetch and
-// without a markdown parser dependency. When the canonical doc changes,
-// update this string in the same commit.
+// without a markdown parser dependency.
+//
+// ── SELF-HOSTERS: this is your customization point ──────────────────
+// When you deploy your own Nagi, replace the string below with your
+// deployment's own privacy policy. Keep the section-heading shape
+// (lines starting with `# `) so the renderer can split + style; the
+// content of every section is yours to rewrite. The published doc
+// at docs/PRIVACY_POLICY.md is the long-form template you can adapt.
+// ────────────────────────────────────────────────────────────────────
 //
 // Headings use # markers so the renderer can split on '\n# ' and style
 // the leading line per section. This keeps formatting on web AND native
 // without pulling in a markdown library.
 
-export const PRIVACY_POLICY_TEXT = `# Privacy at Nagi
-This is the short version. The full text — including legal basis,
-sub-processor list, and your rights — is in our public docs at
-docs/PRIVACY_POLICY.md.
+export const PRIVACY_POLICY_TEXT = `# Privacy at Nagi (demo notice)
+This is the public demo of Nagi at nagi.kas.vu. It exists to show what
+the product does, not as a production SaaS. If you want to use Nagi
+with real elder data, the brand-aligned move is to self-host: the code
+is open source, deployment is documented, and full data sovereignty
+stays with you. See docs/SELF_HOST_COMPLIANCE.md in the repo for the
+deployment compliance kit.
 
-# What Nagi holds about you
+That said, even for the demo, here's what's true.
+
+# What this demo holds about you
 - Caregiver account: email, password (hashed), display name.
 - Settings: device PIN (hashed), language, UI preferences.
 - Elder profile: name, language, notes, optional medical context — all
@@ -22,7 +34,7 @@ docs/PRIVACY_POLICY.md.
 - Pill reminders, proud moments, voice messages, care-circle posts,
   help requests.
 
-# What Nagi does NOT hold
+# What this demo does NOT hold
 - No payment data.
 - No advertising or analytics trackers.
 - No social-network pixels.
@@ -50,6 +62,15 @@ Nagi stores essential session data on your device:
 - The walkthrough-seen flag (so the tour doesn't fire every visit).
 That's it. No advertising cookies. No tracking pixels.
 
+# A practical note for the demo
+This is a small public service. We're transparent about the stack and
+the sub-processors above. We are not a regulated SaaS — if your needs
+include EU data residency, signed DPAs, a designated DPO, or formal
+records of processing, the right path is to deploy your own Nagi at
+home or on your own server. The repo's docs/SELF_HOST_COMPLIANCE.md
+walks you through what becoming the controller for your own deployment
+involves.
+
 # Children
 Nagi is for adults caring for adult elders. We do not knowingly collect
 data about people under 16.
@@ -58,4 +79,4 @@ data about people under 16.
 privacy@nagi.kas.vu — we aim to respond within 14 days.
 
 # Last updated
-2026-04-26 — DRAFT pending legal review.`;
+2026-04-26.`;

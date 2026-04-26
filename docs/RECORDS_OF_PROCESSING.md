@@ -1,8 +1,14 @@
 # Records of Processing Activities (RoPA)
 
-> **DRAFT — Legal review required.** Internal-only document satisfying
-> GDPR Art. 30. Not customer-facing. Update whenever a new processing
-> activity, sub-processor, or category of data is added.
+> **TEMPLATE for self-hosted deployments.** When you deploy Nagi, this
+> becomes *your* Art. 30 record after you fill in the `{{PLACEHOLDERS}}`.
+> Internal-only document — your auditors and counsel read it; users
+> don't. Update whenever a new processing activity, sub-processor, or
+> category of data is added.
+>
+> Cross-references: [SELF_HOST_COMPLIANCE.md](./SELF_HOST_COMPLIANCE.md)
+> for the bigger picture, [SUB_PROCESSORS.md](./SUB_PROCESSORS.md) for
+> the canonical list referenced here.
 
 **Last updated:** {{DATE_TO_FILL}}
 **Maintained by:** {{NAME}} ({{ROLE}})
