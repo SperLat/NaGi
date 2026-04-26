@@ -293,7 +293,31 @@ BEGIN
     (bill_id,    target_user_id, 'niece (primary caregiver)',    now_ts - interval '90 days', now_ts - interval '90 days')
   ON CONFLICT (elder_id, user_id) DO NOTHING;
 
-  -- ── 4. Wipe prior seed rows so iterating doesn't accumulate ─────────
+  -- ── 4. Pre-set elder kiosk PINs so the walkthrough demo can hand off ──
+  -- All three elders' exit PIN is 5678 — judges only memorize one number
+  -- across the whole demo. Hash format matches kiosk.ts:
+  --   hash = SHA-256(salt + ':' + pin), hex-encoded, lowercase
+  --   salt = 16 random bytes hex-encoded (32 chars)
+  DECLARE
+    v_pin     text := '5678';
+    v_salt    text;
+    v_hash    text;
+    v_elder_id uuid;
+    v_ids     uuid[] := ARRAY[eleanor_id, frances_id, bill_id];
+  BEGIN
+    FOREACH v_elder_id IN ARRAY v_ids
+    LOOP
+      v_salt := encode(gen_random_bytes(16), 'hex');
+      v_hash := encode(digest(v_salt || ':' || v_pin, 'sha256'), 'hex');
+      UPDATE elders
+         SET kiosk_pin_hash = v_hash,
+             kiosk_pin_salt = v_salt,
+             updated_at      = now_ts
+       WHERE id = v_elder_id;
+    END LOOP;
+  END;
+
+  -- ── 5. Wipe prior seed rows so iterating doesn't accumulate ─────────
   DELETE FROM activity_log
   WHERE elder_id IN (eleanor_id, frances_id, bill_id)
     AND payload->>'seed_marker' = seed_marker;

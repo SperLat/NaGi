@@ -23,6 +23,7 @@ import { supabase } from '@/lib/supabase';
 import { relativeTime } from '@/lib/time';
 import { isMock } from '@/config/mode';
 import { useSession } from '@/state';
+import { Walkthrough, isWalkthroughSeen } from '@/features/walkthrough';
 
 export default function IntermediaryDashboard() {
   const { activeOrgId, userId, clearSession, setSession } = useSession();
@@ -32,7 +33,25 @@ export default function IntermediaryDashboard() {
   const [invitations, setInvitations] = useState<PendingInvitation[]>([]);
   const [invitationError, setInvitationError] = useState<string | null>(null);
   const [busyInvitationId, setBusyInvitationId] = useState<string | null>(null);
+  const [walkthroughOpen, setWalkthroughOpen] = useState(false);
   const shakeAnim                   = useRef(new Animated.Value(0)).current;
+
+  // First-time tour: opens automatically once on dashboard mount when
+  // the AsyncStorage flag is unset. Replayable from the sidebar via
+  // the "Replay tour" button. Skipped entirely in mock mode (the demo
+  // data may not match the walkthrough copy).
+  useEffect(() => {
+    if (isMock) return;
+    void isWalkthroughSeen().then(seen => {
+      if (!seen) setWalkthroughOpen(true);
+    });
+  }, []);
+
+  // Find Eleanor's id (the only elder the walkthrough Hand-off button
+  // routes to). Falls back to the first elder if no match — that
+  // keeps the button alive for non-Pemberton seeds during testing.
+  const eleanorId =
+    elders.find(e => e.display_name === 'Eleanor Pemberton')?.id ?? elders[0]?.id;
 
   const refreshInvitations = async () => {
     const { data, error } = await listMyPendingInvitations();
@@ -455,6 +474,11 @@ export default function IntermediaryDashboard() {
           <Text className="text-neutral-400 text-sm">Sign out</Text>
         </Pressable>
       </View>
+      <Walkthrough
+        visible={walkthroughOpen}
+        onClose={() => setWalkthroughOpen(false)}
+        elderIds={{ eleanor: eleanorId }}
+      />
     </SafeAreaView>
   );
 }

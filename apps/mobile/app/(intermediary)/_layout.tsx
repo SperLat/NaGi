@@ -12,6 +12,7 @@ import {
 import { signOut } from '@/features/auth';
 import { useSession } from '@/state';
 import { relativeTime } from '@/lib/time';
+import { resetWalkthrough } from '@/features/walkthrough';
 
 /** "active" if the elder used the app in the last hour. Beyond that, hide. */
 const ACTIVE_WINDOW_MS = 60 * 60_000;
@@ -185,6 +186,18 @@ function Sidebar() {
           className="rounded-xl px-3 py-2.5"
         >
           <Text className="text-sm font-medium text-accent-700">+ Add elder</Text>
+        </Pressable>
+        <Pressable
+          onPress={async () => {
+            await resetWalkthrough();
+            // Navigate to the dashboard so the walkthrough trigger fires.
+            // If we're already there, replace forces the effect to re-run.
+            router.replace('/(intermediary)/');
+          }}
+          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+          className="rounded-xl px-3 py-2"
+        >
+          <Text className="text-sm text-accent-600">↻ Replay tour</Text>
         </Pressable>
         <Pressable
           onPress={handleSignOut}

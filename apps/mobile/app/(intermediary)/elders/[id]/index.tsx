@@ -13,6 +13,7 @@ import {
 import { generateDigest, type DigestResult } from '@/features/digest';
 import { TeamChatPanel } from '@/features/team-chat';
 import { useSession } from '@/state';
+import { setDeviceMode } from '@/lib/kiosk';
 
 export default function ElderOverview() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -124,16 +125,42 @@ export default function ElderOverview() {
           </View>
         </View>
 
+        {/* Two ways into the elder shell:
+              "Open elder interface" — preview mode, no kiosk lockdown,
+                back navigation works. For the intermediary configuring.
+              "Hand to <elder>" — kiosk mode, locks the device down.
+                The elder owns the screen until they enter their exit PIN. */}
         <Pressable
-          className="bg-accent-600 rounded-2xl py-4 items-center mb-6"
+          className="bg-accent-500 rounded-2xl py-4 items-center mb-3"
           style={({ pressed }) => ({ opacity: pressed ? 0.82 : 1 })}
           onPress={() => {
             setActiveElder(id);
             router.push('/(elder)/');
           }}
         >
-          <Text className="text-paper font-semibold text-base">🧓 Open elder interface</Text>
+          <Text className="text-paper font-semibold text-base">🧓 Preview elder interface</Text>
         </Pressable>
+
+        {elder?.kiosk_pin_hash ? (
+          <Pressable
+            className="bg-accent-600 rounded-2xl py-4 items-center mb-6"
+            style={({ pressed }) => ({ opacity: pressed ? 0.82 : 1 })}
+            onPress={async () => {
+              await setDeviceMode({ kind: 'elder', elderId: id });
+              router.replace('/(elder)/');
+            }}
+          >
+            <Text className="text-paper font-semibold text-base">
+              ✋ Hand the device to {(elder.profile as Record<string, string>)?.preferred_name ?? elder.display_name}
+            </Text>
+          </Pressable>
+        ) : (
+          <View className="bg-surface-intermediary-sunken rounded-2xl py-3 px-4 mb-6">
+            <Text className="text-neutral-500 text-xs text-center">
+              Set an exit PIN in <Text className="font-semibold">Configure interface</Text> to enable kiosk hand-off.
+            </Text>
+          </View>
+        )}
 
         <View className="gap-3 mb-8">
           <Pressable
