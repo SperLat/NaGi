@@ -98,7 +98,7 @@ Deno.serve(async (req: Request) => {
       .gte('created_at', periodStartIso),
     db
       .from('help_requests')
-      .select('id, message, status, created_at, acknowledged_at, acknowledged_by')
+      .select('id, status, created_at, acknowledged_at, acknowledged_by')
       .eq('elder_id', elder_id)
       .gte('created_at', periodStartIso),
     // Pill reminder events for the past 7 days. Each row is one slot —
@@ -167,10 +167,13 @@ Deno.serve(async (req: Request) => {
     output_tokens: number | null;
     error: string | null;
   }>;
+  // help_requests is a tap-to-alert surface — no free-text message.
+  // The elder presses "Need help"; the family acknowledges. We only
+  // get status + timing for the digest narrative.
   const help = (helpRes.data ?? []) as Array<{
-    message: string | null;
     status: string;
     acknowledged_at: string | null;
+    created_at: string;
   }>;
   const pillEvents = (pillRes.data ?? []) as Array<{
     reminder_id: string;
@@ -232,7 +235,8 @@ Deno.serve(async (req: Request) => {
     .slice(0, 10)
     .map(h => {
       const status = h.status === 'acknowledged' ? '✓ handled' : '⏳ pending';
-      return `- ${status}: "${(h.message ?? '').trim().slice(0, 120)}"`;
+      const when = new Date(h.created_at).toLocaleDateString('en-US', { weekday: 'short' });
+      return `- ${status} (${when})`;
     })
     .join('\n');
 
