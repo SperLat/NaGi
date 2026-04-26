@@ -77,7 +77,7 @@ export default function NewElder() {
                 >
                   <Text
                     className={`text-sm font-medium ${
-                      lang === l.code ? 'text-white' : 'text-gray-700'
+                      lang === l.code ? 'text-paper' : 'text-gray-700'
                     }`}
                   >
                     {l.label}
@@ -100,7 +100,7 @@ export default function NewElder() {
             {loading ? (
               <ActivityIndicator color="white" />
             ) : (
-              <Text className="text-white font-semibold text-lg">Add {name || 'them'}</Text>
+              <Text className="text-paper font-semibold text-lg">Add {name || 'them'}</Text>
             )}
           </Pressable>
         </View>

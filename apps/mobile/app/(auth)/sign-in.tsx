@@ -98,7 +98,7 @@ export default function SignIn() {
             {loading ? (
               <ActivityIndicator color="white" />
             ) : (
-              <Text className="text-white font-semibold text-lg">Sign in</Text>
+              <Text className="text-paper font-semibold text-lg">Sign in</Text>
             )}
           </Pressable>
 

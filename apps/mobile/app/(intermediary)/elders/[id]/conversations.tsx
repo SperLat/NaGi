@@ -100,7 +100,7 @@ export default function ElderConversations() {
                 active ? 'bg-accent-600 border-accent-600' : 'bg-surface-intermediary-raised border-gray-200'
               }`}
             >
-              <Text className={`text-xs font-medium ${active ? 'text-white' : 'text-gray-700'}`}>
+              <Text className={`text-xs font-medium ${active ? 'text-paper' : 'text-gray-700'}`}>
                 {r.label}
               </Text>
             </Pressable>

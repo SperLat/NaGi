@@ -116,7 +116,7 @@ export default function SignUp() {
               {loading ? (
                 <ActivityIndicator color="white" />
               ) : (
-                <Text className="text-white font-semibold text-lg">Create account</Text>
+                <Text className="text-paper font-semibold text-lg">Create account</Text>
               )}
             </Pressable>
 

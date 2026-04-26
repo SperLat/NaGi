@@ -54,8 +54,8 @@ export default function ElderHome() {
 
   const tc = TEXT_CLASS[textSize];
   const cardKeys = (elder.ui_config.home_cards ?? Object.keys(CARD_EMOJIS)) as CardKey[];
-  const bg = highContrast ? 'bg-black' : 'bg-surface-elder-raised';
-  const textColor = highContrast ? 'text-white' : 'text-gray-900';
+  const bg = highContrast ? 'bg-charcoal-deep' : 'bg-surface-elder-raised';
+  const textColor = highContrast ? 'text-paper' : 'text-gray-900';
   const cardBg = highContrast ? 'bg-gray-900 border-gray-600' : 'bg-accent-50 border-accent-100';
 
   // TODO: source intermediaryName from session/membership when intermediary identity
@@ -76,7 +76,7 @@ export default function ElderHome() {
   return (
     <SafeAreaView
       className={`flex-1 ${bg}`}
-      style={{ backgroundColor: highContrast ? '#000000' : '#FCFAF7' }}
+      style={{ backgroundColor: highContrast ? '#0F0F0F' : '#FCFAF7' }}
     >
       <View className="flex-1 px-6 pt-8 pb-4">
         {/* Exit to intermediary dashboard — only visible when pushed from that flow */}

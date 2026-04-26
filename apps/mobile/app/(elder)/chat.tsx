@@ -284,8 +284,8 @@ export default function ElderChat() {
 
   // ── UI ───────────────────────────────────────────────────────────────────────
 
-  const bg        = highContrast ? 'bg-black' : 'bg-gray-50';
-  const textColor = highContrast ? 'text-white' : 'text-gray-900';
+  const bg        = highContrast ? 'bg-charcoal-deep' : 'bg-gray-50';
+  const textColor = highContrast ? 'text-paper' : 'text-gray-900';
 
   // No elder selected (typically after a page reload — Zustand state
   // doesn't persist across reloads by design). Bounce back to the
@@ -307,7 +307,7 @@ export default function ElderChat() {
   return (
     <SafeAreaView
       className={`flex-1 ${bg}`}
-      style={{ backgroundColor: highContrast ? '#000000' : '#F9FAFB' }}
+      style={{ backgroundColor: highContrast ? '#0F0F0F' : '#F7F5F2' }}
     >
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1">
 
@@ -371,7 +371,7 @@ export default function ElderChat() {
               >
                 <Text
                   className={`${tc.body} leading-relaxed ${
-                    item.role === 'user' ? 'text-white' : textColor
+                    item.role === 'user' ? 'text-paper' : textColor
                   }`}
                 >
                   {item.content || (item.role === 'streaming' ? '…' : '')}
@@ -432,8 +432,8 @@ export default function ElderChat() {
               }`}
               style={({ pressed }) => ({ opacity: streaming ? 0.4 : pressed ? 0.82 : 1 })}
             >
-              <Text className="text-white text-3xl">{listening ? '■' : '◉'}</Text>
-              <Text className="text-white text-xs mt-0.5">
+              <Text className="text-paper text-3xl">{listening ? '■' : '◉'}</Text>
+              <Text className="text-paper text-xs mt-0.5">
                 {listening ? s.stop : s.speak}
               </Text>
             </Pressable>
@@ -460,7 +460,7 @@ export default function ElderChat() {
             >
               {streaming
                 ? <ActivityIndicator color="white" size="small" />
-                : <Text className="text-white font-semibold">→</Text>
+                : <Text className="text-paper font-semibold">→</Text>
               }
             </Pressable>
           </View>

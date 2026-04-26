@@ -165,7 +165,7 @@ export default function ElderConfigure() {
                     lang === l.code ? 'bg-accent-600 border-accent-600' : 'bg-surface-intermediary-raised border-gray-200'
                   }`}
                 >
-                  <Text className={`text-sm font-medium ${lang === l.code ? 'text-white' : 'text-gray-700'}`}>
+                  <Text className={`text-sm font-medium ${lang === l.code ? 'text-paper' : 'text-gray-700'}`}>
                     {l.label}
                   </Text>
                 </Pressable>
@@ -185,7 +185,7 @@ export default function ElderConfigure() {
                     textSize === s.value ? 'bg-accent-600 border-accent-600' : 'bg-surface-intermediary-raised border-gray-200'
                   }`}
                 >
-                  <Text className={`text-sm font-medium ${textSize === s.value ? 'text-white' : 'text-gray-700'}`}>
+                  <Text className={`text-sm font-medium ${textSize === s.value ? 'text-paper' : 'text-gray-700'}`}>
                     {s.label}
                   </Text>
                 </Pressable>
@@ -384,7 +384,7 @@ export default function ElderConfigure() {
           {saving ? (
             <ActivityIndicator color="white" />
           ) : (
-            <Text className="text-white font-semibold text-lg">Save changes</Text>
+            <Text className="text-paper font-semibold text-lg">Save changes</Text>
           )}
         </Pressable>
       </View>

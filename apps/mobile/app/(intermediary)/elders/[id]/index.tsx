@@ -132,7 +132,7 @@ export default function ElderOverview() {
             router.push('/(elder)/');
           }}
         >
-          <Text className="text-white font-semibold text-base">🧓 Open elder interface</Text>
+          <Text className="text-paper font-semibold text-base">🧓 Open elder interface</Text>
         </Pressable>
 
         <View className="gap-3 mb-8">
@@ -298,7 +298,7 @@ export default function ElderOverview() {
                 {inviteBusy ? (
                   <ActivityIndicator color="white" />
                 ) : (
-                  <Text className="text-white font-semibold">Send invite</Text>
+                  <Text className="text-paper font-semibold">Send invite</Text>
                 )}
               </Pressable>
             </View>
@@ -371,7 +371,7 @@ function DigestModal({ visible, busy, digest, error, elderName, onClose, onRegen
 
   return (
     <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
-      <View className="flex-1 bg-black/40 items-center justify-center p-4">
+      <View className="flex-1 bg-charcoal/40 items-center justify-center p-4">
         <View className="bg-surface-intermediary-raised rounded-2xl w-full max-w-2xl max-h-[85%] flex flex-col">
           <View className="flex-row items-center justify-between px-5 py-4 border-b border-gray-100">
             <Text className="text-lg font-bold text-gray-900">This week with {elderName}</Text>
@@ -424,7 +424,7 @@ function DigestModal({ visible, busy, digest, error, elderName, onClose, onRegen
               onPress={handleCopy}
               disabled={busy || !digest}
             >
-              <Text className="text-white font-medium">Copy to clipboard</Text>
+              <Text className="text-paper font-medium">Copy to clipboard</Text>
             </Pressable>
           </View>
         </View>

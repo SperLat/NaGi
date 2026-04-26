@@ -129,7 +129,7 @@ export default function ElderNotes() {
               {posting ? (
                 <ActivityIndicator color="white" />
               ) : (
-                <Text className={`font-medium text-sm ${body.trim() ? 'text-white' : 'text-gray-400'}`}>
+                <Text className={`font-medium text-sm ${body.trim() ? 'text-paper' : 'text-gray-400'}`}>
                   Post note
                 </Text>
               )}

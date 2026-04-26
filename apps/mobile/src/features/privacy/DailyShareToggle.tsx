@@ -151,7 +151,7 @@ export function DailyShareToggle({ elderId, lang, highContrast }: Props) {
                 {busy ? (
                   <ActivityIndicator color="#FFFFFF" />
                 ) : (
-                  <Text style={{ color: '#FFFFFF', fontSize: 16, fontWeight: '600' }}>
+                  <Text style={{ color: '#FCFAF7', fontSize: 16, fontWeight: '600' }}>
                     {shared ? s.privacyConfirmHide : s.privacyConfirmShare}
                   </Text>
                 )}

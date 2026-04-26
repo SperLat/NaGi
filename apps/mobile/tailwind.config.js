@@ -20,8 +20,27 @@ module.exports = {
           intermediary:          '#F7F5F2',
           'intermediary-raised': '#FCFAF7',
           'intermediary-sunken': '#EDEAE3',
-          dark:                  '#1E1E1E',  // Charcoal Root
-          'dark-raised':         '#2A2A2A',
+          dark:                  '#1E1E1E',  // Charcoal Root — HC mode background
+          'dark-raised':         '#2A2A2A',  // Charcoal lifted — cards on dark
+          'dark-deep':           '#0F0F0F',  // Charcoal Root deep — true-deep canvas, max-emphasis
+        },
+
+        // ── Paper — the palette's "whitest" tool ──────────────────────
+        // Aliased to surface-*-raised but exposed as a top-level
+        // shortcut so `text-paper` / `bg-paper` reads naturally for
+        // labels on Pine Deep buttons and any context that would
+        // otherwise reach for pure #FFFFFF. Pure white never appears in
+        // the brand — when the eye wants "whitest", this is whitest.
+        paper: '#FCFAF7',
+
+        // ── Charcoal — the palette's "deepest" tool ───────────────────
+        // For backgrounds and ink that would otherwise reach for
+        // pure #000000. Two stops:
+        //   charcoal       (= surface-dark)       Charcoal Root
+        //   charcoal-deep  (= surface-dark-deep)  near-pure black, palette-grounded
+        charcoal: {
+          DEFAULT: '#1E1E1E',
+          deep:    '#0F0F0F',
         },
 
         // ── Pine Deep — primary structural accent ─────────────────────

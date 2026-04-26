@@ -140,7 +140,7 @@ function Sidebar() {
                   </Text>
                   {pendingCount > 0 ? (
                     <View className="ml-2 bg-red-500 rounded-full min-w-[20px] h-5 px-1.5 items-center justify-center">
-                      <Text className="text-white text-[10px] font-bold">{pendingCount}</Text>
+                      <Text className="text-paper text-[10px] font-bold">{pendingCount}</Text>
                     </View>
                   ) : null}
                 </View>

@@ -56,7 +56,7 @@ export default function ElderWelcome() {
         >
           <Text
             style={{ fontSize: 22 }}
-            className="text-white font-semibold"
+            className="text-paper font-semibold"
           >
             {s.start}
           </Text>

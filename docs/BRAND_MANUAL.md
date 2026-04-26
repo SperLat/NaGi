@@ -108,9 +108,23 @@ The single named exception is **Safety Red**. It exists for the elder's emergenc
 1. **Elder ergonomics.** Cataracts scatter the blue-end of the spectrum; pure-white surfaces read as "glare-bright" to elderly eyes while warm off-whites read as "soft paper." This is a measured ergonomic preference, not aesthetic — body text on `#FCFAF7` is just as legible (15.21:1 with Charcoal Root) without the glare cost.
 2. **Visual hierarchy.** A raised card at `#FCFAF7` against a Fog White surface at `#F7F5F2` shows a 1.5% lift — subtle but consistent. Pure white against Fog White creates a 3.5% jolt that reads as "harsh hot spot" rather than "lifted paper." The smaller delta is the right paper-on-paper metaphor.
 
-`#FFFFFF` (true white) is reserved for *text* on Pine Deep buttons and `#000000` is reserved for the high-contrast-mode elder surface. They are tools, not surfaces.
+**Pure `#FFFFFF` and `#000000` are off-palette and forbidden.** Even when the eye wants "whitest" (button labels on Pine Deep) or "blackest" (HC-mode background), the brand reaches for palette tokens, not raw values. The two tools that fill those roles:
 
-The dark surface is true charcoal (`#1E1E1E`) rather than warm-biased near-black, so high-contrast mode reads as "darkness" not "burnt earth."
+| Token | Hex | Name | Replaces |
+|---|---|---|---|
+| `paper` | `#FCFAF7` | Paper | Any prior use of `#FFFFFF` — text on Pine Deep buttons, max-emphasis text on dark surfaces, anywhere the eye wanted "whitest" |
+| `charcoal` | `#1E1E1E` | Charcoal Root | The HC-mode mid-dark layer — same value as `surface-dark`, exposed as a top-level alias for ink/canvas use |
+| `charcoal-deep` | `#0F0F0F` | Charcoal Root deep | Replaces any prior use of `#000000` — true-deep canvas for HC-mode root, modal backdrops, max-emphasis darks |
+
+The `paper` and `charcoal` aliases share values with `surface-*-raised` and `surface-dark` respectively — the duplication is deliberate. Same value, different role: surfaces are *places*, paper/charcoal are *inks*. Using the right name at the call site is what keeps the palette legible to the next contributor.
+
+**Dark hierarchy** (mirrors the light side's Fog White → Paper):
+
+| Layer | Hex | Use |
+|---|---|---|
+| `charcoal-deep` `#0F0F0F` | true-deep | HC-mode page background (replaces inline `#000000`), modal backdrops |
+| `charcoal` / `surface-dark` `#1E1E1E` | Charcoal Root | Charcoal text on light surfaces, mid-canvas in HC mode |
+| `surface-dark-raised` `#2A2A2A` | Charcoal lifted | Cards in HC/dark mode |
 
 ### 3.2 Pine Deep — the primary structural accent
 

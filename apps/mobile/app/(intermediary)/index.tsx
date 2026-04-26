@@ -239,13 +239,13 @@ export default function IntermediaryDashboard() {
       {alerts.length > 0 && (
         <Animated.View style={{ transform: [{ translateX: shakeAnim }] }} className="mx-6 mb-3">
           <View className="bg-safety-critical rounded-2xl px-5 py-4">
-            <Text className="text-white font-bold text-base mb-1">
+            <Text className="text-paper font-bold text-base mb-1">
               Urgent help request
             </Text>
             {alerts.map(req => (
               <View key={req.id} className="flex-row items-center justify-between mt-2">
                 <View>
-                  <Text className="text-white font-semibold">{req.elder_name}</Text>
+                  <Text className="text-paper font-semibold">{req.elder_name}</Text>
                   <Text className="text-safety-critical-soft text-xs">
                     {new Date(req.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </Text>
@@ -305,7 +305,7 @@ export default function IntermediaryDashboard() {
                     {busy ? (
                       <ActivityIndicator color="white" />
                     ) : (
-                      <Text className="text-white font-semibold">Accept</Text>
+                      <Text className="text-paper font-semibold">Accept</Text>
                     )}
                   </Pressable>
                 </View>
@@ -445,7 +445,7 @@ export default function IntermediaryDashboard() {
           style={({ pressed }) => ({ opacity: pressed ? 0.82 : 1 })}
           onPress={() => router.push('/(intermediary)/elders/new')}
         >
-          <Text className="text-white font-semibold text-lg">Add Elder</Text>
+          <Text className="text-paper font-semibold text-lg">Add Elder</Text>
         </Pressable>
         <Pressable
           className="items-center pt-4 pb-1"
