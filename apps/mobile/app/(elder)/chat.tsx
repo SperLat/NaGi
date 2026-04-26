@@ -12,7 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Redirect } from 'expo-router';
 import { safeBack } from '@/lib/nav';
-import { useSession } from '@/state';
+import { useSession, selectActiveElderId } from '@/state';
 import * as Speech from 'expo-speech';
 import { startListening, isSupported } from '@/lib/voice';
 import { sendChatMessage, loadChatHistory, type ChatMessage } from '@/features/ai-chat';
@@ -35,7 +35,10 @@ interface DisplayMsg {
 
 export default function ElderChat() {
   const { elder, textSize, highContrast, orgId } = useElderCtx();
-  const { activeElderId } = useSession();
+  // Use the centralized selector — chat used to read activeElderId
+  // alone, which silently bounced kiosk-mode users to intermediary
+  // because their elder id lives on deviceMode, not activeElderId.
+  const elderId = useSession(selectActiveElderId);
   const s = useStrings(elder?.preferred_lang);
   const [messages, setMessages]   = useState<ChatMessage[]>([]);
   const [display, setDisplay]     = useState<DisplayMsg[]>([]);
@@ -287,11 +290,12 @@ export default function ElderChat() {
   const bg        = highContrast ? 'bg-charcoal-deep' : 'bg-gray-50';
   const textColor = highContrast ? 'text-paper' : 'text-gray-900';
 
-  // No elder selected (typically after a page reload — Zustand state
-  // doesn't persist across reloads by design). Bounce back to the
-  // intermediary dashboard instead of spinning forever; the normal entry
-  // point into chat is dashboard → tap elder.
-  if (!activeElderId) {
+  // No elder selected at all — neither kiosk nor preview path resolved
+  // an id (typically after a page reload, since Zustand state doesn't
+  // persist by design and deviceMode hydration may still be pending).
+  // Bounce to intermediary; the normal entry into chat is dashboard
+  // → tap elder.
+  if (!elderId) {
     return <Redirect href="/(intermediary)/" />;
   }
 

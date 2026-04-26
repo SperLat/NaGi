@@ -49,6 +49,23 @@ export const useSession = create<SessionState>(set => ({
   setHydrated: () => set({ hydrated: true }),
 }));
 
+// ── Selectors ────────────────────────────────────────────────────────
+//
+// Use these helpers when reading "the current elder" so every consumer
+// agrees on the resolution rule. Two state fields conspire to identify
+// the active elder:
+//   - deviceMode.elderId — set when the device is in kiosk mode (an
+//     elder is using it). This wins when present: a handed-over device
+//     is locked TO that elder, full stop.
+//   - activeElderId — the legacy preview path, set when an intermediary
+//     is previewing what an elder will see without entering kiosk.
+//
+// Bugs surface when readers pick one field and ignore the other —
+// chat.tsx used to bounce out of kiosk because it only checked
+// activeElderId. Always go through this selector.
+export const selectActiveElderId = (s: SessionState): string | null =>
+  s.deviceMode?.kind === 'elder' ? s.deviceMode.elderId : (s.activeElderId ?? null);
+
 // Hydrate device mode from AsyncStorage once at module load. The result
 // is set into the store regardless of mock mode (mock mode just doesn't
 // USE the device mode for routing — it short-circuits to intermediary).

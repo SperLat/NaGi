@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { Stack, router } from 'expo-router';
 import { getElder, verifyElderKioskPin, type Elder } from '@/features/elders';
-import { useSession } from '@/state';
+import { useSession, selectActiveElderId } from '@/state';
 import { PinEntry } from '@/components/PinEntry';
 
 interface ElderCtx {
@@ -34,7 +34,8 @@ const TAP_WINDOW_MS = 3000;
 const TAPS_TO_OPEN = 5;
 
 export default function ElderLayout() {
-  const { activeElderId, activeOrgId, deviceMode, setDeviceMode } = useSession();
+  const { activeOrgId, deviceMode, setDeviceMode } = useSession();
+  const elderId = useSession(selectActiveElderId);
   const [elder, setElder] = useState<Elder | null>(null);
   const [pinOpen, setPinOpen] = useState(false);
   const tapTimes = useRef<number[]>([]);
@@ -43,12 +44,6 @@ export default function ElderLayout() {
   // can also be navigated by an intermediary previewing what the elder will
   // see — in that case we DON'T install the back-handler / gesture traps.
   const inKiosk = deviceMode?.kind === 'elder';
-
-  // Resolve the active elder for the layout context. In kiosk mode the
-  // elder is whoever the device was handed to; otherwise it's whatever
-  // the intermediary set last (legacy preview path).
-  const elderId =
-    deviceMode?.kind === 'elder' ? deviceMode.elderId : (activeElderId ?? null);
 
   useEffect(() => {
     if (!elderId) return;

@@ -1,1 +1,1 @@
-export { useSession } from './session';
+export { useSession, selectActiveElderId } from './session';
