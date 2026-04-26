@@ -124,7 +124,10 @@ export default function ElderMessages() {
 
   useEffect(() => {
     void refresh();
-    return () => { Speech.stop(); };
+    return () => {
+      Speech.stop();
+      playbackRef.current?.stop();
+    };
   }, [refresh]);
 
   // Auto-play newly-arrived messages once each (no replay loop).
