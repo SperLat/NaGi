@@ -38,7 +38,7 @@
 DO $$
 DECLARE
   -- ◆◆◆ EDIT THIS — set to the email of the auth user you want to seed into.
-  target_email     text := 'demo-en@nagi.test';
+  target_email     text := 'sperlat.latam+naguidemo@gmail.com';
 
   target_user_id   uuid;
   target_org_id    uuid;
