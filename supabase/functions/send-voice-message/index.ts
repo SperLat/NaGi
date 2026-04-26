@@ -182,8 +182,13 @@ Deno.serve(async (req: Request) => {
       ? detectedLang
       : senderLang ?? null;
 
-  // Step 6: upload original audio to storage.
-  const ext = pickExt((audio as File).type);
+  // Step 6: upload original audio to storage. Best-effort — if this
+  // fails, we still deliver the transcript-only message rather than
+  // losing the whole message. The recipient sees a text message and
+  // the "🎙️ Their voice" button hides because audio_path is null.
+  // Brand stance: Whisper compute already succeeded; the elder
+  // shouldn't lose their message because the bucket hiccuped.
+  const ext       = pickExt((audio as File).type);
   const audioPath = `${connectionId}/${crypto.randomUUID()}.${ext}`;
   const audioBuf  = new Uint8Array(await audio.arrayBuffer());
   const { error: upErr } = await adminClient.storage
@@ -192,9 +197,7 @@ Deno.serve(async (req: Request) => {
       contentType: (audio as File).type || 'application/octet-stream',
       upsert: false,
     });
-  if (upErr) {
-    return jsonError(`Storage upload failed: ${upErr.message}`, 500);
-  }
+  const persistedAudioPath = upErr ? null : audioPath;
 
   // Step 7: insert message row using the user-bound client so the
   // existing INSERT RLS (caller in either elder's org) gates the write
@@ -205,16 +208,18 @@ Deno.serve(async (req: Request) => {
       connection_id: connectionId,
       from_elder_id: fromElderId,
       body: transcript,
-      audio_path: audioPath,
+      audio_path: persistedAudioPath,
       source_lang: sourceLang,
     })
     .select('id, created_at')
     .single();
 
   if (insErr || !msg) {
-    // Best-effort: if the row insert fails, remove the orphaned audio
-    // so we don't accumulate untracked storage. Service-role can delete.
-    await adminClient.storage.from('elder-voice-messages').remove([audioPath]).catch(() => {});
+    // Insert failed — cleanup any orphaned storage so we don't
+    // accumulate untracked files.
+    if (persistedAudioPath) {
+      await adminClient.storage.from('elder-voice-messages').remove([persistedAudioPath]).catch(() => {});
+    }
     return jsonError(`Insert failed: ${insErr?.message ?? 'unknown'}`, 500);
   }
 
@@ -223,6 +228,7 @@ Deno.serve(async (req: Request) => {
     message_id: (msg as { id: string }).id,
     transcript,
     detected_lang: sourceLang,
-    audio_path: audioPath,
+    audio_path: persistedAudioPath,
+    audio_persisted: !upErr,
   });
 });
