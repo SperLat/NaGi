@@ -1,0 +1,61 @@
+name: Deploy nagi.kas.vu
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/mobile/**'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.github/workflows/deploy-web.yml'
+  workflow_dispatch: {}
+
+concurrency:
+  group: deploy-web
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Expo Web
+        working-directory: apps/mobile
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
+          EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
+          EXPO_PUBLIC_MOCK_MODE: 'false'
+        run: npx expo export -p web
+
+      # Sanity-check the .htaccess made it into dist/ — if Expo ever
+      # changes how public/ is handled, fail the deploy loudly instead
+      # of silently shipping a broken SPA.
+      - name: Verify .htaccess in build output
+        run: test -f apps/mobile/dist/.htaccess || (echo "::error::.htaccess missing from dist/ — SPA deep links will 404" && exit 1)
+
+      - name: Deploy to Stablepoint via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./apps/mobile/dist/
+          server-dir: ${{ secrets.FTP_TARGET_DIR }}
+          # State file so subsequent deploys only upload changed files,
+          # making each run after the first ~5–10 seconds.
+          state-name: .ftp-deploy-sync-state.json
+          # protocol: ftps  # uncomment if Stablepoint requires explicit FTPS
