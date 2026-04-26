@@ -133,7 +133,14 @@ export default function ElderOverview() {
         <Pressable
           className="bg-accent-500 rounded-2xl py-4 items-center mb-3"
           style={({ pressed }) => ({ opacity: pressed ? 0.82 : 1 })}
-          onPress={() => {
+          onPress={async () => {
+            // Clear any cached device-mode FIRST. If a prior Hand-the-
+            // device routed deviceMode to {kind:'elder', elderId:<other>},
+            // the (elder) layout would still resolve elderId from
+            // deviceMode.elderId — shadowing the activeElderId we're
+            // about to set. Setting intermediary explicitly ensures the
+            // layout falls through to activeElderId for the preview.
+            await setDeviceMode({ kind: 'intermediary' });
             setActiveElder(id);
             router.push('/(elder)/');
           }}
