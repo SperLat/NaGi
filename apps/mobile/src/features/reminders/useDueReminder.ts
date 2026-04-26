@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ensureEvent, listActiveForElder } from './api';
+import { ensureEvent, listActiveForElder, listEventsForElder } from './api';
 import type { PillReminder, PillReminderEvent } from './types';
 
 const POLL_MS = 30_000;
@@ -73,8 +73,31 @@ export function useDueReminder(elderId: string | null | undefined): DueState | n
         }
         const now = new Date();
 
-        // For each active reminder, find a due slot and pick the most
-        // recently scheduled one across all reminders.
+        // First: catch any pending event whose snooze has just elapsed.
+        // Without this, snoozing near the end of the 30-min slot window
+        // would silently cancel the reminder — the slot would age past
+        // DUE_WINDOW_MIN before the snooze ended, and findDueSlot would
+        // return null. Brand stance is "never chased": a snooze must
+        // honor itself.
+        const todayStart = new Date(now);
+        todayStart.setHours(0, 0, 0, 0);
+        const recentEvents = await listEventsForElder(elderId, todayStart.toISOString());
+        const reminderById = new Map(reminders.map(r => [r.id, r]));
+        const elapsedSnooze = recentEvents.find(e =>
+          e.status === 'pending' &&
+          reminderById.has(e.reminder_id) &&
+          e.snoozed_until !== null &&
+          new Date(e.snoozed_until) <= now
+        );
+        if (elapsedSnooze) {
+          if (!cancelled) {
+            setState({ reminder: reminderById.get(elapsedSnooze.reminder_id)!, event: elapsedSnooze });
+          }
+          return;
+        }
+
+        // Otherwise: for each active reminder, find a due slot and pick
+        // the most recently scheduled one across all reminders.
         let pick: { reminder: PillReminder; scheduledAt: Date } | null = null;
         for (const r of reminders) {
           const slot = findDueSlot(r, now);
