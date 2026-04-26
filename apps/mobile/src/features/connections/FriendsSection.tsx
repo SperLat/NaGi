@@ -160,7 +160,9 @@ function ProposeModal({
   onProposed: () => void;
 }) {
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<Array<{ id: string; display_name: string }>>([]);
+  const [results, setResults] = useState<
+    Array<{ id: string; display_name: string; organization_name: string }>
+  >([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -171,7 +173,7 @@ function ProposeModal({
       setError(null);
       return;
     }
-    if (query.trim().length < 2) {
+    if (query.trim().length < 3) {
       setResults([]);
       return;
     }
@@ -235,9 +237,14 @@ function ProposeModal({
           {error ? <Text style={{ color: '#C8392E', fontSize: 13 }}>{error}</Text> : null}
 
           <View style={{ gap: 6, maxHeight: 240 }}>
-            {results.length === 0 && query.trim().length >= 2 && !busy ? (
+            {query.trim().length > 0 && query.trim().length < 3 && !busy ? (
               <Text style={{ color: '#9A9A95', fontSize: 13, fontStyle: 'italic' }}>
-                No elder by that name visible to you. (You can only propose to elders whose families have signed up.)
+                Type at least 3 letters to search.
+              </Text>
+            ) : null}
+            {results.length === 0 && query.trim().length >= 3 && !busy ? (
+              <Text style={{ color: '#9A9A95', fontSize: 13, fontStyle: 'italic' }}>
+                No match. The other family must have an elder profile created on Nagi for them to be findable here.
               </Text>
             ) : null}
             {results.map(r => (
@@ -256,10 +263,15 @@ function ProposeModal({
                   borderColor: '#E0DFDC',
                 })}
               >
-                <Text style={{ color: '#1E1E1E', fontSize: 14, flex: 1 }} numberOfLines={1}>
-                  {r.display_name}
-                </Text>
-                <Text style={{ color: '#34503E', fontSize: 12, fontWeight: '600' }}>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: '#1E1E1E', fontSize: 14 }} numberOfLines={1}>
+                    {r.display_name}
+                  </Text>
+                  <Text style={{ color: '#9A9A95', fontSize: 12 }} numberOfLines={1}>
+                    {r.organization_name}
+                  </Text>
+                </View>
+                <Text style={{ color: '#34503E', fontSize: 12, fontWeight: '600', marginLeft: 8 }}>
                   Propose →
                 </Text>
               </Pressable>

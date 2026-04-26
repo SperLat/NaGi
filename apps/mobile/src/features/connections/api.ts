@@ -74,30 +74,36 @@ export async function respondToElderConnection(
 }
 
 /**
- * Find an elder by display name across the entire system. For demo
- * purposes only — production would have a search UI with consent
- * gates. Used by the "propose by name" form so a caregiver can find
- * Maggie Whitmore by typing the name without knowing the UUID.
+ * Find an elder by display name across orgs, for the proposal flow.
  *
- * RLS limits results to elders in orgs the caller can see, BUT we
- * intentionally bypass that for connection proposals via a dedicated
- * SECURITY DEFINER RPC. For MVP, we use a plain SELECT — caregivers
- * can only propose to elders whose names they already know, and the
- * recipient still has to consent. Privacy floor is at the consent
- * step, not at discovery.
+ * Backed by the SECURITY DEFINER RPC find_elder_for_connection in
+ * migration 0022, which bypasses RLS to enable cross-tenant discovery
+ * (the whole point of "Friends across families"). The RPC requires
+ * a min query length of 3 chars and excludes the caller's own orgs.
+ * Privacy floor stays at the proposal step — the recipient family
+ * still has to accept before any data flows.
+ *
+ * Returns at most 10 rows with just enough fields to disambiguate.
  */
 export async function findElderByName(
   query: string,
-): Promise<Array<{ id: string; display_name: string; preferred_lang: string }>> {
-  if (isMock || !query.trim()) return [];
-  // Note: this query runs with the caller's RLS — they can only see
-  // elders in their own orgs. For cross-tenant discovery we'd need a
-  // SECURITY DEFINER RPC. For demo we expect the caregiver to know
-  // the exact display name and propose via that path.
-  const { data } = await supabase
-    .from('elders')
-    .select('id, display_name, preferred_lang')
-    .ilike('display_name', `%${query.trim()}%`)
-    .limit(10);
-  return (data ?? []) as Array<{ id: string; display_name: string; preferred_lang: string }>;
+): Promise<
+  Array<{
+    id: string;
+    display_name: string;
+    preferred_lang: string;
+    organization_name: string;
+  }>
+> {
+  const trimmed = query.trim();
+  if (isMock || trimmed.length < 3) return [];
+  const { data } = await supabase.rpc('find_elder_for_connection', {
+    query: trimmed,
+  });
+  return (data ?? []) as Array<{
+    id: string;
+    display_name: string;
+    preferred_lang: string;
+    organization_name: string;
+  }>;
 }
