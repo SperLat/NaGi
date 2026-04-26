@@ -389,8 +389,14 @@ export default function ElderChat() {
                 }`}
               >
                 <Text
+                  // Assistant bubbles are always cream (the brand's
+                  // recognizable "Nagi voice" surface), so the text
+                  // inside must always be dark — high-contrast dark
+                  // mode flips the page bg to black but the bubble
+                  // stays cream. Cream-on-cream renders invisibly,
+                  // which the previous `textColor` interpolation did.
                   className={`${tc.body} leading-relaxed ${
-                    item.role === 'user' ? 'text-paper' : textColor
+                    item.role === 'user' ? 'text-paper' : 'text-gray-900'
                   }`}
                 >
                   {item.content || (item.role === 'streaming' ? '…' : '')}
