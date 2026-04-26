@@ -266,6 +266,14 @@ export default function CaregiverSettings() {
           >
             <Text className="text-red-600 text-xs">Delete my account</Text>
           </Pressable>
+
+          <Pressable
+            onPress={() => router.push('/privacy')}
+            className="mt-3 ml-1"
+            style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+          >
+            <Text className="text-accent-600 text-xs">Privacy details</Text>
+          </Pressable>
         </View>
       </ScrollView>
 

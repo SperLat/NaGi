@@ -210,6 +210,13 @@ function Sidebar() {
           <Text className="text-sm text-accent-600">↻ Replay tour</Text>
         </Pressable>
         <Pressable
+          onPress={() => router.push('/privacy')}
+          style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+          className="rounded-xl px-3 py-2"
+        >
+          <Text className="text-sm text-gray-400">Privacy</Text>
+        </Pressable>
+        <Pressable
           onPress={handleSignOut}
           style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
           className="rounded-xl px-3 py-2"

@@ -9,6 +9,7 @@ import { useSession } from '@/state';
 import { startSyncManager } from '@/lib/sync';
 import { startAutoDrain } from '@/features/outbox';
 import { isMock } from '@/config/mode';
+import { PrivacyNotice } from '@/features/privacy';
 
 const queryClient = new QueryClient();
 
@@ -103,7 +104,11 @@ export default function RootLayout() {
         <Stack.Screen name="(intermediary)" />
         <Stack.Screen name="(elder)" />
         <Stack.Screen name="locked" />
+        <Stack.Screen name="privacy" />
       </Stack>
+      {/* Essential-cookies transparency notice. Mounts globally so it
+          shows once across any first-visit route, then never again. */}
+      <PrivacyNotice />
     </QueryClientProvider>
   );
 }
