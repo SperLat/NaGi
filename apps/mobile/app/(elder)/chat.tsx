@@ -298,7 +298,7 @@ export default function ElderChat() {
   // Elder is selected but still loading from the backend.
   if (!elder) {
     return (
-      <SafeAreaView className="flex-1 bg-white items-center justify-center">
+      <SafeAreaView className="flex-1 bg-surface-elder-raised items-center justify-center">
         <ActivityIndicator color="#34503E" />
       </SafeAreaView>
     );
@@ -366,7 +366,7 @@ export default function ElderChat() {
                 className={`rounded-2xl px-4 py-3 ${
                   item.role === 'user'
                     ? 'bg-accent-600'
-                    : 'bg-white border border-gray-100'
+                    : 'bg-surface-elder-raised border border-gray-100'
                 }`}
               >
                 <Text
@@ -420,7 +420,7 @@ export default function ElderChat() {
         )}
 
         {/* Input area */}
-        <View className="px-4 pb-3 pt-2 bg-white border-t border-gray-100 gap-3">
+        <View className="px-4 pb-3 pt-2 bg-surface-elder-raised border-t border-gray-100 gap-3">
 
           {/* Mic button */}
           {voiceMode && (

@@ -108,7 +108,7 @@ export default function ElderNotes() {
 
       {/* Compose box at top — fixed so it stays reachable while the list scrolls */}
       <View className="px-4 pb-3">
-        <View className="bg-white rounded-2xl p-3 border border-gray-100">
+        <View className="bg-surface-intermediary-raised rounded-2xl p-3 border border-gray-100">
           <TextInput
             className="text-gray-900 text-sm min-h-[60px]"
             multiline
@@ -149,7 +149,7 @@ export default function ElderNotes() {
           contentContainerStyle={{ padding: 16, paddingTop: 0 }}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           ListEmptyComponent={
-            <View className="bg-white rounded-2xl p-6 border border-gray-100 items-center mt-2">
+            <View className="bg-surface-intermediary-raised rounded-2xl p-6 border border-gray-100 items-center mt-2">
               <Text className="text-3xl mb-2">📓</Text>
               <Text className="text-gray-500 text-sm text-center">
                 No notes yet.{'\n'}Be the first to share what's happening.
@@ -159,7 +159,7 @@ export default function ElderNotes() {
           renderItem={({ item }) => {
             const isYou = item.author_id === userId;
             return (
-              <View className="bg-white rounded-2xl px-4 py-3 border border-gray-100 mb-2">
+              <View className="bg-surface-intermediary-raised rounded-2xl px-4 py-3 border border-gray-100 mb-2">
                 <View className="flex-row items-baseline justify-between mb-1">
                   <Text className="text-xs font-semibold text-gray-700">
                     {shortAuthor(item.author_email, isYou)}

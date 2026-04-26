@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function NotFound() {
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-surface-intermediary-raised">
       <View className="flex-1 items-center justify-center px-6">
         <Text className="text-6xl mb-4">凪</Text>
         <Text className="text-xl font-semibold text-gray-800 mb-2">

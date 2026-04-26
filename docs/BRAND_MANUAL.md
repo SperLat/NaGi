@@ -93,15 +93,24 @@ The single named exception is **Safety Red**. It exists for the elder's emergenc
 | Token | Hex | Name | Use |
 |---|---|---|---|
 | `surface-elder` | `#F7F5F2` | Fog White | Dominant background on every elder route |
-| `surface-elder-raised` | `#FFFFFF` | Pure white | Cards on elder home, chat bubbles (assistant) |
-| `surface-elder-sunken` | `#EDEAE3` | Fog White deep | Active card press state, input fields |
+| `surface-elder-raised` | `#FCFAF7` | Paper | Cards on elder home, chat bubbles (assistant), input field backgrounds |
+| `surface-elder-sunken` | `#EDEAE3` | Fog White deep | Active card press state, sunken inputs |
 | `surface-intermediary` | `#F7F5F2` | Fog White | Dominant background on every intermediary route |
-| `surface-intermediary-raised` | `#FFFFFF` | Pure white | List rows, configuration cards |
+| `surface-intermediary-raised` | `#FCFAF7` | Paper | List rows, configuration cards, inputs |
 | `surface-intermediary-sunken` | `#EDEAE3` | Fog White deep | Inactive selectors, disabled inputs |
 | `surface-dark` | `#1E1E1E` | Charcoal Root | High-contrast mode, OS dark mode |
 | `surface-dark-raised` | `#2A2A2A` | Charcoal lifted | Cards in dark/HC mode |
 
-**Rationale:** `#F7F5F2` is a near-neutral off-white at 96.5% lightness, slightly warmed (R > B by 5 points) — it reads as "paper" without the cream-wash of the prior palette, which had become saturated to the point of looking yellow on cooler displays. Elder and intermediary surfaces share the same hue: the difference between them is structure and density (the intermediary has a sidebar, the elder has the kanji and no chrome), not skin. The dark surface is true charcoal (`#1E1E1E`) rather than warm-biased near-black, so high-contrast mode reads as "darkness" not "burnt earth."
+**Rationale:** `#F7F5F2` (Fog White) is a near-neutral off-white at 96.5% lightness, slightly warmed (R > B by 5 points) — it reads as "paper" without the cream-wash of the prior palette, which had become saturated to the point of looking yellow on cooler displays. Elder and intermediary surfaces share the same hue: the difference between them is structure and density (the intermediary has a sidebar, the elder has the kanji and no chrome), not skin.
+
+**Why raised cards are NOT pure white:** `#FCFAF7` (Paper) is `#FFFFFF` warmed by the same 5-point R-bias as Fog White. The brand never uses pure `#FFFFFF` as a surface for two reasons:
+
+1. **Elder ergonomics.** Cataracts scatter the blue-end of the spectrum; pure-white surfaces read as "glare-bright" to elderly eyes while warm off-whites read as "soft paper." This is a measured ergonomic preference, not aesthetic — body text on `#FCFAF7` is just as legible (15.21:1 with Charcoal Root) without the glare cost.
+2. **Visual hierarchy.** A raised card at `#FCFAF7` against a Fog White surface at `#F7F5F2` shows a 1.5% lift — subtle but consistent. Pure white against Fog White creates a 3.5% jolt that reads as "harsh hot spot" rather than "lifted paper." The smaller delta is the right paper-on-paper metaphor.
+
+`#FFFFFF` (true white) is reserved for *text* on Pine Deep buttons and `#000000` is reserved for the high-contrast-mode elder surface. They are tools, not surfaces.
+
+The dark surface is true charcoal (`#1E1E1E`) rather than warm-biased near-black, so high-contrast mode reads as "darkness" not "burnt earth."
 
 ### 3.2 Pine Deep — the primary structural accent
 

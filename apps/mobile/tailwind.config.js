@@ -14,13 +14,13 @@ module.exports = {
         // intermediary share the surface family — the difference between
         // surfaces is structure and density, not hue.
         surface: {
-          elder:                 '#F7F5F2',
-          'elder-raised':        '#FFFFFF',
-          'elder-sunken':        '#EDEAE3',
+          elder:                 '#F7F5F2',  // Fog White — main background
+          'elder-raised':        '#FCFAF7',  // Paper — raised cards, chat bubbles, inputs
+          'elder-sunken':        '#EDEAE3',  // Fog White deep — pressed/sunken
           intermediary:          '#F7F5F2',
-          'intermediary-raised': '#FFFFFF',
+          'intermediary-raised': '#FCFAF7',
           'intermediary-sunken': '#EDEAE3',
-          dark:                  '#1E1E1E', // Charcoal Root
+          dark:                  '#1E1E1E',  // Charcoal Root
           'dark-raised':         '#2A2A2A',
         },
 

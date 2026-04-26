@@ -227,7 +227,7 @@ export default function IntermediaryDashboard() {
           <Text className="text-gray-500 text-sm mt-0.5">People you support</Text>
         </View>
         <Pressable
-          className="w-10 h-10 bg-white rounded-full border border-gray-200 items-center justify-center"
+          className="w-10 h-10 bg-surface-intermediary-raised rounded-full border border-gray-200 items-center justify-center"
           style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
           onPress={() => router.push('/(intermediary)/elders/new')}
         >
@@ -252,7 +252,7 @@ export default function IntermediaryDashboard() {
                 </View>
                 <Pressable
                   onPress={() => handleAcknowledge(req)}
-                  className="bg-white rounded-xl px-4 py-2"
+                  className="bg-surface-intermediary-raised rounded-xl px-4 py-2"
                   style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
                 >
                   <Text className="text-safety-critical font-semibold text-sm">Handled</Text>
@@ -274,7 +274,7 @@ export default function IntermediaryDashboard() {
             return (
               <View
                 key={inv.elder_id}
-                className="bg-white rounded-2xl p-4 border border-gray-100"
+                className="bg-surface-intermediary-raised rounded-2xl p-4 border border-gray-100"
               >
                 <Text className="text-gray-900 leading-snug">
                   <Text className="font-semibold">{inv.inviter_email}</Text>
@@ -324,7 +324,7 @@ export default function IntermediaryDashboard() {
             <ActivityIndicator color="#34503E" />
           </View>
         ) : elders.length === 0 ? (
-          <View className="bg-white rounded-2xl p-6 border border-gray-100 items-center">
+          <View className="bg-surface-intermediary-raised rounded-2xl p-6 border border-gray-100 items-center">
             <Text className="text-4xl mb-3">👴</Text>
             <Text className="text-gray-500 text-sm text-center leading-relaxed">
               No elders added yet.{'\n'}Tap + to add someone you support.
@@ -340,7 +340,7 @@ export default function IntermediaryDashboard() {
               <Pressable
                 key={elder.id}
                 onPress={() => router.push(`/(intermediary)/elders/${elder.id}`)}
-                className="bg-white rounded-2xl p-5 border border-gray-100 mb-3"
+                className="bg-surface-intermediary-raised rounded-2xl p-5 border border-gray-100 mb-3"
                 style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
               >
                 <View className="flex-row items-center justify-between">
@@ -414,7 +414,7 @@ export default function IntermediaryDashboard() {
             <Text className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2 ml-1">
               Handled today
             </Text>
-            <View className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+            <View className="bg-surface-intermediary-raised rounded-2xl border border-gray-100 overflow-hidden">
               {recent
                 .filter(r => r.status === 'acknowledged')
                 .slice(0, 5)

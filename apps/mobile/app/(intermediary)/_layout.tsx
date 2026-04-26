@@ -99,7 +99,7 @@ function Sidebar() {
   return (
     <View
       style={{ width: 280 }}
-      className="bg-white border-r border-gray-200 px-4 py-6"
+      className="bg-surface-intermediary-raised border-r border-gray-200 px-4 py-6"
     >
       <Pressable onPress={() => router.push('/(intermediary)/')}>
         <Text className="text-xl font-bold text-accent-700 mb-6 px-2">Nagi</Text>

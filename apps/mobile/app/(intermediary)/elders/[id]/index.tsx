@@ -100,7 +100,7 @@ export default function ElderOverview() {
 
   if (!elder) {
     return (
-      <SafeAreaView className="flex-1 bg-white items-center justify-center">
+      <SafeAreaView className="flex-1 bg-surface-intermediary-raised items-center justify-center">
         <ActivityIndicator color="#34503E" />
       </SafeAreaView>
     );
@@ -137,7 +137,7 @@ export default function ElderOverview() {
 
         <View className="gap-3 mb-8">
           <Pressable
-            className="bg-white rounded-2xl p-4 border border-gray-100 flex-row items-center"
+            className="bg-surface-intermediary-raised rounded-2xl p-4 border border-gray-100 flex-row items-center"
             style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
             onPress={() => router.push(`/(intermediary)/elders/${id}/configure`)}
           >
@@ -150,7 +150,7 @@ export default function ElderOverview() {
           </Pressable>
 
           <Pressable
-            className="bg-white rounded-2xl p-4 border border-gray-100 flex-row items-center"
+            className="bg-surface-intermediary-raised rounded-2xl p-4 border border-gray-100 flex-row items-center"
             style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
             onPress={() => router.push(`/(intermediary)/elders/${id}/activity`)}
           >
@@ -163,7 +163,7 @@ export default function ElderOverview() {
           </Pressable>
 
           <Pressable
-            className="bg-white rounded-2xl p-4 border border-gray-100 flex-row items-center"
+            className="bg-surface-intermediary-raised rounded-2xl p-4 border border-gray-100 flex-row items-center"
             style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
             onPress={() => router.push(`/(intermediary)/elders/${id}/conversations`)}
           >
@@ -176,7 +176,7 @@ export default function ElderOverview() {
           </Pressable>
 
           <Pressable
-            className="bg-white rounded-2xl p-4 border border-gray-100 flex-row items-center"
+            className="bg-surface-intermediary-raised rounded-2xl p-4 border border-gray-100 flex-row items-center"
             style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
             onPress={() => router.push(`/(intermediary)/elders/${id}/notes`)}
           >
@@ -189,7 +189,7 @@ export default function ElderOverview() {
           </Pressable>
 
           <Pressable
-            className="bg-white rounded-2xl p-4 border border-gray-100 flex-row items-center"
+            className="bg-surface-intermediary-raised rounded-2xl p-4 border border-gray-100 flex-row items-center"
             style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
             onPress={handleGenerateDigest}
           >
@@ -215,14 +215,14 @@ export default function ElderOverview() {
 
         <View className="gap-2 mb-3">
           {people.length === 0 ? (
-            <View className="bg-white rounded-2xl p-4 border border-gray-100">
+            <View className="bg-surface-intermediary-raised rounded-2xl p-4 border border-gray-100">
               <Text className="text-gray-500 text-sm">No one else yet.</Text>
             </View>
           ) : (
             people.map(p => (
               <View
                 key={p.user_id}
-                className="bg-white rounded-2xl p-4 border border-gray-100"
+                className="bg-surface-intermediary-raised rounded-2xl p-4 border border-gray-100"
               >
                 <View className="flex-row items-center gap-2">
                   <Text className="font-semibold text-gray-900 flex-shrink">
@@ -243,7 +243,7 @@ export default function ElderOverview() {
         </View>
 
         {showInvite ? (
-          <View className="bg-white rounded-2xl p-4 border border-gray-100 gap-3">
+          <View className="bg-surface-intermediary-raised rounded-2xl p-4 border border-gray-100 gap-3">
             <View>
               <Text className="text-xs font-medium text-gray-500 mb-1.5 ml-1">
                 Their email
@@ -309,7 +309,7 @@ export default function ElderOverview() {
               <Text className="text-gray-600 text-sm mb-2 ml-1">{inviteNote.text}</Text>
             ) : null}
             <Pressable
-              className="bg-white rounded-2xl p-4 border border-gray-100 flex-row items-center"
+              className="bg-surface-intermediary-raised rounded-2xl p-4 border border-gray-100 flex-row items-center"
               style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
               onPress={() => {
                 setInviteNote(null);
@@ -372,7 +372,7 @@ function DigestModal({ visible, busy, digest, error, elderName, onClose, onRegen
   return (
     <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
       <View className="flex-1 bg-black/40 items-center justify-center p-4">
-        <View className="bg-white rounded-2xl w-full max-w-2xl max-h-[85%] flex flex-col">
+        <View className="bg-surface-intermediary-raised rounded-2xl w-full max-w-2xl max-h-[85%] flex flex-col">
           <View className="flex-row items-center justify-between px-5 py-4 border-b border-gray-100">
             <Text className="text-lg font-bold text-gray-900">This week with {elderName}</Text>
             <Pressable onPress={onClose} className="px-2">

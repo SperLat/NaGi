@@ -126,7 +126,7 @@ export default function ElderConfigure() {
 
   if (!elder) {
     return (
-      <SafeAreaView className="flex-1 bg-white items-center justify-center">
+      <SafeAreaView className="flex-1 bg-surface-intermediary-raised items-center justify-center">
         <ActivityIndicator color="#34503E" />
       </SafeAreaView>
     );
@@ -147,7 +147,7 @@ export default function ElderConfigure() {
           <View>
             <Text className="text-xs font-medium text-gray-500 mb-1.5 ml-1">Display name</Text>
             <TextInput
-              className="border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 bg-white"
+              className="border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 bg-surface-intermediary-raised"
               value={name}
               onChangeText={setName}
             />
@@ -162,7 +162,7 @@ export default function ElderConfigure() {
                   key={l.code}
                   onPress={() => setLang(l.code)}
                   className={`flex-1 py-3 rounded-xl items-center border ${
-                    lang === l.code ? 'bg-accent-600 border-accent-600' : 'bg-white border-gray-200'
+                    lang === l.code ? 'bg-accent-600 border-accent-600' : 'bg-surface-intermediary-raised border-gray-200'
                   }`}
                 >
                   <Text className={`text-sm font-medium ${lang === l.code ? 'text-white' : 'text-gray-700'}`}>
@@ -182,7 +182,7 @@ export default function ElderConfigure() {
                   key={s.value}
                   onPress={() => setTextSize(s.value)}
                   className={`flex-1 py-3 rounded-xl items-center border ${
-                    textSize === s.value ? 'bg-accent-600 border-accent-600' : 'bg-white border-gray-200'
+                    textSize === s.value ? 'bg-accent-600 border-accent-600' : 'bg-surface-intermediary-raised border-gray-200'
                   }`}
                 >
                   <Text className={`text-sm font-medium ${textSize === s.value ? 'text-white' : 'text-gray-700'}`}>
@@ -194,7 +194,7 @@ export default function ElderConfigure() {
           </View>
 
           {/* Toggles */}
-          <View className="bg-white rounded-2xl border border-gray-100 divide-y divide-gray-100">
+          <View className="bg-surface-intermediary-raised rounded-2xl border border-gray-100 divide-y divide-gray-100">
             <View className="flex-row items-center justify-between px-4 py-4">
               <View className="flex-1 mr-4">
                 <Text className="text-gray-900 font-medium">High contrast</Text>
@@ -226,7 +226,7 @@ export default function ElderConfigure() {
               Shown when the AI is unavailable
             </Text>
             <TextInput
-              className="border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 bg-white"
+              className="border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 bg-surface-intermediary-raised"
               multiline
               numberOfLines={3}
               value={offlineMsg}
@@ -247,7 +247,7 @@ export default function ElderConfigure() {
               <View>
                 <Text className="text-xs font-medium text-gray-500 mb-1.5 ml-1">What they like to be called</Text>
                 <TextInput
-                  className="border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 bg-white"
+                  className="border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 bg-surface-intermediary-raised"
                   value={preferredName}
                   onChangeText={setPreferredName}
                   placeholder={`e.g. Mami, Doña ${elder.display_name.split(' ')[0]}`}
@@ -259,7 +259,7 @@ export default function ElderConfigure() {
                 <Text className="text-xs font-medium text-gray-500 mb-1.5 ml-1">Languages they speak</Text>
                 <Text className="text-gray-400 text-xs mb-2 ml-1">Comma-separated. The first one is preferred.</Text>
                 <TextInput
-                  className="border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 bg-white"
+                  className="border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 bg-surface-intermediary-raised"
                   value={spokenLanguages}
                   onChangeText={setSpokenLanguages}
                   placeholder="e.g. Spanish, some English"
@@ -271,7 +271,7 @@ export default function ElderConfigure() {
                 <Text className="text-xs font-medium text-gray-500 mb-1.5 ml-1">Topics they enjoy</Text>
                 <Text className="text-gray-400 text-xs mb-2 ml-1">Things to bring up when conversation lulls.</Text>
                 <TextInput
-                  className="border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 bg-white"
+                  className="border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 bg-surface-intermediary-raised"
                   multiline
                   numberOfLines={2}
                   value={topicsEnjoy}
@@ -285,7 +285,7 @@ export default function ElderConfigure() {
                 <Text className="text-xs font-medium text-gray-500 mb-1.5 ml-1">Topics to handle gently</Text>
                 <Text className="text-gray-400 text-xs mb-2 ml-1">Don't raise these first.</Text>
                 <TextInput
-                  className="border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 bg-white"
+                  className="border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 bg-surface-intermediary-raised"
                   multiline
                   numberOfLines={2}
                   value={topicsAvoid}
@@ -305,7 +305,7 @@ export default function ElderConfigure() {
                   You'll see "a private moment" with a timestamp.
                 </Text>
                 <TextInput
-                  className="border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 bg-white"
+                  className="border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 bg-surface-intermediary-raised"
                   multiline
                   numberOfLines={2}
                   value={topicsKeepPrivate}
@@ -318,7 +318,7 @@ export default function ElderConfigure() {
               <View>
                 <Text className="text-xs font-medium text-gray-500 mb-1.5 ml-1">Communication notes</Text>
                 <TextInput
-                  className="border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 bg-white"
+                  className="border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 bg-surface-intermediary-raised"
                   multiline
                   numberOfLines={3}
                   value={communicationNotes}
@@ -331,7 +331,7 @@ export default function ElderConfigure() {
               <View>
                 <Text className="text-xs font-medium text-gray-500 mb-1.5 ml-1">Accessibility notes</Text>
                 <TextInput
-                  className="border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 bg-white"
+                  className="border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 bg-surface-intermediary-raised"
                   multiline
                   numberOfLines={3}
                   value={accessibilityNotes}
@@ -341,19 +341,19 @@ export default function ElderConfigure() {
                 />
               </View>
 
-              <View className="bg-white rounded-2xl border border-gray-100 p-4">
+              <View className="bg-surface-intermediary-raised rounded-2xl border border-gray-100 p-4">
                 <Text className="text-gray-900 font-medium mb-1">Trusted person</Text>
                 <Text className="text-gray-500 text-xs mb-3">Who Nagi suggests calling for things outside its scope.</Text>
                 <View className="gap-2">
                   <TextInput
-                    className="border border-gray-200 rounded-xl px-4 py-3 text-gray-900 bg-white"
+                    className="border border-gray-200 rounded-xl px-4 py-3 text-gray-900 bg-surface-intermediary-raised"
                     value={emergencyName}
                     onChangeText={setEmergencyName}
                     placeholder="Name (e.g. Carlos)"
                     placeholderTextColor="#9ca3af"
                   />
                   <TextInput
-                    className="border border-gray-200 rounded-xl px-4 py-3 text-gray-900 bg-white"
+                    className="border border-gray-200 rounded-xl px-4 py-3 text-gray-900 bg-surface-intermediary-raised"
                     value={emergencyPhone}
                     onChangeText={setEmergencyPhone}
                     placeholder="Phone"
@@ -361,7 +361,7 @@ export default function ElderConfigure() {
                     keyboardType="phone-pad"
                   />
                   <TextInput
-                    className="border border-gray-200 rounded-xl px-4 py-3 text-gray-900 bg-white"
+                    className="border border-gray-200 rounded-xl px-4 py-3 text-gray-900 bg-surface-intermediary-raised"
                     value={emergencyRelation}
                     onChangeText={setEmergencyRelation}
                     placeholder="Relation (e.g. son, daughter)"

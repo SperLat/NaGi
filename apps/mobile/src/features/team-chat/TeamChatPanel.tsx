@@ -123,7 +123,7 @@ export function TeamChatPanel({ elderId, organizationId, userId }: TeamChatPanel
   }, [body, elderId, organizationId, refresh, userId]);
 
   return (
-    <View className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+    <View className="bg-surface-intermediary-raised rounded-2xl border border-gray-100 overflow-hidden">
       <View className="px-4 py-3 border-b border-gray-100 flex-row items-center">
         <Text className="text-2xl mr-2">👥</Text>
         <View className="flex-1">

@@ -97,7 +97,7 @@ export default function ElderConversations() {
               key={r.key}
               onPress={() => setRange(r.key)}
               className={`px-3 py-1.5 rounded-full border ${
-                active ? 'bg-accent-600 border-accent-600' : 'bg-white border-gray-200'
+                active ? 'bg-accent-600 border-accent-600' : 'bg-surface-intermediary-raised border-gray-200'
               }`}
             >
               <Text className={`text-xs font-medium ${active ? 'text-white' : 'text-gray-700'}`}>
@@ -121,7 +121,7 @@ export default function ElderConversations() {
           onEndReached={onLoadMore}
           onEndReachedThreshold={0.4}
           ListEmptyComponent={
-            <View className="bg-white rounded-2xl p-6 border border-gray-100 items-center mt-2">
+            <View className="bg-surface-intermediary-raised rounded-2xl p-6 border border-gray-100 items-center mt-2">
               <Text className="text-3xl mb-2">💬</Text>
               <Text className="text-gray-500 text-sm text-center">
                 No conversations yet in this range.
@@ -183,7 +183,7 @@ export default function ElderConversations() {
                   </View>
                 ) : null}
                 {item.assistant_message ? (
-                  <View className="bg-white rounded-2xl rounded-tl-sm px-4 py-3 mr-8 border border-gray-100">
+                  <View className="bg-surface-intermediary-raised rounded-2xl rounded-tl-sm px-4 py-3 mr-8 border border-gray-100">
                     <Text className="text-gray-800 text-sm leading-snug" selectable>
                       {assistantText}
                     </Text>

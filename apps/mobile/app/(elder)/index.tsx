@@ -46,7 +46,7 @@ export default function ElderHome() {
 
   if (!elder) {
     return (
-      <SafeAreaView className="flex-1 bg-white items-center justify-center">
+      <SafeAreaView className="flex-1 bg-surface-elder-raised items-center justify-center">
         <ActivityIndicator color="#34503E" />
       </SafeAreaView>
     );
@@ -54,7 +54,7 @@ export default function ElderHome() {
 
   const tc = TEXT_CLASS[textSize];
   const cardKeys = (elder.ui_config.home_cards ?? Object.keys(CARD_EMOJIS)) as CardKey[];
-  const bg = highContrast ? 'bg-black' : 'bg-white';
+  const bg = highContrast ? 'bg-black' : 'bg-surface-elder-raised';
   const textColor = highContrast ? 'text-white' : 'text-gray-900';
   const cardBg = highContrast ? 'bg-gray-900 border-gray-600' : 'bg-accent-50 border-accent-100';
 
@@ -76,7 +76,7 @@ export default function ElderHome() {
   return (
     <SafeAreaView
       className={`flex-1 ${bg}`}
-      style={{ backgroundColor: highContrast ? '#000000' : '#FFFFFF' }}
+      style={{ backgroundColor: highContrast ? '#000000' : '#FCFAF7' }}
     >
       <View className="flex-1 px-6 pt-8 pb-4">
         {/* Exit to intermediary dashboard — only visible when pushed from that flow */}

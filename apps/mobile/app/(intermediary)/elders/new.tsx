@@ -38,7 +38,7 @@ export default function NewElder() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-surface-intermediary-raised">
       <View className="flex-1 px-6 pt-6">
         <Pressable className="mb-6" onPress={() => safeBack('/(intermediary)/')}>
           <Text className="text-accent-600 font-medium">← Back</Text>
@@ -72,7 +72,7 @@ export default function NewElder() {
                   className={`flex-1 py-3 rounded-xl items-center border ${
                     lang === l.code
                       ? 'bg-accent-600 border-accent-600'
-                      : 'bg-white border-gray-200'
+                      : 'bg-surface-intermediary-raised border-gray-200'
                   }`}
                 >
                   <Text

@@ -70,7 +70,7 @@ export default function ElderActivity() {
           contentContainerStyle={{ padding: 16, paddingTop: 0 }}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           ListEmptyComponent={
-            <View className="bg-white rounded-2xl p-6 border border-gray-100 items-center mt-2">
+            <View className="bg-surface-intermediary-raised rounded-2xl p-6 border border-gray-100 items-center mt-2">
               <Text className="text-3xl mb-2">📭</Text>
               <Text className="text-gray-500 text-sm text-center">
                 No activity yet.{'\n'}Pull to refresh after they use the app.
@@ -78,7 +78,7 @@ export default function ElderActivity() {
             </View>
           }
           renderItem={({ item }) => (
-            <View className="bg-white rounded-2xl px-4 py-3 border border-gray-100 mb-2 flex-row items-start">
+            <View className="bg-surface-intermediary-raised rounded-2xl px-4 py-3 border border-gray-100 mb-2 flex-row items-start">
               <Text className="text-2xl mr-3 mt-0.5">{KIND_ICON[item.kind] ?? '📋'}</Text>
               <View className="flex-1">
                 <Text className="text-gray-900 text-sm leading-snug">{summaryText(item)}</Text>
