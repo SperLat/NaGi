@@ -128,7 +128,7 @@ export function Walkthrough({ visible, onClose, elderIds }: Props) {
       >
         <View
           style={{
-            backgroundColor: '#FCFAF7',
+            backgroundColor: '#FAF5EC',
             borderRadius: 24,
             paddingTop: 28,
             paddingBottom: 16,
@@ -219,7 +219,7 @@ export function Walkthrough({ visible, onClose, elderIds }: Props) {
                     opacity: pressed ? 0.85 : 1,
                   })}
                 >
-                  <Text style={{ color: '#FCFAF7', fontWeight: '600', fontSize: 15 }}>
+                  <Text style={{ color: '#FAF5EC', fontWeight: '600', fontSize: 15 }}>
                     Next →
                   </Text>
                 </Pressable>
@@ -235,7 +235,7 @@ export function Walkthrough({ visible, onClose, elderIds }: Props) {
                     opacity: pressed ? 0.85 : 1,
                   })}
                 >
-                  <Text style={{ color: '#FCFAF7', fontWeight: '600', fontSize: 15 }}>
+                  <Text style={{ color: '#FAF5EC', fontWeight: '600', fontSize: 15 }}>
                     Start exploring
                   </Text>
                 </Pressable>
@@ -511,9 +511,9 @@ function SlideHandoff({
           })}
         >
           {busy ? (
-            <ActivityIndicator color="#FCFAF7" />
+            <ActivityIndicator color="#FAF5EC" />
           ) : (
-            <Text style={{ color: '#FCFAF7', fontWeight: '600', fontSize: 16 }}>
+            <Text style={{ color: '#FAF5EC', fontWeight: '600', fontSize: 16 }}>
               Hand to Eleanor →
             </Text>
           )}

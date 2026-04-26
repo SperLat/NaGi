@@ -15,10 +15,10 @@ module.exports = {
         // surfaces is structure and density, not hue.
         surface: {
           elder:                 '#F7F5F2',  // Fog White — main background
-          'elder-raised':        '#FCFAF7',  // Paper — raised cards, chat bubbles, inputs
+          'elder-raised':        '#FAF5EC',  // Paper — raised cards, chat bubbles, inputs
           'elder-sunken':        '#EDEAE3',  // Fog White deep — pressed/sunken
           intermediary:          '#F7F5F2',
-          'intermediary-raised': '#FCFAF7',
+          'intermediary-raised': '#FAF5EC',
           'intermediary-sunken': '#EDEAE3',
           dark:                  '#1E1E1E',  // Charcoal Root — HC mode background
           'dark-raised':         '#2A2A2A',  // Charcoal lifted — cards on dark
@@ -31,7 +31,7 @@ module.exports = {
         // labels on Pine Deep buttons and any context that would
         // otherwise reach for pure #FFFFFF. Pure white never appears in
         // the brand — when the eye wants "whitest", this is whitest.
-        paper: '#FCFAF7',
+        paper: '#FAF5EC',
 
         // ── Charcoal — the palette's "deepest" tool ───────────────────
         // For backgrounds and ink that would otherwise reach for

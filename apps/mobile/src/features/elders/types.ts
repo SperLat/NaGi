@@ -41,6 +41,31 @@ export interface ElderProfile {
   communication_notes?: string;
   accessibility_notes?: string;
   emergency_contact?: { name: string; phone: string; relation: string };
+
+  // ── Per-elder voice/identity guardrails ───────────────────────────
+  // Each field below is rendered into the AI's per-elder system block
+  // (supabase/functions/_shared/anthropic.ts buildElderSystemBlock).
+  // All optional — absent fields produce no system-prompt lines.
+
+  /** "Diabetic, low-sodium, lactose-intolerant" — Nagi avoids suggesting violations. */
+  dietary_notes?: string;
+  /** Conditions Nagi should be aware of when conversation touches health. NOT for advice — for context. */
+  medical_conditions?: string[];
+  /** Medication labels (text only — not structured drug data) for context, never advice. */
+  medications?: string[];
+  /** Free-form: "Mild dementia, repeats stories, long-term memory intact." */
+  cognitive_profile?: string;
+  /** "Step-by-step", "overview-first, then details", "visual cues if possible". */
+  learning_style?: string;
+  /** "Grieving but functional", "Generally cheerful", "Anxious about health". Adjusts opening tone. */
+  mood_baseline?: string;
+  /**
+   * Hard "always/never" rules from the caregiver. Rendered as
+   * non-negotiable rules in the system prompt. Examples:
+   *   - "Never ask 'don't you remember?' — she finds it humiliating."
+   *   - "Don't bring up his late wife unless he mentions her first."
+   */
+  voice_guardrails?: string[];
 }
 
 export interface ElderUiConfig {

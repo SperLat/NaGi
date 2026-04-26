@@ -54,6 +54,15 @@ export default function ElderConfigure() {
   const [emergencyPhone, setEmergencyPhone] = useState('');
   const [emergencyRelation, setEmergencyRelation] = useState('');
 
+  // Voice / identity guardrails
+  const [dietaryNotes, setDietaryNotes] = useState('');
+  const [medicalConditions, setMedicalConditions] = useState('');
+  const [medications, setMedications] = useState('');
+  const [cognitiveProfile, setCognitiveProfile] = useState('');
+  const [learningStyle, setLearningStyle] = useState('');
+  const [moodBaseline, setMoodBaseline] = useState('');
+  const [voiceGuardrails, setVoiceGuardrails] = useState('');
+
   useEffect(() => {
     getElder(id).then(({ data }) => {
       if (!data) return;
@@ -76,6 +85,15 @@ export default function ElderConfigure() {
       setEmergencyName(p.emergency_contact?.name ?? '');
       setEmergencyPhone(p.emergency_contact?.phone ?? '');
       setEmergencyRelation(p.emergency_contact?.relation ?? '');
+      setDietaryNotes(p.dietary_notes ?? '');
+      setMedicalConditions((p.medical_conditions ?? []).join(', '));
+      setMedications((p.medications ?? []).join(', '));
+      setCognitiveProfile(p.cognitive_profile ?? '');
+      setLearningStyle(p.learning_style ?? '');
+      setMoodBaseline(p.mood_baseline ?? '');
+      // Voice guardrails are line-separated (one rule per line) — caregivers
+      // write them like a list, not comma-separated like topic strings.
+      setVoiceGuardrails((p.voice_guardrails ?? []).join('\n'));
     });
   }, [id]);
 
@@ -95,6 +113,16 @@ export default function ElderConfigure() {
       topics_to_keep_private: csvToArray(topicsKeepPrivate),
       communication_notes: communicationNotes.trim() || undefined,
       accessibility_notes: accessibilityNotes.trim() || undefined,
+      dietary_notes: dietaryNotes.trim() || undefined,
+      medical_conditions: csvToArray(medicalConditions),
+      medications: csvToArray(medications),
+      cognitive_profile: cognitiveProfile.trim() || undefined,
+      learning_style: learningStyle.trim() || undefined,
+      mood_baseline: moodBaseline.trim() || undefined,
+      voice_guardrails: voiceGuardrails
+        .split('\n')
+        .map(s => s.trim())
+        .filter(Boolean),
       emergency_contact: emergencyName.trim()
         ? {
             name: emergencyName.trim(),
@@ -341,7 +369,113 @@ export default function ElderConfigure() {
                 />
               </View>
 
-              <View className="bg-surface-intermediary-raised rounded-2xl border border-gray-100 p-4">
+              {/* ── How Nagi should handle them ────────────────────── */}
+              <View className="mt-2 pt-6 border-t border-gray-200">
+                <Text className="text-xl font-bold text-gray-900 mb-1">How Nagi should handle them</Text>
+                <Text className="text-gray-500 text-sm mb-5">
+                  These fields shape Nagi's tone and constraints. Information for context, not for medical advice.
+                </Text>
+
+                <View className="gap-5">
+                  <View>
+                    <Text className="text-xs font-medium text-gray-500 mb-1.5 ml-1">Dietary notes</Text>
+                    <Text className="text-gray-400 text-xs mb-2 ml-1">
+                      Avoidance of certain foods. Nagi won't suggest things that conflict.
+                    </Text>
+                    <TextInput
+                      className="border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 bg-surface-intermediary-raised"
+                      value={dietaryNotes}
+                      onChangeText={setDietaryNotes}
+                      placeholder="e.g. Diabetic, low-sodium"
+                      placeholderTextColor="#9ca3af"
+                    />
+                  </View>
+
+                  <View>
+                    <Text className="text-xs font-medium text-gray-500 mb-1.5 ml-1">Medical conditions</Text>
+                    <Text className="text-gray-400 text-xs mb-2 ml-1">
+                      Comma-separated. For Nagi's awareness — never for advice.
+                    </Text>
+                    <TextInput
+                      className="border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 bg-surface-intermediary-raised"
+                      value={medicalConditions}
+                      onChangeText={setMedicalConditions}
+                      placeholder="e.g. Mild COPD, hypertension"
+                      placeholderTextColor="#9ca3af"
+                    />
+                  </View>
+
+                  <View>
+                    <Text className="text-xs font-medium text-gray-500 mb-1.5 ml-1">Medications</Text>
+                    <Text className="text-gray-400 text-xs mb-2 ml-1">
+                      Names only — Nagi never advises on dose or interactions.
+                    </Text>
+                    <TextInput
+                      className="border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 bg-surface-intermediary-raised"
+                      value={medications}
+                      onChangeText={setMedications}
+                      placeholder="e.g. Metformin, Lisinopril"
+                      placeholderTextColor="#9ca3af"
+                    />
+                  </View>
+
+                  <View>
+                    <Text className="text-xs font-medium text-gray-500 mb-1.5 ml-1">Cognitive profile</Text>
+                    <TextInput
+                      className="border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 bg-surface-intermediary-raised"
+                      multiline
+                      numberOfLines={2}
+                      value={cognitiveProfile}
+                      onChangeText={setCognitiveProfile}
+                      placeholder="e.g. Mild dementia, repeats stories. Long-term memory intact."
+                      placeholderTextColor="#9ca3af"
+                    />
+                  </View>
+
+                  <View>
+                    <Text className="text-xs font-medium text-gray-500 mb-1.5 ml-1">Learning style</Text>
+                    <TextInput
+                      className="border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 bg-surface-intermediary-raised"
+                      value={learningStyle}
+                      onChangeText={setLearningStyle}
+                      placeholder="e.g. Step-by-step. Visual cues if possible."
+                      placeholderTextColor="#9ca3af"
+                    />
+                  </View>
+
+                  <View>
+                    <Text className="text-xs font-medium text-gray-500 mb-1.5 ml-1">Mood baseline</Text>
+                    <TextInput
+                      className="border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 bg-surface-intermediary-raised"
+                      value={moodBaseline}
+                      onChangeText={setMoodBaseline}
+                      placeholder="e.g. Grieving but functional. Generally cheerful."
+                      placeholderTextColor="#9ca3af"
+                    />
+                  </View>
+
+                  <View>
+                    <Text className="text-xs font-medium text-gray-500 mb-1.5 ml-1">
+                      Caregiver guardrails
+                    </Text>
+                    <Text className="text-gray-400 text-xs mb-2 ml-1">
+                      One rule per line. Nagi treats these as non-negotiable.
+                    </Text>
+                    <TextInput
+                      className="border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 bg-surface-intermediary-raised"
+                      multiline
+                      numberOfLines={4}
+                      value={voiceGuardrails}
+                      onChangeText={setVoiceGuardrails}
+                      placeholder={"e.g. Never ask 'don't you remember?' — she finds it humiliating.\nDon't bring up grief unless he mentions it first."}
+                      placeholderTextColor="#9ca3af"
+                      textAlignVertical="top"
+                    />
+                  </View>
+                </View>
+              </View>
+
+              <View className="bg-surface-intermediary-raised rounded-2xl border border-gray-100 p-4 mt-4">
                 <Text className="text-gray-900 font-medium mb-1">Trusted person</Text>
                 <Text className="text-gray-500 text-xs mb-3">Who Nagi suggests calling for things outside its scope.</Text>
                 <View className="gap-2">

@@ -166,7 +166,7 @@ export function PinEntry({
                     flex: 1,
                     height: 64,
                     borderRadius: 16,
-                    backgroundColor: pressed ? '#F0F0EE' : '#FCFAF7',
+                    backgroundColor: pressed ? '#F0F0EE' : '#FAF5EC',
                     borderWidth: 1,
                     borderColor: '#E0DFDC',
                     alignItems: 'center',

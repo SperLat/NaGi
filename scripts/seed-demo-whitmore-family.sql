@@ -96,6 +96,13 @@ BEGIN
         'communication_notes',    'Sharp mind, independent. Treat her like the librarian she was — she can find her own answers if you point her at them. Do NOT speak slowly or pat her along. She likes specifics: dates, page numbers, episode titles.',
         'accessibility_notes',    'Hip replacement four weeks ago — still with a cane. Reading glasses for screens. Hard of hearing in the left ear; speak toward the right side.',
         'emergency_contact',      jsonb_build_object('name', 'Sarah (her daughter)', 'phone', '+1 313 555 0142', 'relation', 'daughter'),
+        'cognitive_profile',      'Sharp librarian''s mind — better with specifics than with abstractions.',
+        'learning_style',         'Specifics. Dates, page numbers, episode titles. She will follow a thread if you give her the thread.',
+        'mood_baseline',          'Steady. Hip recovery has tested her independence; she rebounds when she can do something for herself.',
+        'voice_guardrails',       jsonb_build_array(
+          'Do not speak slowly or condescend — she is mentally faster than most people half her age.',
+          'Do not pat her along with empty encouragement. Acknowledge specifics.'
+        ),
         'long_context_recall',    true
       ),
       1,
@@ -137,6 +144,14 @@ BEGIN
         'communication_notes',    'Mild short-term memory issues — repeat important things in different words, do not ask "don''t you remember?". He prefers being treated as the teacher he was, not as a forgetful old man. He notices when he''s being patronized.',
         'accessibility_notes',    'Hearing aid in the left ear. Slight tremor in his right hand — gives him trouble with small touch targets. Reading glasses for close work.',
         'emergency_contact',      jsonb_build_object('name', 'Sarah (his daughter)', 'phone', '+1 313 555 0142', 'relation', 'daughter'),
+        'cognitive_profile',      'Mild short-term memory issues. Long-term and analytical — sharp. Still the English teacher he was for 38 years.',
+        'learning_style',         'Narrative. Frame information as a story or argument and he keeps up; bullet-point checklists slip away from him.',
+        'mood_baseline',          'Generally even. Beatrice''s passing surfaces; he leads when it does.',
+        'voice_guardrails',       jsonb_build_array(
+          'Never ask "don''t you remember?" — he notices and it bruises him.',
+          'Treat him as a colleague, never as a patient.',
+          'When he loses a thread, repeat the gist in fresh words — do not ask him to retrace.'
+        ),
         'long_context_recall',    true
       ),
       1,

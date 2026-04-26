@@ -76,7 +76,7 @@ export default function ElderHome() {
   return (
     <SafeAreaView
       className={`flex-1 ${bg}`}
-      style={{ backgroundColor: highContrast ? '#0F0F0F' : '#FCFAF7' }}
+      style={{ backgroundColor: highContrast ? '#0F0F0F' : '#FAF5EC' }}
     >
       <View className="flex-1 px-6 pt-8 pb-4">
         {/* Exit to intermediary dashboard — only visible when pushed from that flow */}

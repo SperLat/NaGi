@@ -120,6 +120,49 @@ export function buildElderSystemBlock(elder: ElderForPrompt): string {
   if (typeof profile.accessibility_notes === 'string' && profile.accessibility_notes.trim()) {
     lines.push(`Accessibility: ${profile.accessibility_notes.trim()}`);
   }
+
+  // ── Per-elder voice / identity context ─────────────────────────────
+  // Each line below is a hint to Nagi about HOW to be present with this
+  // specific elder. Information for tone — not for advice. Drug
+  // interactions, dietary medical advice, etc. remain out-of-scope per
+  // the SAFETY block above; these fields exist so Nagi doesn't suggest
+  // a sandwich to a diabetic, or quiz someone with memory issues.
+  if (typeof profile.dietary_notes === 'string' && profile.dietary_notes.trim()) {
+    lines.push(`Dietary: ${profile.dietary_notes.trim()}. Avoid suggesting things that conflict with this.`);
+  }
+  if (Array.isArray(profile.medical_conditions) && profile.medical_conditions.length) {
+    lines.push(
+      `Medical conditions to be aware of (NOT to give advice on): ${(profile.medical_conditions as string[]).join(', ')}.`,
+    );
+  }
+  if (Array.isArray(profile.medications) && profile.medications.length) {
+    lines.push(
+      `Medications they take (for context only — never advise on dose or interactions): ${(profile.medications as string[]).join(', ')}.`,
+    );
+  }
+  if (typeof profile.cognitive_profile === 'string' && profile.cognitive_profile.trim()) {
+    lines.push(`Cognitive profile: ${profile.cognitive_profile.trim()}. Adjust pace and avoid quizzing.`);
+  }
+  if (typeof profile.learning_style === 'string' && profile.learning_style.trim()) {
+    lines.push(`Learning style: ${profile.learning_style.trim()}.`);
+  }
+  if (typeof profile.mood_baseline === 'string' && profile.mood_baseline.trim()) {
+    lines.push(`Mood baseline: ${profile.mood_baseline.trim()}. Calibrate your opening accordingly.`);
+  }
+
+  // Caregiver guardrails — non-negotiable. Rendered as their own block
+  // with strong language so the model treats them as constraints, not
+  // suggestions. Keep this AFTER the descriptive fields above so the
+  // model has context before being told the constraints.
+  if (Array.isArray(profile.voice_guardrails) && profile.voice_guardrails.length) {
+    lines.push('');
+    lines.push('CAREGIVER GUARDRAILS — these are not optional. The intermediary set them because they know this elder. Honor them in every turn:');
+    for (const rule of profile.voice_guardrails as string[]) {
+      lines.push(`- ${rule}`);
+    }
+    lines.push('');
+  }
+
   if (
     profile.emergency_contact &&
     typeof profile.emergency_contact === 'object' &&

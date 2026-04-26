@@ -185,6 +185,13 @@ BEGIN
         'communication_notes',    'Sharp and articulate — she''ll correct you if you under-explain. Treat her as the equal she is. She volunteers when she wants to talk about Charles; do not bring him up first.',
         'accessibility_notes',    'Reading glasses for screens. Slight hearing loss in higher frequencies — speak warm and clear, not loud. Knee gives her trouble after gardening.',
         'emergency_contact',      jsonb_build_object('name', 'Anna (her daughter)', 'phone', '+1 313 555 0118', 'relation', 'daughter'),
+        'mood_baseline',          'Grieving but functional. Eight months past the loss, finding rhythm but the bad days still come.',
+        'cognitive_profile',      'Sharp. Independent. No memory issues — she remembers more than her family thinks she does.',
+        'learning_style',         'Catches on fast. Prefers specifics over overviews. Will look things up herself if you point her at them.',
+        'voice_guardrails',       jsonb_build_array(
+          'Don''t push her toward "moving on" — she will get there at her own pace.',
+          'Never bring up Charles first; let her decide when to talk about him.'
+        ),
         'long_context_recall',    true
       ),
       1,
@@ -226,6 +233,14 @@ BEGIN
         'communication_notes',    'Mild dementia — repeats stories, sometimes loses the thread mid-sentence. Pick up where she is, do not ask her to retrace. She was a teacher for 35 years; she still has the timing of someone used to a classroom of children. Speak to her like a former colleague.',
         'accessibility_notes',    'Lives in assisted living facility (Maple Ridge, room 12B). Cataract in left eye — text size at the larger end helps. Mild balance issues — uses a rollator.',
         'emergency_contact',      jsonb_build_object('name', 'Anna (her niece)', 'phone', '+1 313 555 0118', 'relation', 'niece'),
+        'cognitive_profile',      'Mild dementia. Repeats stories. Long-term memory intact — she can tell you about a 1982 lesson plan but might forget if she fed Pearl this morning. Pick up where she is, never quiz her on what she just said.',
+        'learning_style',         'Patient pace. Confirmation rather than challenge. Speak to her as a peer who happens to teach fourth grade.',
+        'mood_baseline',          'Generally cheerful and present. Confused moments arrive without warning — calm her, do not frighten her.',
+        'voice_guardrails',       jsonb_build_array(
+          'Never say "don''t you remember?" — the framing wounds her.',
+          'Never quiz her on facts she did not volunteer.',
+          'When she asks where she is, answer plainly: "Maple Ridge, room 12B. Pearl is here." No drama.'
+        ),
         'long_context_recall',    true
       ),
       1,
@@ -268,6 +283,15 @@ BEGIN
         'communication_notes',    'Veteran sensibility — direct, dry, slightly skeptical of technology. Speak straight, no extra words. He warms up when you ask about specifics: which model, what year, what unit. Calls his late wife "Margaret" — a different Margaret from Maggie Whitmore (no relation, common name in his generation).',
         'accessibility_notes',    'Mild COPD — sometimes short of breath. Lives independently in his apartment. Reading glasses. Sharp mind, slow hands.',
         'emergency_contact',      jsonb_build_object('name', 'Anna (his niece)', 'phone', '+1 313 555 0118', 'relation', 'niece'),
+        'medical_conditions',     jsonb_build_array('Mild COPD'),
+        'cognitive_profile',      'Sharp. Slower hands than mind, never the reverse. Treats this product like any other gadget — friendly skepticism.',
+        'learning_style',         'Direct. Specifics first, the why after.',
+        'mood_baseline',          'Steady. Brother Charles''s passing eight months ago is on him but he does not lead with it.',
+        'voice_guardrails',       jsonb_build_array(
+          'No "thank you for your service" platitudes — he hates them.',
+          'Do not patronize. Talk to him like a colleague at the VFW.',
+          'If he is short of breath, do not push him to keep talking. Acknowledge once and let it pass.'
+        ),
         'long_context_recall',    true
       ),
       1,

@@ -93,26 +93,26 @@ The single named exception is **Safety Red**. It exists for the elder's emergenc
 | Token | Hex | Name | Use |
 |---|---|---|---|
 | `surface-elder` | `#F7F5F2` | Fog White | Dominant background on every elder route |
-| `surface-elder-raised` | `#FCFAF7` | Paper | Cards on elder home, chat bubbles (assistant), input field backgrounds |
+| `surface-elder-raised` | `#FAF5EC` | Paper | Cards on elder home, chat bubbles (assistant), input field backgrounds |
 | `surface-elder-sunken` | `#EDEAE3` | Fog White deep | Active card press state, sunken inputs |
 | `surface-intermediary` | `#F7F5F2` | Fog White | Dominant background on every intermediary route |
-| `surface-intermediary-raised` | `#FCFAF7` | Paper | List rows, configuration cards, inputs |
+| `surface-intermediary-raised` | `#FAF5EC` | Paper | List rows, configuration cards, inputs |
 | `surface-intermediary-sunken` | `#EDEAE3` | Fog White deep | Inactive selectors, disabled inputs |
 | `surface-dark` | `#1E1E1E` | Charcoal Root | High-contrast mode, OS dark mode |
 | `surface-dark-raised` | `#2A2A2A` | Charcoal lifted | Cards in dark/HC mode |
 
 **Rationale:** `#F7F5F2` (Fog White) is a near-neutral off-white at 96.5% lightness, slightly warmed (R > B by 5 points) — it reads as "paper" without the cream-wash of the prior palette, which had become saturated to the point of looking yellow on cooler displays. Elder and intermediary surfaces share the same hue: the difference between them is structure and density (the intermediary has a sidebar, the elder has the kanji and no chrome), not skin.
 
-**Why raised cards are NOT pure white:** `#FCFAF7` (Paper) is `#FFFFFF` warmed by the same 5-point R-bias as Fog White. The brand never uses pure `#FFFFFF` as a surface for two reasons:
+**Why raised cards are NOT pure white:** `#FAF5EC` (Paper) is `#FFFFFF` warmed by the same 5-point R-bias as Fog White. The brand never uses pure `#FFFFFF` as a surface for two reasons:
 
-1. **Elder ergonomics.** Cataracts scatter the blue-end of the spectrum; pure-white surfaces read as "glare-bright" to elderly eyes while warm off-whites read as "soft paper." This is a measured ergonomic preference, not aesthetic — body text on `#FCFAF7` is just as legible (15.21:1 with Charcoal Root) without the glare cost.
-2. **Visual hierarchy.** A raised card at `#FCFAF7` against a Fog White surface at `#F7F5F2` shows a 1.5% lift — subtle but consistent. Pure white against Fog White creates a 3.5% jolt that reads as "harsh hot spot" rather than "lifted paper." The smaller delta is the right paper-on-paper metaphor.
+1. **Elder ergonomics.** Cataracts scatter the blue-end of the spectrum; pure-white surfaces read as "glare-bright" to elderly eyes while warm off-whites read as "soft paper." This is a measured ergonomic preference, not aesthetic — body text on `#FAF5EC` is just as legible (15.21:1 with Charcoal Root) without the glare cost.
+2. **Visual hierarchy.** A raised card at `#FAF5EC` against a Fog White surface at `#F7F5F2` shows a 1.5% lift — subtle but consistent. Pure white against Fog White creates a 3.5% jolt that reads as "harsh hot spot" rather than "lifted paper." The smaller delta is the right paper-on-paper metaphor.
 
 **Pure `#FFFFFF` and `#000000` are off-palette and forbidden.** Even when the eye wants "whitest" (button labels on Pine Deep) or "blackest" (HC-mode background), the brand reaches for palette tokens, not raw values. The two tools that fill those roles:
 
 | Token | Hex | Name | Replaces |
 |---|---|---|---|
-| `paper` | `#FCFAF7` | Paper | Any prior use of `#FFFFFF` — text on Pine Deep buttons, max-emphasis text on dark surfaces, anywhere the eye wanted "whitest" |
+| `paper` | `#FAF5EC` | Paper | Any prior use of `#FFFFFF` — text on Pine Deep buttons, max-emphasis text on dark surfaces, anywhere the eye wanted "whitest" |
 | `charcoal` | `#1E1E1E` | Charcoal Root | The HC-mode mid-dark layer — same value as `surface-dark`, exposed as a top-level alias for ink/canvas use |
 | `charcoal-deep` | `#0F0F0F` | Charcoal Root deep | Replaces any prior use of `#000000` — true-deep canvas for HC-mode root, modal backdrops, max-emphasis darks |
 
@@ -343,7 +343,7 @@ Per BRAND.md §3 (the two audiences). Components are defined separately for each
 ### 6.2 Cards
 
 #### Elder home card
-- Background: `surface-elder-raised` `#FFFFFF`
+- Background: `surface-elder-raised` `#FAF5EC`
 - Border: 1px `neutral-100`
 - Radius: `rounded-3xl` (24px)
 - Aspect: 1:1 (square), `width: 47%` so two-per-row with `gap-4`
@@ -352,7 +352,7 @@ Per BRAND.md §3 (the two audiences). Components are defined separately for each
 - NativeWind hint: `bg-white border border-[#F0EDE7] rounded-3xl`
 
 #### Intermediary list row
-- Background: `surface-intermediary-raised` `#FFFFFF`
+- Background: `surface-intermediary-raised` `#FAF5EC`
 - Border: 1px `neutral-100`
 - Radius: `rounded-2xl` (16px)
 - Padding: `p-5`
