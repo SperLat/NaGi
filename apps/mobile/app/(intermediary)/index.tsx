@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { View, Text, ScrollView, Pressable, ActivityIndicator, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router } from 'expo-router';
 import {
   listElders,
   listMyPendingInvitations,
@@ -23,7 +23,7 @@ import { supabase } from '@/lib/supabase';
 import { relativeTime } from '@/lib/time';
 import { isMock } from '@/config/mode';
 import { useSession } from '@/state';
-import { Walkthrough, isWalkthroughSeen } from '@/features/walkthrough';
+import { Walkthrough, isWalkthroughSeen, useWalkthrough } from '@/features/walkthrough';
 import {
   listMyPendingElderConnections,
   respondToElderConnection,
@@ -38,7 +38,12 @@ export default function IntermediaryDashboard() {
   const [invitations, setInvitations] = useState<PendingInvitation[]>([]);
   const [invitationError, setInvitationError] = useState<string | null>(null);
   const [busyInvitationId, setBusyInvitationId] = useState<string | null>(null);
-  const [walkthroughOpen, setWalkthroughOpen] = useState(false);
+  // Walkthrough open state lives in a tiny Zustand store (features/
+  // walkthrough/state.ts) so the sidebar's "Replay tour" button can
+  // open it directly without route navigation tricks.
+  const walkthroughOpen = useWalkthrough(s => s.isOpen);
+  const openWalkthrough = useWalkthrough(s => s.open);
+  const closeWalkthrough = useWalkthrough(s => s.close);
   const [pendingConnections, setPendingConnections] = useState<PendingElderConnection[]>([]);
   const [respondingConn, setRespondingConn] = useState<string | null>(null);
   const shakeAnim                   = useRef(new Animated.Value(0)).current;
@@ -78,23 +83,9 @@ export default function IntermediaryDashboard() {
     if (isMock) return;
     if (!isPembertonOrg) return;
     void isWalkthroughSeen().then(seen => {
-      if (!seen) setWalkthroughOpen(true);
+      if (!seen) openWalkthrough();
     });
-  }, [isPembertonOrg]);
-
-  // "Replay tour" entry path. The sidebar button does
-  //   router.replace('/(intermediary)/?replay=1')
-  // after wiping the seen-flag. We open the walkthrough on that signal
-  // and immediately strip the param so a future navigation away and back
-  // doesn't re-trigger. Same-route `replace` doesn't remount, but the
-  // params object DOES change identity, so this effect fires.
-  const params = useLocalSearchParams<{ replay?: string }>();
-  useEffect(() => {
-    if (params.replay === '1' && isPembertonOrg) {
-      setWalkthroughOpen(true);
-      router.replace('/(intermediary)/');
-    }
-  }, [params.replay, isPembertonOrg]);
+  }, [isPembertonOrg, openWalkthrough]);
 
   const refreshInvitations = async () => {
     const { data, error } = await listMyPendingInvitations();
@@ -579,7 +570,7 @@ export default function IntermediaryDashboard() {
       </View>
       <Walkthrough
         visible={walkthroughOpen}
-        onClose={() => setWalkthroughOpen(false)}
+        onClose={closeWalkthrough}
         elderIds={{ eleanor: eleanorId }}
       />
     </SafeAreaView>

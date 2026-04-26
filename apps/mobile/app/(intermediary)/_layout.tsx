@@ -12,7 +12,7 @@ import {
 import { signOut } from '@/features/auth';
 import { useSession } from '@/state';
 import { relativeTime } from '@/lib/time';
-import { resetWalkthrough } from '@/features/walkthrough';
+import { resetWalkthrough, useWalkthrough } from '@/features/walkthrough';
 
 /** "active" if the elder used the app in the last hour. Beyond that, hide. */
 const ACTIVE_WINDOW_MS = 60 * 60_000;
@@ -189,16 +189,20 @@ function Sidebar() {
         </Pressable>
         <Pressable
           onPress={async () => {
+            // Wipe the seen-flag so the next first-mount-trigger would
+            // also open it (covers refresh-then-replay), and open the
+            // modal directly via the Zustand store. Earlier attempts
+            // tried router.replace with a query param to re-trigger the
+            // dashboard's mount effect, but expo-router doesn't remount
+            // on same-route replace and the param parsing was flaky.
+            // The store call is synchronous and dependency-free.
             await resetWalkthrough();
-            // Pass `replay=1` as a query param. The dashboard reads it
-            // via useLocalSearchParams and opens the walkthrough when
-            // present. The previous code replaced to the same route
-            // hoping the trigger effect would re-run, but expo-router
-            // does NOT remount on same-route replace, so the effect
-            // never re-fired and the user landed on the dashboard with
-            // no tour. The query param changes the route signature so
-            // the dashboard sees a new render and reacts.
-            router.replace('/(intermediary)/?replay=1');
+            useWalkthrough.getState().open();
+            // If the user happens to be on a different intermediary
+            // sub-route when they tap, navigate them home so the
+            // <Walkthrough/> component (mounted in index.tsx) is on
+            // screen to render.
+            router.replace('/(intermediary)/');
           }}
           style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
           className="rounded-xl px-3 py-2"

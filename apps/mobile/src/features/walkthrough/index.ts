@@ -29,3 +29,4 @@ export async function resetWalkthrough(): Promise<void> {
 }
 
 export { Walkthrough } from './Walkthrough';
+export { useWalkthrough } from './state';
