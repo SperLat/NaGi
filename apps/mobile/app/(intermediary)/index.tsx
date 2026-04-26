@@ -65,22 +65,22 @@ export default function IntermediaryDashboard() {
     [refreshPendingConnections],
   );
 
-  // First-time tour: opens automatically once on dashboard mount when
-  // the AsyncStorage flag is unset. Replayable from the sidebar via
-  // the "Replay tour" button. Skipped entirely in mock mode (the demo
-  // data may not match the walkthrough copy).
+  // The walkthrough is a scripted Pemberton-family demo tour, not a
+  // generic onboarding — its copy names Eleanor/Frances/William and the
+  // handoff step routes to Eleanor. Gate firing on actually having a
+  // Pemberton seed in this org. Non-Pemberton orgs (Whitmore, García,
+  // real customers) skip it. Replayable from the sidebar; skipped in
+  // mock mode.
+  const eleanorId = elders.find(e => e.display_name === 'Eleanor Pemberton')?.id;
+  const isPembertonOrg = !!eleanorId;
+
   useEffect(() => {
     if (isMock) return;
+    if (!isPembertonOrg) return;
     void isWalkthroughSeen().then(seen => {
       if (!seen) setWalkthroughOpen(true);
     });
-  }, []);
-
-  // Find Eleanor's id (the only elder the walkthrough Hand-off button
-  // routes to). Falls back to the first elder if no match — that
-  // keeps the button alive for non-Pemberton seeds during testing.
-  const eleanorId =
-    elders.find(e => e.display_name === 'Eleanor Pemberton')?.id ?? elders[0]?.id;
+  }, [isPembertonOrg]);
 
   const refreshInvitations = async () => {
     const { data, error } = await listMyPendingInvitations();

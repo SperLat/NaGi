@@ -261,9 +261,10 @@ function SlideWelcome() {
         Welcome to Nagi
       </Text>
       <Text style={{ fontSize: 15, color: '#545454', textAlign: 'center', lineHeight: 22 }}>
-        You're now caring for The Pemberton Family — three loved ones who use Nagi
-        to talk through their day. This is the family member's dashboard. Let's
-        walk through what it does.
+        This is the family member's dashboard — where the elders in your care,
+        their conversations, and the rhythms of their week live. Throughout
+        this tour we'll use The Pemberton Family — three example elders — to
+        show what Nagi can do.
       </Text>
     </View>
   );
@@ -273,11 +274,12 @@ function SlideFamily() {
   return (
     <View style={{ gap: 14 }}>
       <Text style={{ fontSize: 22, fontWeight: '700', color: '#1E1E1E' }}>
-        Three lives in your care
+        An example family
       </Text>
       <Text style={{ fontSize: 14, color: '#545454', lineHeight: 20 }}>
-        You'll see all three on the sidebar after this tour. Each has their own
-        profile, conversation history, and care preferences.
+        Each elder in your care has their own profile, conversation history,
+        and care preferences. To illustrate, meet the Pembertons — they're the
+        example we'll use throughout this tour:
       </Text>
 
       <ElderRow
@@ -435,9 +437,10 @@ function SlideElderPin() {
         Their exit PIN
       </Text>
       <Text style={{ fontSize: 14, color: '#545454', lineHeight: 20 }}>
-        Each elder also has a PIN for stepping out of their kiosk view. We've
-        pre-set Eleanor, Frances, and William's exit PINs all to the same
-        number for this demo:
+        Each elder also has a PIN for stepping out of their kiosk view. In the
+        Pemberton example, all three share the same exit PIN so judges only
+        memorize one number — in production each family sets their own per
+        elder:
       </Text>
       <View
         style={{
