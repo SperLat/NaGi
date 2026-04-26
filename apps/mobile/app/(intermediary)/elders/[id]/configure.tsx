@@ -309,9 +309,11 @@ export default function ElderConfigure() {
 
           {/* ── About this person ──────────────────────────────────── */}
           <View className="mt-2 pt-6 border-t border-gray-200">
-            <Text className="text-xl font-bold text-gray-900 mb-1">About {elder.display_name}</Text>
+            <Text className="text-xl font-bold text-gray-900 mb-1">
+              About {preferredName.trim() || elder.display_name.split(' ')[0]}
+            </Text>
             <Text className="text-gray-500 text-sm mb-5">
-              Helps Nagi talk to them as a real person. All optional.
+              Helps Nagi talk to them as a real person.
             </Text>
 
             <View className="gap-5">
@@ -368,11 +370,11 @@ export default function ElderConfigure() {
 
               <View>
                 <Text className="text-xs font-medium text-gray-500 mb-1.5 ml-1">
-                  Topics to keep private from family
+                  Topics that belong to {preferredName.trim() || elder.display_name.split(' ')[0]}
                 </Text>
                 <Text className="text-gray-400 text-xs mb-2 ml-1">
-                  When the conversation drifts here, Nagi handles the moment
-                  with them but the substance won't appear on this dashboard.
+                  When the conversation goes here, Nagi stays with them — and
+                  the substance is theirs to share when and how they want.
                   You'll see "a private moment" with a timestamp.
                 </Text>
                 <TextInput

@@ -25,6 +25,10 @@ function jsonError(msg: string, status: number): Response {
   return new Response(JSON.stringify({ error: msg }), { status, headers: CORS });
 }
 
+// Family-facing digest stats. ai_input_tokens / ai_output_tokens used to
+// be exposed here but they're infrastructure metrics that don't help a
+// caregiver understand how their loved one is doing — kept server-side
+// for ops observability only (logged below if needed).
 interface DigestStats {
   questions_asked: number;
   errors: number;
@@ -32,8 +36,6 @@ interface DigestStats {
   help_requests_total: number;
   help_requests_acknowledged: number;
   help_requests_pending: number;
-  ai_input_tokens: number;
-  ai_output_tokens: number;
   pill_taken: number;
   pill_skipped: number;
   pill_pending: number;
@@ -183,8 +185,6 @@ Deno.serve(async (req: Request) => {
     help_requests_total: help.length,
     help_requests_acknowledged: help.filter(h => h.status === 'acknowledged').length,
     help_requests_pending: help.filter(h => h.status === 'pending').length,
-    ai_input_tokens: aiRows.reduce((s, r) => s + (r.input_tokens ?? 0), 0),
-    ai_output_tokens: aiRows.reduce((s, r) => s + (r.output_tokens ?? 0), 0),
     pill_taken: pillEvents.filter(e => e.status === 'taken').length,
     pill_skipped: pillEvents.filter(e => e.status === 'skipped').length,
     pill_pending: pillEvents.filter(e => e.status === 'pending').length,
@@ -252,8 +252,11 @@ Numbers from the past 7 days:
 - Questions asked of Nagi: ${stats.questions_asked}
 - Errors / things that broke: ${stats.errors}
 - Times Nagi was offline: ${stats.offline_unavailable}
-- Help requests sent to family: ${stats.help_requests_total} (${stats.help_requests_acknowledged} handled, ${stats.help_requests_pending} still pending)
-- Pill reminders this week: ${stats.pill_taken} taken, ${stats.pill_skipped} skipped, ${stats.pill_pending} unconfirmed${stats.pill_taken + stats.pill_skipped + stats.pill_pending === 0 ? ' (no reminders set)' : ''}
+- Help requests sent to family: ${stats.help_requests_total} (${stats.help_requests_acknowledged} handled, ${stats.help_requests_pending} still pending)${
+    stats.pill_taken + stats.pill_skipped + stats.pill_pending > 0
+      ? `\n- Pill reminders this week: ${stats.pill_taken} taken, ${stats.pill_skipped} skipped, ${stats.pill_pending} unconfirmed`
+      : ''
+  }
 
 What ${callName} actually asked Nagi about (most recent first):
 ${recentTurns || '(no questions this week)'}

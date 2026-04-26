@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import { env } from '@/config/env';
 import { isMock } from '@/config/mode';
+import { getElder } from '@/features/elders';
 
 /**
  * Stats the digest function returns alongside the markdown.
@@ -16,8 +17,6 @@ export interface DigestStats {
   help_requests_total: number;
   help_requests_acknowledged: number;
   help_requests_pending: number;
-  ai_input_tokens: number;
-  ai_output_tokens: number;
   pill_taken: number;
   pill_skipped: number;
   pill_pending: number;
@@ -37,8 +36,6 @@ const EMPTY_STATS: DigestStats = {
   help_requests_total: 0,
   help_requests_acknowledged: 0,
   help_requests_pending: 0,
-  ai_input_tokens: 0,
-  ai_output_tokens: 0,
   pill_taken: 0,
   pill_skipped: 0,
   pill_pending: 0,
@@ -56,10 +53,16 @@ const EMPTY_STATS: DigestStats = {
  */
 export async function generateDigest(elderId: string): Promise<DigestResult> {
   if (isMock) {
+    // Look up the actual elder name so the mock digest doesn't hallucinate
+    // characters ("Margarita", "Carlos", "Sofia") that don't exist in the
+    // current org. Fall back to a neutral phrase if lookup fails — better
+    // than fictional names that mislead caregivers running mock.
+    const { data: e } = await getElder(elderId);
+    const firstName = e?.display_name?.split(' ')[0] ?? 'your loved one';
     const now = new Date();
     const weekAgo = new Date(now.getTime() - 7 * 24 * 3600_000);
     return {
-      digest_markdown: `## This week with Margarita\n\nA quiet, steady week. Margarita asked Nagi a handful of questions — mostly about messaging her granddaughter Sofia and one about a recipe she half-remembered.\n\nShe got stuck once trying to attach a photo and sent a help request; Carlos handled it within twenty minutes. No errors otherwise.\n\nNothing concerning to flag. If you have a moment this weekend, she mentioned wanting to learn how to make a video call — might be a nice one to teach in person.`,
+      digest_markdown: `## This week with ${firstName}\n\nA quiet, steady week. ${firstName} asked Nagi a handful of questions and used the device without trouble.\n\nNothing concerning to flag. If you have a moment this weekend, a check-in call might be a nice one — small, no agenda.`,
       period_start: weekAgo.toISOString(),
       period_end: now.toISOString(),
       stats: { ...EMPTY_STATS, questions_asked: 12, help_requests_total: 1, help_requests_acknowledged: 1 },

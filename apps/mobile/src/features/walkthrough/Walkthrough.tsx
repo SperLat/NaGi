@@ -262,9 +262,8 @@ function SlideWelcome() {
       </Text>
       <Text style={{ fontSize: 15, color: '#545454', textAlign: 'center', lineHeight: 22 }}>
         This is the family member's dashboard — where the elders in your care,
-        their conversations, and the rhythms of their week live. Throughout
-        this tour we'll use The Pemberton Family — three example elders — to
-        show what Nagi can do.
+        their conversations, and the rhythms of their week live. Meet the three
+        people you're caring for: Eleanor, Frances, and William Pemberton.
       </Text>
     </View>
   );
@@ -274,28 +273,27 @@ function SlideFamily() {
   return (
     <View style={{ gap: 14 }}>
       <Text style={{ fontSize: 22, fontWeight: '700', color: '#1E1E1E' }}>
-        An example family
+        Three lives in your care
       </Text>
       <Text style={{ fontSize: 14, color: '#545454', lineHeight: 20 }}>
-        Each elder in your care has their own profile, conversation history,
-        and care preferences. To illustrate, meet the Pembertons — they're the
-        example we'll use throughout this tour:
+        Each elder has their own profile, conversation history, and care
+        preferences. Here's who you'll find on the sidebar after this tour:
       </Text>
 
       <ElderRow
         name="Eleanor 'Nell' Pemberton"
         age={74}
-        detail="Recently widowed, gardener, jazz devotee. Sharp — treat her as the equal she is."
+        detail="Recently widowed. A gardener and a jazz devotee — sharp, and she'll spar with you. That's how she shows trust."
       />
       <ElderRow
         name="Frances 'Fran' Pemberton"
         age={78}
-        detail="Mild dementia, retired schoolteacher, loves her cat Pearl and the cardinals at her window."
+        detail="A retired schoolteacher with mild dementia. Pearl the cat is her steady companion, and she watches for cardinals at her window."
       />
       <ElderRow
         name="William 'Bill' Pemberton"
         age={82}
-        detail="Ex-Army Korea, builds model planes, walks daily despite mild COPD. Veteran sensibility — direct talk only."
+        detail="A Korea-era Army veteran. He builds model planes and walks daily, COPD and all. Direct talk lands well with him."
       />
     </View>
   );
