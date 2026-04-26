@@ -29,6 +29,7 @@ type Slide =
   | 'recall'
   | 'privacy'
   | 'friends'
+  | 'self-host'
   | 'device-pin'
   | 'elder-pin'
   | 'handoff'
@@ -40,6 +41,7 @@ const ORDER: Slide[] = [
   'recall',
   'privacy',
   'friends',
+  'self-host',
   'device-pin',
   'elder-pin',
   'handoff',
@@ -172,6 +174,7 @@ export function Walkthrough({ visible, onClose, elderIds }: Props) {
             {slide === 'recall' && <SlideRecall />}
             {slide === 'privacy' && <SlidePrivacy />}
             {slide === 'friends' && <SlideFriends />}
+            {slide === 'self-host' && <SlideSelfHost />}
             {slide === 'device-pin' && (
               <SlideDevicePin onEntered={handleDevicePinEntry} busy={busy} />
             )}
@@ -571,6 +574,51 @@ function SlideFriends() {
         section lets you propose new connections by elder name. The other family
         accepts on their dashboard. Either side can pause the connection at any time —
         the elder owns the relationship, the family owns the boundary.
+      </Text>
+    </View>
+  );
+}
+
+function SlideSelfHost() {
+  return (
+    <View style={{ gap: 14 }}>
+      <Text style={{ fontSize: 22, fontWeight: '700', color: '#1E1E1E' }}>
+        Yours to host
+      </Text>
+      <Text style={{ fontSize: 14, color: '#545454', lineHeight: 20 }}>
+        This demo is the public reference deployment. The brand-aligned
+        path for real use is to self-host: the code is open source, and
+        for someone caring for three or four families, that's the way
+        you keep full control of who sees the data.
+      </Text>
+      <View
+        style={{
+          backgroundColor: '#DDE5DF',
+          borderRadius: 14,
+          padding: 14,
+          gap: 8,
+        }}
+      >
+        <Text style={{ fontSize: 12, color: '#1A2E25', fontWeight: '600', letterSpacing: 0.5 }}>
+          THE COMPLIANCE KIT SHIPS WITH THE CODE
+        </Text>
+        <Text style={{ fontSize: 14, color: '#1A2E25', lineHeight: 20 }}>
+          When you deploy Nagi at home or on your own server, you become
+          the controller of the data. We didn't want that to feel like a
+          courtroom — it should feel like a checklist.
+        </Text>
+        <Text style={{ fontSize: 13, color: '#1A2E25', lineHeight: 18 }}>
+          Inside the repo, <Text style={{ fontWeight: '600' }}>docs/</Text> ships:
+          a privacy policy template, a records-of-processing record, a
+          breach-response runbook, a sub-processor list, and an overall
+          self-host compliance guide. Each is a fillable template, not
+          legal-jargon wallpaper.
+        </Text>
+      </View>
+      <Text style={{ fontSize: 13, color: '#727270', fontStyle: 'italic', lineHeight: 18 }}>
+        In the app, the same care surfaces are already wired in: Download
+        my data, Delete my account, in-product privacy notice, hashed
+        PINs, RLS-isolated tenants. Self-host and you inherit all of it.
       </Text>
     </View>
   );
