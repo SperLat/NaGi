@@ -14,7 +14,6 @@ import { generateDigest, type DigestResult } from '@/features/digest';
 import { TeamChatPanel } from '@/features/team-chat';
 import { FriendsSection } from '@/features/connections/FriendsSection';
 import { useSession } from '@/state';
-import { setDeviceMode } from '@/lib/kiosk';
 
 export default function ElderOverview() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -27,7 +26,7 @@ export default function ElderOverview() {
   const [inviteNote, setInviteNote] = useState<
     { kind: 'info' | 'success'; text: string } | null
   >(null);
-  const { setActiveElder, activeOrgId, userId } = useSession();
+  const { setActiveElder, setDeviceMode, activeOrgId, userId } = useSession();
 
   // Weekly digest — stateless, regenerated each click. Lives in a modal
   // because it's a heavy block of text and the rest of the screen still

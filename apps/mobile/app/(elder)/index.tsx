@@ -114,7 +114,19 @@ export default function ElderHome() {
   }
 
   const tc = TEXT_CLASS[textSize];
-  const cardKeys = (elder.ui_config.home_cards ?? Object.keys(CARD_EMOJIS)) as CardKey[];
+  // Merge configured cards with any newly-added cards the elder's
+  // ui_config doesn't yet list. Existing elders seeded before D + F
+  // shipped have ui_config.home_cards = [call_family, get_help, my_day,
+  // one_task] — without this merge the new pastimes + proud_moments
+  // tiles never appear. Append-only: configured order is preserved,
+  // new keys land at the end. If a caregiver later removes a card
+  // explicitly via UI, that intent is captured by an explicit "hidden"
+  // list in a follow-up; for now, all known cards show.
+  const allCards = Object.keys(CARD_EMOJIS) as CardKey[];
+  const configured = (elder.ui_config.home_cards as CardKey[] | undefined);
+  const cardKeys: CardKey[] = configured
+    ? [...configured, ...allCards.filter(k => !configured.includes(k))]
+    : allCards;
   const bg = highContrast ? 'bg-charcoal-deep' : 'bg-surface-elder-raised';
   const textColor = highContrast ? 'text-paper' : 'text-gray-900';
   const cardBg = highContrast ? 'bg-gray-900 border-gray-600' : 'bg-accent-50 border-accent-100';

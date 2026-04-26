@@ -3,7 +3,7 @@ import { View, Text, TextInput, Pressable, ScrollView, Switch, ActivityIndicator
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
 import { safeBack } from '@/lib/nav';
-import { getElder, updateElder, type Elder, type ElderProfile } from '@/features/elders';
+import { getElder, updateElder, setElderKioskPin, type Elder, type ElderProfile } from '@/features/elders';
 
 /**
  * Comma → array, trimming and dropping empties.
@@ -55,6 +55,14 @@ export default function ElderConfigure() {
   const [emergencyName, setEmergencyName] = useState('');
   const [emergencyPhone, setEmergencyPhone] = useState('');
   const [emergencyRelation, setEmergencyRelation] = useState('');
+
+  // Kiosk exit PIN — required for the "Hand the device" handoff.
+  // We never display the existing PIN (it's hashed); only show whether
+  // one is set, and let the caregiver replace it by typing a new value.
+  const [newKioskPin, setNewKioskPin] = useState('');
+  const [savingPin, setSavingPin] = useState(false);
+  const [pinSavedAt, setPinSavedAt] = useState<number | null>(null);
+  const [pinError, setPinError] = useState<string | null>(null);
 
   // Voice / identity guardrails
   const [dietaryNotes, setDietaryNotes] = useState('');
@@ -111,6 +119,27 @@ export default function ElderConfigure() {
       });
     return () => { cancelled = true; };
   }, [id]);
+
+  const handleSavePin = async () => {
+    setPinError(null);
+    if (!/^\d{4}$/.test(newKioskPin)) {
+      setPinError('PIN must be 4 digits.');
+      return;
+    }
+    setSavingPin(true);
+    const result = await setElderKioskPin(id, newKioskPin);
+    setSavingPin(false);
+    if (!result.ok) {
+      setPinError(result.error ?? 'Could not save PIN.');
+      return;
+    }
+    setNewKioskPin('');
+    setPinSavedAt(Date.now());
+    // Refresh the elder so kiosk_pin_hash flips to truthy in local state
+    // and the "Hand the device" button becomes available immediately.
+    const { data } = await getElder(id);
+    if (data) setElder(data);
+  };
 
   const handleSave = async () => {
     if (!elder) return;
@@ -288,6 +317,47 @@ export default function ElderConfigure() {
                 trackColor={{ true: '#34503E' }}
               />
             </View>
+          </View>
+
+          {/* Kiosk exit PIN — gates the "Hand the device" handoff */}
+          <View>
+            <Text className="text-xs font-medium text-gray-500 mb-1.5 ml-1">Kiosk exit PIN</Text>
+            <Text className="text-gray-400 text-xs mb-2 ml-1">
+              4 digits. {elder.kiosk_pin_hash
+                ? 'A PIN is set. Enter a new one below to replace it.'
+                : 'No PIN yet — set one to enable "Hand the device" handoff.'}
+            </Text>
+            <View className="flex-row gap-2 items-center">
+              <TextInput
+                className="flex-1 border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 bg-surface-intermediary-raised tracking-widest"
+                value={newKioskPin}
+                onChangeText={t => setNewKioskPin(t.replace(/\D/g, '').slice(0, 4))}
+                placeholder="••••"
+                placeholderTextColor="#cbd5e1"
+                keyboardType="number-pad"
+                maxLength={4}
+                secureTextEntry
+              />
+              <Pressable
+                onPress={handleSavePin}
+                disabled={savingPin || newKioskPin.length !== 4}
+                className={`rounded-xl px-4 py-3.5 ${newKioskPin.length === 4 ? 'bg-accent-600' : 'bg-gray-200'}`}
+                style={({ pressed }) => ({ opacity: pressed ? 0.82 : 1 })}
+              >
+                {savingPin ? (
+                  <ActivityIndicator color="white" />
+                ) : (
+                  <Text className={`font-semibold text-sm ${newKioskPin.length === 4 ? 'text-paper' : 'text-gray-400'}`}>
+                    Set PIN
+                  </Text>
+                )}
+              </Pressable>
+            </View>
+            {pinError ? (
+              <Text className="text-red-600 text-xs mt-2 ml-1">{pinError}</Text>
+            ) : pinSavedAt ? (
+              <Text className="text-accent-700 text-xs mt-2 ml-1">PIN saved.</Text>
+            ) : null}
           </View>
 
           {/* Offline message */}
