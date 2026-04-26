@@ -127,6 +127,7 @@ export default function ElderMessages() {
     return () => {
       Speech.stop();
       playbackRef.current?.stop();
+      recorderRef.current?.cancel();
     };
   }, [refresh]);
 
