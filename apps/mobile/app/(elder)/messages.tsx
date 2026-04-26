@@ -16,10 +16,17 @@ import {
   ensureTranslation,
   markMessageRead,
   sendMessage,
+  sendVoiceMessage,
   type ElderMessage,
 } from '@/features/messages';
 import { listConnectionsForElder } from '@/features/connections';
 import { supabase } from '@/lib/supabase';
+import {
+  startRecording,
+  isSupported as voiceRecordingSupported,
+  pickedExtension,
+  type AudioRecorderHandle,
+} from '@/lib/audio-recorder';
 import { useElderCtx } from './_layout';
 
 interface DisplayMessage {
@@ -50,6 +57,9 @@ export default function ElderMessages() {
     connectionId: string;
     fromElderName: string;
   } | null>(null);
+  const [recording, setRecording] = useState(false);
+  const [recordError, setRecordError] = useState<string | null>(null);
+  const recorderRef = useRef<AudioRecorderHandle | null>(null);
   const spokeIdsRef = useRef<Set<string>>(new Set());
 
   const targetLang = elder?.preferred_lang ?? 'en';
@@ -137,6 +147,58 @@ export default function ElderMessages() {
       await refresh();
     }
   }, [activeReplyTarget, elder, refresh, reply]);
+
+  // Start recording — opens mic, begins capturing. Errors (no mic,
+  // permission denied) surface as recordError; the text input stays
+  // available as the fallback.
+  const startVoice = useCallback(async () => {
+    setRecordError(null);
+    try {
+      const handle = await startRecording();
+      recorderRef.current = handle;
+      setRecording(true);
+    } catch (err) {
+      setRecordError(String((err as Error).message ?? err));
+    }
+  }, []);
+
+  // Stop recording, upload to send-voice-message, refresh on success.
+  // The recorder gives us a Blob in whatever MIME the browser chose;
+  // we forward it as-is (Whisper handles webm/mp4/m4a/ogg/wav).
+  const stopVoiceAndSend = useCallback(async () => {
+    if (!activeReplyTarget || !elder || !recorderRef.current) return;
+    const handle = recorderRef.current;
+    recorderRef.current = null;
+    setRecording(false);
+    setSending(true);
+    try {
+      const blob = await handle.stop();
+      const ext  = pickedExtension(blob);
+      const result = await sendVoiceMessage(
+        activeReplyTarget.connectionId,
+        elder.id,
+        blob,
+        `voice.${ext}`,
+      );
+      if (!result.ok) {
+        setRecordError(result.error ?? 'Send failed');
+        return;
+      }
+      setReply('');
+      setActiveReplyTarget(null);
+      await refresh();
+    } catch (err) {
+      setRecordError(String((err as Error).message ?? err));
+    } finally {
+      setSending(false);
+    }
+  }, [activeReplyTarget, elder, refresh]);
+
+  const cancelVoice = useCallback(() => {
+    recorderRef.current?.cancel();
+    recorderRef.current = null;
+    setRecording(false);
+  }, []);
 
   return (
     <SafeAreaView className="flex-1 bg-surface-elder">
@@ -227,25 +289,70 @@ export default function ElderMessages() {
               placeholderTextColor="#9A9A95"
               value={reply}
               onChangeText={setReply}
-              autoFocus={Platform.OS !== 'web'}
+              autoFocus={Platform.OS !== 'web' && !recording}
+              editable={!recording && !sending}
               textAlignVertical="top"
             />
+
+            {recordError ? (
+              <Text className="text-red-600 text-sm mb-2">{recordError}</Text>
+            ) : null}
+
+            {recording && (
+              <View className="flex-row items-center mb-3">
+                <View className="w-3 h-3 rounded-full bg-red-500 mr-2" />
+                <Text className="text-neutral-700 text-base">{recordingLabel(targetLang)}</Text>
+              </View>
+            )}
+
             <View className="flex-row gap-2">
               <Pressable
-                onPress={() => { setActiveReplyTarget(null); setReply(''); }}
+                onPress={() => {
+                  if (recording) cancelVoice();
+                  setActiveReplyTarget(null);
+                  setReply('');
+                  setRecordError(null);
+                }}
                 disabled={sending}
                 className="border border-gray-200 rounded-2xl py-3 px-5"
                 style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
               >
                 <Text className="text-neutral-600 font-medium">{cancelLabel(targetLang)}</Text>
               </Pressable>
+
+              {voiceRecordingSupported() && (
+                recording ? (
+                  <Pressable
+                    onPress={stopVoiceAndSend}
+                    disabled={sending}
+                    className="bg-red-600 rounded-2xl py-3 px-5 items-center"
+                    style={({ pressed }) => ({ opacity: pressed ? 0.82 : 1 })}
+                  >
+                    {sending ? (
+                      <ActivityIndicator color="#FAF5EC" />
+                    ) : (
+                      <Text className="text-paper font-semibold">■ {stopLabel(targetLang)}</Text>
+                    )}
+                  </Pressable>
+                ) : (
+                  <Pressable
+                    onPress={startVoice}
+                    disabled={sending}
+                    className="bg-accent-100 rounded-2xl py-3 px-5 items-center"
+                    style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                  >
+                    <Text className="text-accent-ink font-semibold">🎤 {recordLabel(targetLang)}</Text>
+                  </Pressable>
+                )
+              )}
+
               <Pressable
                 onPress={send}
-                disabled={sending || !reply.trim()}
+                disabled={sending || recording || !reply.trim()}
                 className="bg-accent-600 rounded-2xl py-3 px-5 flex-1 items-center"
                 style={({ pressed }) => ({ opacity: pressed ? 0.82 : 1 })}
               >
-                {sending ? (
+                {sending && !recording ? (
                   <ActivityIndicator color="#FAF5EC" />
                 ) : (
                   <Text className="text-paper font-semibold">{sendLabel(targetLang)}</Text>
@@ -275,4 +382,7 @@ function replyToLabel(c: string, n: string) { return c === 'es' ? `Responder a $
 function replyPlaceholder(c: string)  { return c === 'es' ? 'Escribe tu mensaje…' : c === 'pt' ? 'Escreva sua mensagem…' : 'Write your message…'; }
 function cancelLabel(c: string)       { return c === 'es' ? 'Cancelar' : c === 'pt' ? 'Cancelar' : 'Cancel'; }
 function sendLabel(c: string)         { return c === 'es' ? 'Enviar'   : c === 'pt' ? 'Enviar'   : 'Send'; }
+function recordLabel(c: string)       { return c === 'es' ? 'Hablar'   : c === 'pt' ? 'Falar'    : 'Speak'; }
+function stopLabel(c: string)         { return c === 'es' ? 'Enviar'   : c === 'pt' ? 'Enviar'   : 'Send'; }
+function recordingLabel(c: string)    { return c === 'es' ? 'Grabando…' : c === 'pt' ? 'Gravando…' : 'Recording…'; }
 function greetingFor(c: string)       { return c === 'es' ? 'te escribe' : c === 'pt' ? 'te escreve' : 'writes to you'; }
