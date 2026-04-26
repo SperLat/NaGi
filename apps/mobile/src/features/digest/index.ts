@@ -1,2 +1,2 @@
-export { generateDigest } from './api';
-export type { DigestResult, DigestStats } from './api';
+export { generateDigest, listArchivedDigests } from './api';
+export type { ArchivedDigest, DigestResult, DigestStats } from './api';

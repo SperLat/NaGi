@@ -3,6 +3,33 @@ import { env } from '@/config/env';
 import { isMock } from '@/config/mode';
 import { getElder } from '@/features/elders';
 
+export interface ArchivedDigest {
+  id: string;
+  elder_id: string;
+  organization_id: string;
+  period_start: string;
+  period_end: string;
+  digest_markdown: string;
+  stats_json: DigestStats | null;
+  created_at: string;
+}
+
+/**
+ * List previously-generated digests for an elder, newest first. Used by
+ * the family-side archive panel so caregivers can compare last week to
+ * earlier weeks without re-running the LLM.
+ */
+export async function listArchivedDigests(elderId: string, limit = 12): Promise<ArchivedDigest[]> {
+  if (isMock) return [];
+  const { data } = await supabase
+    .from('weekly_digests')
+    .select('*')
+    .eq('elder_id', elderId)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+  return (data ?? []) as ArchivedDigest[];
+}
+
 /**
  * Stats the digest function returns alongside the markdown.
  *

@@ -295,6 +295,24 @@ Don't repeat the raw numbers — weave them in only when they help the story. Do
     return jsonError(`Claude call failed: ${String(err)}`, 502);
   }
 
+  // Persist the digest so the family-side archive can list past weeks.
+  // Best-effort — if the write fails (transient DB hiccup) we still
+  // return the freshly-generated digest to the caller. The archive
+  // gets the next one. Better than blocking a successful generation
+  // on a non-critical write.
+  await db
+    .from('weekly_digests')
+    .insert({
+      organization_id: auth.organizationId,
+      elder_id,
+      period_start: periodStartIso,
+      period_end: periodEndIso,
+      digest_markdown: digestMarkdown,
+      stats_json: stats,
+    })
+    .then(() => {})
+    .catch(() => {});
+
   return new Response(
     JSON.stringify({
       digest_markdown: digestMarkdown,

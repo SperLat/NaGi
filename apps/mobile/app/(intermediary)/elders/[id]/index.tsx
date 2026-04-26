@@ -10,7 +10,7 @@ import {
   type Elder,
   type ElderIntermediary,
 } from '@/features/elders';
-import { generateDigest, type DigestResult } from '@/features/digest';
+import { generateDigest, listArchivedDigests, type ArchivedDigest, type DigestResult } from '@/features/digest';
 import { TeamChatPanel } from '@/features/team-chat';
 import { FriendsSection } from '@/features/connections/FriendsSection';
 import { useSession } from '@/state';
@@ -35,6 +35,14 @@ export default function ElderOverview() {
   const [digestOpen, setDigestOpen] = useState(false);
   const [digestBusy, setDigestBusy] = useState(false);
   const [digestError, setDigestError] = useState<string | null>(null);
+  // Archive of past digests (persisted by the edge function on each
+  // successful generation). Refreshed after every new digest so the
+  // newly-generated one shows up at the top.
+  const [archive, setArchive] = useState<ArchivedDigest[]>([]);
+  const refreshArchive = useCallback(async () => {
+    if (!id) return;
+    setArchive(await listArchivedDigests(id));
+  }, [id]);
 
   const handleGenerateDigest = useCallback(async () => {
     setDigestOpen(true);
@@ -43,12 +51,37 @@ export default function ElderOverview() {
     try {
       const result = await generateDigest(id);
       setDigest(result);
+      // The edge function persists the new row before responding, so a
+      // refresh now shows it at the top of the archive.
+      void refreshArchive();
     } catch (e) {
       setDigestError(String(e));
     } finally {
       setDigestBusy(false);
     }
-  }, [id]);
+  }, [id, refreshArchive]);
+
+  // Load the archive on mount + after every refresh trigger.
+  useEffect(() => {
+    void refreshArchive();
+  }, [refreshArchive]);
+
+  const openArchivedDigest = useCallback((entry: ArchivedDigest) => {
+    setDigest({
+      digest_markdown: entry.digest_markdown,
+      period_start:    entry.period_start,
+      period_end:      entry.period_end,
+      stats:           entry.stats_json ?? {
+        questions_asked: 0, errors: 0, offline_unavailable: 0,
+        help_requests_total: 0, help_requests_acknowledged: 0,
+        help_requests_pending: 0,
+        pill_taken: 0, pill_skipped: 0, pill_pending: 0,
+      },
+    });
+    setDigestError(null);
+    setDigestBusy(false);
+    setDigestOpen(true);
+  }, []);
 
   const refreshPeople = useCallback(async () => {
     const { data } = await listIntermediaries(id);
@@ -260,6 +293,43 @@ export default function ElderOverview() {
             </View>
             <Text className="text-gray-300 text-xl">›</Text>
           </Pressable>
+
+          {archive.length > 0 ? (
+            <View className="bg-surface-intermediary-raised rounded-2xl border border-gray-100 overflow-hidden">
+              <View className="px-4 py-3 border-b border-gray-100">
+                <Text className="font-semibold text-gray-900 text-sm">Past summaries</Text>
+                <Text className="text-gray-500 text-xs mt-0.5">
+                  Tap any entry to re-read what was sent
+                </Text>
+              </View>
+              {archive.slice(0, 6).map((entry, i) => {
+                const start = new Date(entry.period_start);
+                const end   = new Date(entry.period_end);
+                const fmt   = (d: Date) =>
+                  d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                return (
+                  <Pressable
+                    key={entry.id}
+                    onPress={() => openArchivedDigest(entry)}
+                    className={`flex-row items-center px-4 py-3 ${i < 5 ? 'border-b border-gray-50' : ''}`}
+                    style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                  >
+                    <View className="flex-1">
+                      <Text className="text-gray-900 text-sm">
+                        Week of {fmt(start)} – {fmt(end)}
+                      </Text>
+                      <Text className="text-gray-400 text-xs mt-0.5">
+                        {new Date(entry.created_at).toLocaleDateString(undefined, {
+                          weekday: 'short', month: 'short', day: 'numeric',
+                        })}
+                      </Text>
+                    </View>
+                    <Text className="text-gray-300 text-xl">›</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          ) : null}
         </View>
 
         <Text className="text-xs font-medium text-gray-500 mb-2 ml-1 uppercase tracking-wide">
