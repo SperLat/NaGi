@@ -29,6 +29,15 @@ export interface ElderProfile {
   spoken_languages?: string[];
   topics_they_enjoy?: string[];
   topics_to_avoid?: string[];
+  /**
+   * Topics the elder wants kept private FROM the family — distinct from
+   * topics_to_avoid (which are tender areas to handle gently). When the
+   * conversation drifts into one of these, Nagi appends a [private]
+   * sentinel to the turn so the row is logged with is_private = true.
+   * Family-facing surfaces show "a private moment" placeholder instead
+   * of the substance.
+   */
+  topics_to_keep_private?: string[];
   communication_notes?: string;
   accessibility_notes?: string;
   emergency_contact?: { name: string; phone: string; relation: string };
@@ -75,4 +84,13 @@ export interface Elder {
   status: 'active' | 'paused' | 'archived';
   created_at: string;
   updated_at: string;
+  /**
+   * Hashed PIN for exiting elder kiosk mode on a handed-over device.
+   * Null when the elder has not been handed over yet — the intermediary
+   * must set a PIN before "Hand to elder" is enabled.
+   * Plaintext PIN never stored anywhere.
+   */
+  kiosk_pin_hash?: string | null;
+  /** Per-record salt paired with kiosk_pin_hash. */
+  kiosk_pin_salt?: string | null;
 }

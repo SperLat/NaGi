@@ -5,6 +5,7 @@ import { router, useNavigation } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { safeBack } from '@/lib/nav';
 import { logActivity } from '@/features/activity-log';
+import { DailyShareToggle } from '@/features/privacy/DailyShareToggle';
 import { useStrings } from '@/lib/i18n';
 import { useElderCtx } from './_layout';
 import { WELCOME_SEEN_KEY } from './welcome';
@@ -121,7 +122,15 @@ export default function ElderHome() {
           <Text className={`text-safety-critical font-bold ${tc.btn}`}>{s.needHelp}</Text>
         </Pressable>
 
-        <Text className="text-base text-neutral-500 text-center mb-2 mt-8">
+        <View style={{ marginTop: 24, marginBottom: 8 }}>
+          <DailyShareToggle
+            elderId={elder.id}
+            lang={elder.preferred_lang}
+            highContrast={highContrast}
+          />
+        </View>
+
+        <Text className="text-base text-neutral-500 text-center mb-2 mt-4">
           {s.preparedBy(intermediaryName ?? s.companion)}
         </Text>
       </View>

@@ -83,6 +83,7 @@ export default function RootLayout() {
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(intermediary)" />
         <Stack.Screen name="(elder)" />
+        <Stack.Screen name="locked" />
       </Stack>
     </QueryClientProvider>
   );

@@ -12,9 +12,20 @@ export const CREATE_ELDERS = `
     ui_config        TEXT NOT NULL DEFAULT '{}',
     status           TEXT NOT NULL DEFAULT 'active',
     created_at       TEXT NOT NULL,
-    updated_at       TEXT NOT NULL
+    updated_at       TEXT NOT NULL,
+    kiosk_pin_hash   TEXT,
+    kiosk_pin_salt   TEXT
   )
 `;
+
+// SQLite has no `ALTER TABLE ... ADD COLUMN IF NOT EXISTS`. The caller
+// runs each statement in a try/catch so devices with the old elders
+// table get the new columns added without erroring on a fresh install
+// where they're already in CREATE_ELDERS.
+export const ALTER_ELDERS_ADD_KIOSK_PIN_HASH =
+  'ALTER TABLE elders ADD COLUMN kiosk_pin_hash TEXT';
+export const ALTER_ELDERS_ADD_KIOSK_PIN_SALT =
+  'ALTER TABLE elders ADD COLUMN kiosk_pin_salt TEXT';
 
 export const CREATE_ORGANIZATION_MEMBERS = `
   CREATE TABLE IF NOT EXISTS organization_members (
@@ -50,9 +61,14 @@ export const CREATE_ACTIVITY_LOG = `
     payload          TEXT NOT NULL,
     client_ts        TEXT NOT NULL,
     server_ts        TEXT,
-    device_id        TEXT NOT NULL
+    device_id        TEXT NOT NULL,
+    is_private       INTEGER NOT NULL DEFAULT 0
   )
 `;
+
+// SQLite stores booleans as 0/1. Idempotent column add for older devices.
+export const ALTER_ACTIVITY_LOG_ADD_IS_PRIVATE =
+  'ALTER TABLE activity_log ADD COLUMN is_private INTEGER NOT NULL DEFAULT 0';
 
 // Sync bookkeeping
 export const CREATE_SYNC_META = `

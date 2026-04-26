@@ -160,6 +160,91 @@ export async function updateElder(
   return { data: updated, error: null };
 }
 
+// ── Kiosk PIN (exit elder mode on a handed-over device) ────────────────────
+
+import { hashPin, verifyPin } from '@/lib/kiosk';
+
+/**
+ * Sets or rotates the elder's kiosk-exit PIN. The plaintext is hashed
+ * locally with a fresh per-record salt; only the hash + salt are
+ * persisted. Calling with the same PIN twice produces different stored
+ * values (different salt each time).
+ */
+export async function setElderKioskPin(
+  elderId: string,
+  pin: string,
+): Promise<{ ok: boolean; error: string | null }> {
+  const { hash, salt } = await hashPin(pin);
+  const updated_at = new Date().toISOString();
+
+  if (isMock || !localDb) {
+    const { error } = await db
+      .from('elders')
+      .update({ kiosk_pin_hash: hash, kiosk_pin_salt: salt, updated_at })
+      .eq('id', elderId);
+    if (error) {
+      // Mock and real Supabase errors widen the same way — narrow safely.
+      const msg = (error as { message?: string }).message ?? String(error);
+      return { ok: false, error: msg };
+    }
+    return { ok: true, error: null };
+  }
+
+  localDb.runSync(
+    'UPDATE elders SET kiosk_pin_hash = ?, kiosk_pin_salt = ?, updated_at = ? WHERE id = ?',
+    [hash, salt, updated_at, elderId],
+  );
+  enqueueOutbox('elders', 'update', {
+    id: elderId,
+    kiosk_pin_hash: hash,
+    kiosk_pin_salt: salt,
+    updated_at,
+  } as Record<string, unknown>);
+  return { ok: true, error: null };
+}
+
+/** Verify a plaintext PIN against the stored hash for this elder. */
+export async function verifyElderKioskPin(
+  elderId: string,
+  pin: string,
+): Promise<boolean> {
+  const { data: elder } = await getElder(elderId);
+  if (!elder?.kiosk_pin_hash || !elder.kiosk_pin_salt) return false;
+  return verifyPin(pin, elder.kiosk_pin_hash, elder.kiosk_pin_salt);
+}
+
+/** Removes the elder's kiosk PIN — they can no longer be handed over until a new one is set. */
+export async function clearElderKioskPin(
+  elderId: string,
+): Promise<{ ok: boolean; error: string | null }> {
+  const updated_at = new Date().toISOString();
+
+  if (isMock || !localDb) {
+    const { error } = await db
+      .from('elders')
+      .update({ kiosk_pin_hash: null, kiosk_pin_salt: null, updated_at })
+      .eq('id', elderId);
+    if (error) {
+      // Mock and real Supabase errors widen the same way — narrow safely.
+      const msg = (error as { message?: string }).message ?? String(error);
+      return { ok: false, error: msg };
+    }
+    return { ok: true, error: null };
+  }
+
+  localDb.runSync(
+    'UPDATE elders SET kiosk_pin_hash = NULL, kiosk_pin_salt = NULL, updated_at = ? WHERE id = ?',
+    [updated_at, elderId],
+  );
+  enqueueOutbox('elders', 'update', {
+    id: elderId,
+    kiosk_pin_hash: null,
+    kiosk_pin_salt: null,
+    updated_at,
+  } as Record<string, unknown>);
+  return { ok: true, error: null };
+}
+
 // ── Per-elder status (sidebar badges, dashboard counts) ─────────────────────
 
 /** Lightweight per-elder status used by the sidebar and dashboard cards. */

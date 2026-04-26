@@ -6,6 +6,9 @@ import {
   CREATE_OUTBOX,
   CREATE_ACTIVITY_LOG,
   CREATE_SYNC_META,
+  ALTER_ELDERS_ADD_KIOSK_PIN_HASH,
+  ALTER_ELDERS_ADD_KIOSK_PIN_SALT,
+  ALTER_ACTIVITY_LOG_ADD_IS_PRIVATE,
 } from './schema';
 
 // In mock mode, the in-memory shim handles data — no SQLite needed.
@@ -14,6 +17,15 @@ export const localDb: SQLite.SQLiteDatabase = isMock
   ? (null as unknown as SQLite.SQLiteDatabase)
   : SQLite.openDatabaseSync('nagi.db');
 
+function tryAlter(sql: string): void {
+  // Idempotent ADD COLUMN. Catches "duplicate column" on existing DBs.
+  try {
+    localDb.execSync(sql);
+  } catch {
+    /* column already present */
+  }
+}
+
 export function initLocalDb(): void {
   if (isMock) return;
   localDb.execSync(CREATE_ELDERS);
@@ -21,6 +33,9 @@ export function initLocalDb(): void {
   localDb.execSync(CREATE_OUTBOX);
   localDb.execSync(CREATE_ACTIVITY_LOG);
   localDb.execSync(CREATE_SYNC_META);
+  tryAlter(ALTER_ELDERS_ADD_KIOSK_PIN_HASH);
+  tryAlter(ALTER_ELDERS_ADD_KIOSK_PIN_SALT);
+  tryAlter(ALTER_ACTIVITY_LOG_ADD_IS_PRIVATE);
 }
 
 // Call at app startup (from _layout.tsx).

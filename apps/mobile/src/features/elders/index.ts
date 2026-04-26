@@ -20,4 +20,7 @@ export {
   listMyPendingInvitations,
   acceptInvitation,
   declineInvitation,
+  setElderKioskPin,
+  verifyElderKioskPin,
+  clearElderKioskPin,
 } from './api';

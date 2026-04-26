@@ -36,6 +36,15 @@ export interface ElderStrings {
   // Empty chat state — first-time or no-history case
   chatEmptyTitle:    (firstName: string) => string;
   chatEmptySubtitle: string;
+  // Privacy pill — daily share toggle
+  privacyShared:        string;   // pill state when today's chat is visible to family
+  privacyHidden:        string;   // pill state when today's chat is hidden from family
+  privacyHideTitle:     string;   // confirmation modal title
+  privacyHideMessage:   string;   // confirmation modal body when hiding
+  privacyShareMessage:  string;   // confirmation modal body when re-sharing
+  privacyConfirmHide:   string;
+  privacyConfirmShare:  string;
+  privacyCancel:        string;
 }
 
 const strings: Record<Lang, ElderStrings> = {
@@ -67,6 +76,14 @@ const strings: Record<Lang, ElderStrings> = {
     offlineMessage: 'Ahora mismo no puedo responder. Llama a tu familia si necesitas ayuda.',
     chatEmptyTitle:    (n) => `Hola, ${n}.`,
     chatEmptySubtitle: 'Soy Nagi. Aquí estoy. ¿De qué te gustaría hablar?',
+    privacyShared:        'Hoy se comparte con tu familia',
+    privacyHidden:        'Hoy queda solo entre nosotros',
+    privacyHideTitle:     '¿Ocultar la conversación de hoy?',
+    privacyHideMessage:   'Tu familia verá que hablaste conmigo hoy, pero no lo que dijimos.',
+    privacyShareMessage:  '¿Volver a compartir la conversación de hoy con tu familia?',
+    privacyConfirmHide:   'Sí, mantener privado',
+    privacyConfirmShare:  'Sí, compartir',
+    privacyCancel:        'Cancelar',
   },
 
   pt: {
@@ -97,6 +114,14 @@ const strings: Record<Lang, ElderStrings> = {
     offlineMessage: 'Não consigo responder agora. Ligue para sua família se precisar de ajuda.',
     chatEmptyTitle:    (n) => `Olá, ${n}.`,
     chatEmptySubtitle: 'Sou o Nagi. Estou aqui. Sobre o que você gostaria de conversar?',
+    privacyShared:        'Hoje é compartilhado com sua família',
+    privacyHidden:        'Hoje fica só entre nós',
+    privacyHideTitle:     'Ocultar a conversa de hoje?',
+    privacyHideMessage:   'Sua família verá que você falou comigo hoje, mas não o que dissemos.',
+    privacyShareMessage:  'Voltar a compartilhar a conversa de hoje com sua família?',
+    privacyConfirmHide:   'Sim, manter privado',
+    privacyConfirmShare:  'Sim, compartilhar',
+    privacyCancel:        'Cancelar',
   },
 
   en: {
@@ -127,6 +152,14 @@ const strings: Record<Lang, ElderStrings> = {
     offlineMessage: 'I cannot respond right now. Call your family if you need help.',
     chatEmptyTitle:    (n) => `Hello, ${n}.`,
     chatEmptySubtitle: "I'm Nagi. I'm here. What would you like to talk about?",
+    privacyShared:        "Today is shared with your family",
+    privacyHidden:        "Today stays just between us",
+    privacyHideTitle:     "Hide today's conversation?",
+    privacyHideMessage:   "Your family will see that you talked with me today, but not what we said.",
+    privacyShareMessage:  "Share today's conversation with your family again?",
+    privacyConfirmHide:   "Yes, keep private",
+    privacyConfirmShare:  "Yes, share",
+    privacyCancel:        "Cancel",
   },
 };
 

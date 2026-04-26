@@ -89,6 +89,13 @@ export interface ConversationTurn {
   client_ts: string;
   user_message: string;
   assistant_message: string;
+  /**
+   * True when the elder marked this turn private. The intermediary
+   * transcript view replaces the bubble content with a placeholder;
+   * the elder's own AI history loader (loadChatHistory) ignores this
+   * flag — Nagi remembers private turns even when the family doesn't.
+   */
+  is_private: boolean;
 }
 
 export interface ListConversationTurnsOptions {
@@ -120,7 +127,7 @@ export async function listConversationTurns(
   // deno-lint-ignore-next-line — supabase client is typed `any` to dodge mock QueryBuilder limits
   let query = supabase
     .from('activity_log')
-    .select('id, client_ts, payload')
+    .select('id, client_ts, payload, is_private')
     .eq('elder_id', elderId)
     .eq('kind', 'ai_turn')
     .order('client_ts', { ascending: false })
@@ -132,7 +139,14 @@ export async function listConversationTurns(
   const { data, error } = await query;
   if (error || !data) return [];
 
-  return (data as Array<{ id: string; client_ts: string; payload: unknown }>)
+  return (
+    data as Array<{
+      id: string;
+      client_ts: string;
+      payload: unknown;
+      is_private?: boolean;
+    }>
+  )
     .map(row => {
       const raw =
         typeof row.payload === 'string'
@@ -143,6 +157,7 @@ export async function listConversationTurns(
         client_ts: row.client_ts,
         user_message: (raw?.message ?? '').trim(),
         assistant_message: (raw?.response ?? '').trim(),
+        is_private: row.is_private === true,
       };
     })
     // Drop rows where both halves are empty — keeps the UI from rendering

@@ -47,6 +47,7 @@ export default function ElderConfigure() {
   const [spokenLanguages, setSpokenLanguages] = useState('');
   const [topicsEnjoy, setTopicsEnjoy] = useState('');
   const [topicsAvoid, setTopicsAvoid] = useState('');
+  const [topicsKeepPrivate, setTopicsKeepPrivate] = useState('');
   const [communicationNotes, setCommunicationNotes] = useState('');
   const [accessibilityNotes, setAccessibilityNotes] = useState('');
   const [emergencyName, setEmergencyName] = useState('');
@@ -69,6 +70,7 @@ export default function ElderConfigure() {
       setSpokenLanguages((p.spoken_languages ?? []).join(', '));
       setTopicsEnjoy((p.topics_they_enjoy ?? []).join(', '));
       setTopicsAvoid((p.topics_to_avoid ?? []).join(', '));
+      setTopicsKeepPrivate((p.topics_to_keep_private ?? []).join(', '));
       setCommunicationNotes(p.communication_notes ?? '');
       setAccessibilityNotes(p.accessibility_notes ?? '');
       setEmergencyName(p.emergency_contact?.name ?? '');
@@ -90,6 +92,7 @@ export default function ElderConfigure() {
       spoken_languages: csvToArray(spokenLanguages),
       topics_they_enjoy: csvToArray(topicsEnjoy),
       topics_to_avoid: csvToArray(topicsAvoid),
+      topics_to_keep_private: csvToArray(topicsKeepPrivate),
       communication_notes: communicationNotes.trim() || undefined,
       accessibility_notes: accessibilityNotes.trim() || undefined,
       emergency_contact: emergencyName.trim()
@@ -288,6 +291,26 @@ export default function ElderConfigure() {
                   value={topicsAvoid}
                   onChangeText={setTopicsAvoid}
                   placeholder="e.g. her late husband, her recent diagnosis"
+                  placeholderTextColor="#9ca3af"
+                />
+              </View>
+
+              <View>
+                <Text className="text-xs font-medium text-gray-500 mb-1.5 ml-1">
+                  Topics to keep private from family
+                </Text>
+                <Text className="text-gray-400 text-xs mb-2 ml-1">
+                  When the conversation drifts here, Nagi handles the moment
+                  with them but the substance won't appear on this dashboard.
+                  You'll see "a private moment" with a timestamp.
+                </Text>
+                <TextInput
+                  className="border border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 bg-white"
+                  multiline
+                  numberOfLines={2}
+                  value={topicsKeepPrivate}
+                  onChangeText={setTopicsKeepPrivate}
+                  placeholder="e.g. money worries, an old friend she misses, anything she asks to keep secret"
                   placeholderTextColor="#9ca3af"
                 />
               </View>

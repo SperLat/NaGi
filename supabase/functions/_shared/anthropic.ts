@@ -32,7 +32,20 @@ CULTIVATION
 SAFETY
 - Medical emergency, severe distress, or any mention of self-harm → immediately and warmly suggest calling emergency services or their trusted contact.
 - Never provide medical, legal, or financial advice.
-- Outside your scope → redirect warmly to their trusted person.`;
+- Outside your scope → redirect warmly to their trusted person.
+
+PRIVACY — the elder's right to a boundary
+- Most of what the elder says is shared with their family on the dashboard. Their family reads it later as a way to stay close. That's the default.
+- BUT the elder can draw a private boundary at any time, and you must honor it.
+- TWO SIGNALS that a turn is private:
+  1. The elder says something like "this is private", "between us", "don't tell", "es un secreto", "no le digas", "isto é privado", or any other clear phrase asking you to keep it between the two of you. Trust their words — don't second-guess.
+  2. The conversation enters a topic that is listed in this elder's private-topics list (you'll see "Topics they want kept private" in the per-elder context below, when set).
+- HOW TO RESPOND when a turn is private:
+  - Acknowledge gently. One sentence is plenty: "That stays between us." / "Eso queda entre nosotros." / "Isso fica entre nós."
+  - Stay present and helpful within that turn. Don't refuse to engage; that would punish them for trusting you.
+  - Do NOT summarize the private substance back to them — they know what they said.
+  - End your turn (after your real response) with the literal sentinel [private] on its own at the very end, so the device can mark this turn private in the family's view. It is a control marker, not a word — do not translate it, do not put anything after it.
+- Private turns ARE still part of your memory of this elder — you remember them so you can be a continuous companion. The family just doesn't see the substance.`;
 
 /**
  * Wrapper around the elder row for prompt construction.
@@ -91,6 +104,14 @@ export function buildElderSystemBlock(elder: ElderForPrompt): string {
   if (Array.isArray(profile.topics_to_avoid) && profile.topics_to_avoid.length) {
     lines.push(
       `Topics to handle gently or avoid raising first: ${(profile.topics_to_avoid as string[]).join(', ')}.`,
+    );
+  }
+  if (
+    Array.isArray(profile.topics_to_keep_private) &&
+    profile.topics_to_keep_private.length
+  ) {
+    lines.push(
+      `Topics they want kept private from family (mark these turns with the [private] sentinel per the privacy section above): ${(profile.topics_to_keep_private as string[]).join(', ')}.`,
     );
   }
   if (typeof profile.communication_notes === 'string' && profile.communication_notes.trim()) {

@@ -5,6 +5,71 @@ import { env } from '@/config/env';
 import { isMock } from '@/config/mode';
 import type { ChatMessage } from './types';
 
+/**
+ * Trigger phrases the elder can say to mark a single turn as private.
+ * Detected case-insensitively as a substring of the user's message.
+ *
+ * Brand voice: short, plain, what a real person would actually say.
+ * NOT a slash command; just words. Adding a phrase is a one-line
+ * change and ships a real boundary across all three languages.
+ */
+const PRIVATE_TRIGGERS: Record<string, string[]> = {
+  es: [
+    'esto es privado',
+    'esto queda entre nosotros',
+    'no le digas a',
+    'no lo compartas',
+    'es un secreto',
+  ],
+  pt: [
+    'isto é privado',
+    'isso é privado',
+    'isso fica entre nós',
+    'não conte a',
+    'é um segredo',
+  ],
+  en: [
+    'this is private',
+    'between us',
+    "don't tell",
+    'do not tell',
+    'keep this secret',
+    'just between you and me',
+  ],
+};
+
+function detectPrivateTrigger(message: string, lang: string): boolean {
+  const phrases = PRIVATE_TRIGGERS[lang] ?? PRIVATE_TRIGGERS.en;
+  const lower = message.toLowerCase();
+  return phrases.some(p => lower.includes(p));
+}
+
+/**
+ * Sentinel the model is instructed to append at the very end of its
+ * response when the conversation drifts into a profile-listed private
+ * topic. Mobile strips this from the saved transcript and sets
+ * is_private = true on the resulting activity_log row.
+ *
+ * Kept literal-strange-enough that the model will reliably terminate it
+ * on its own — no other prompt in Nagi has reason to produce this token
+ * verbatim. The user will see this flash for a moment at the end of the
+ * model's response on the screen; brand voice explicitly prefers honest
+ * surfacing of the boundary over invisible magic.
+ */
+const PRIVATE_MARKER = '[private]';
+
+/** Returns the text minus the trailing marker, plus whether it was present. */
+function stripPrivateMarker(text: string): { text: string; markerPresent: boolean } {
+  const trimmed = text.trimEnd();
+  if (trimmed.endsWith(PRIVATE_MARKER)) {
+    return {
+      text: trimmed.slice(0, -PRIVATE_MARKER.length).trimEnd(),
+      markerPresent: true,
+    };
+  }
+  return { text, markerPresent: false };
+}
+
 export async function sendChatMessage(
   elderId: string,
   organizationId: string,
@@ -20,11 +85,14 @@ export async function sendChatMessage(
       onChunk(char);
       await new Promise(r => setTimeout(r, 18));
     }
-    await logActivity(elderId, organizationId, 'ai_turn', {
-      message: lastMsg,
-      response,
-      model: 'mock',
-    });
+    const triggered = detectPrivateTrigger(lastMsg, lang);
+    await logActivity(
+      elderId,
+      organizationId,
+      'ai_turn',
+      { message: lastMsg, response, model: 'mock' },
+      { isPrivate: triggered },
+    );
     return;
   }
 
@@ -85,10 +153,25 @@ export async function sendChatMessage(
 
   clearTimeout(timeout);
   const lastMsg = messages.at(-1)?.content ?? '';
-  await logActivity(elderId, organizationId, 'ai_turn', {
-    message: lastMsg,
-    response: fullResponse,
-    // MODELS — change here when Anthropic releases a new version
-    model: 'claude-opus-4-7',
-  });
+
+  // Privacy flag: either the elder explicitly triggered it via a phrase
+  // ("this is private"), or the model marked the turn private at its
+  // tail because the conversation drifted into a topic on their profile
+  // private-topics list.
+  const triggered = detectPrivateTrigger(lastMsg, lang);
+  const stripped = stripPrivateMarker(fullResponse);
+  const isPrivate = triggered || stripped.markerPresent;
+
+  await logActivity(
+    elderId,
+    organizationId,
+    'ai_turn',
+    {
+      message: lastMsg,
+      response: stripped.text,
+      // MODELS — change here when Anthropic releases a new version
+      model: 'claude-opus-4-7',
+    },
+    { isPrivate },
+  );
 }

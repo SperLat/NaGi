@@ -136,6 +136,25 @@ export default function ElderConversations() {
             ) : null
           }
           renderItem={({ item }) => {
+            // Private turn: show the timestamp + a quiet placeholder, never
+            // the substance. The row is preserved (not filtered out) so the
+            // family knows their elder had a moment with Nagi at this time —
+            // honest about the boundary, opaque about the content.
+            if (item.is_private) {
+              return (
+                <View className="mb-3">
+                  <Text className="text-gray-400 text-xs mb-1 ml-1">
+                    {relativeTime(item.client_ts)}
+                  </Text>
+                  <View className="bg-neutral-50 rounded-2xl px-4 py-3 border border-neutral-200 self-stretch">
+                    <Text className="text-neutral-500 text-sm italic leading-snug">
+                      A private moment
+                    </Text>
+                  </View>
+                </View>
+              );
+            }
+
             const isExpanded = expanded[item.id] ?? false;
             const userTooLong = item.user_message.length > 280;
             const assistantTooLong = item.assistant_message.length > 400;

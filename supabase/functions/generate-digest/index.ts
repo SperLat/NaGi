@@ -68,10 +68,15 @@ Deno.serve(async (req: Request) => {
   // counts and snippets.
   const [elderRes, activityRes, aiRes, helpRes] = await Promise.all([
     db.from('elders').select('display_name, preferred_lang, profile').eq('id', elder_id).single(),
+    // is_private = false: private turns the elder marked never reach
+    // the digest LLM. The count of those turns IS still counted (via the
+    // separate countRes below) so the family knows their elder used Nagi
+    // N times this week, just without the substance of any private moments.
     db
       .from('activity_log')
       .select('kind, payload, client_ts')
       .eq('elder_id', elder_id)
+      .eq('is_private', false)
       .gte('client_ts', periodStartIso)
       .order('client_ts', { ascending: false })
       .limit(500),
@@ -106,6 +111,19 @@ Deno.serve(async (req: Request) => {
     payload: unknown;
     client_ts: string;
   }>;
+
+  // Total ai_turn count INCLUDING private turns — needed for the
+  // "questions_asked" stat. The activity[] array above is already
+  // filtered to public-only; we run a separate head-only count to
+  // get the true total without re-fetching payloads.
+  const totalAiTurnsRes = await db
+    .from('activity_log')
+    .select('id', { count: 'exact', head: true })
+    .eq('elder_id', elder_id)
+    .eq('kind', 'ai_turn')
+    .gte('client_ts', periodStartIso);
+  const totalAiTurns =
+    (totalAiTurnsRes as unknown as { count: number | null }).count ?? activity.filter(a => a.kind === 'ai_turn').length;
   const aiRows = (aiRes.data ?? []) as Array<{
     input_tokens: number | null;
     output_tokens: number | null;
@@ -118,7 +136,7 @@ Deno.serve(async (req: Request) => {
   }>;
 
   const stats: DigestStats = {
-    questions_asked: activity.filter(a => a.kind === 'ai_turn').length,
+    questions_asked: totalAiTurns,
     errors: activity.filter(a => a.kind === 'error').length,
     offline_unavailable: activity.filter(a => a.kind === 'offline_ai_unavailable').length,
     help_requests_total: help.length,
