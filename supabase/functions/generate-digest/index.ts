@@ -296,20 +296,28 @@ Don't repeat the raw numbers — weave them in only when they help the story. Do
   }
 
   // Persist the digest so the family-side archive can list past weeks.
+  // Upsert keyed on (elder_id, period_end_day) — re-clicks within the
+  // same calendar day overwrite the row instead of cluttering the
+  // archive. Earlier days stay untouched.
+  //
   // Best-effort — if the write fails (transient DB hiccup) we still
   // return the freshly-generated digest to the caller. The archive
-  // gets the next one. Better than blocking a successful generation
-  // on a non-critical write.
+  // gets the next one.
+  const periodEndDay = periodEnd.toISOString().slice(0, 10); // YYYY-MM-DD
   await db
     .from('weekly_digests')
-    .insert({
-      organization_id: auth.organizationId,
-      elder_id,
-      period_start: periodStartIso,
-      period_end: periodEndIso,
-      digest_markdown: digestMarkdown,
-      stats_json: stats,
-    })
+    .upsert(
+      {
+        organization_id: auth.organizationId,
+        elder_id,
+        period_start: periodStartIso,
+        period_end: periodEndIso,
+        period_end_day: periodEndDay,
+        digest_markdown: digestMarkdown,
+        stats_json: stats,
+      },
+      { onConflict: 'elder_id,period_end_day' },
+    )
     .then(() => {})
     .catch(() => {});
 
