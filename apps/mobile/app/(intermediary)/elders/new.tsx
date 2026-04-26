@@ -3,6 +3,7 @@ import { View, Text, TextInput, Pressable, ActivityIndicator } from 'react-nativ
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { safeBack } from '@/lib/nav';
 import { createElder } from '@/features/elders';
+import { ensureActiveOrg } from '@/features/auth';
 import { useSession } from '@/state';
 
 const LANGUAGES = [
@@ -12,7 +13,7 @@ const LANGUAGES = [
 ];
 
 export default function NewElder() {
-  const { activeOrgId } = useSession();
+  const { activeOrgId, userId, setSession } = useSession();
   const [name, setName] = useState('');
   const [lang, setLang] = useState('es');
   const [error, setError] = useState<string | null>(null);
@@ -23,16 +24,45 @@ export default function NewElder() {
       setError('Enter a name for the person you support');
       return;
     }
-    if (!activeOrgId) return;
-
     setLoading(true);
     setError(null);
 
-    await createElder({
-      organization_id: activeOrgId,
-      display_name: name.trim(),
-      preferred_lang: lang,
-    });
+    // Self-heal a missing activeOrgId: if the session was hydrated
+    // before the user's family org was provisioned (e.g. legacy users
+    // from before the auth.users insert trigger landed, or a session
+    // cached across a backfill), we attempt to find or create the org
+    // here rather than silently bailing. Caller of ensureActiveOrg
+    // refreshes the session store on success.
+    let orgId = activeOrgId;
+    if (!orgId) {
+      if (!userId) {
+        setError('Not signed in. Please refresh the page and sign in again.');
+        setLoading(false);
+        return;
+      }
+      const result = await ensureActiveOrg(userId);
+      if (!result.ok) {
+        setError(
+          result.error ?? 'Could not find your family. Please refresh the page and try again.',
+        );
+        setLoading(false);
+        return;
+      }
+      orgId = result.orgId;
+      setSession(userId, result.orgId);
+    }
+
+    try {
+      await createElder({
+        organization_id: orgId,
+        display_name: name.trim(),
+        preferred_lang: lang,
+      });
+    } catch (e) {
+      setError(`Could not add: ${e instanceof Error ? e.message : String(e)}`);
+      setLoading(false);
+      return;
+    }
 
     safeBack('/(intermediary)/');
   };
