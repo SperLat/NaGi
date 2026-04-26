@@ -35,7 +35,7 @@
 --
 -- ── Username-style login ─────────────────────────────────────────────
 -- Supabase's auth uses email as the canonical login identifier but
--- doesn't validate deliverability — so `nagi-demo@local.test` works as
+-- doesn't validate deliverability — so `nagi-demo@nagi.kas.vu` works as
 -- a "username". This script creates that account on first run and
 -- refreshes its password on subsequent runs. Judges sign in to
 -- nagi.kas.vu with the credentials at the top of the create-user block.
@@ -70,7 +70,7 @@
 DO $create_user$
 DECLARE
   v_user_id uuid;
-  v_email   text := 'nagi-demo@local.test';   -- ◆◆◆ EDIT to change the username
+  v_email   text := 'nagi-demo@nagi.kas.vu';   -- ◆◆◆ EDIT to change the username
   v_pass    text := 'NagiDemo2026!';          -- ◆◆◆ EDIT to change the password
 BEGIN
   IF EXISTS (SELECT 1 FROM auth.users WHERE email = v_email) THEN
@@ -127,7 +127,7 @@ DO $$
 DECLARE
   -- Targets the demo user created in Step 1. If you changed v_email
   -- above, change this to match.
-  target_email     text := 'nagi-demo@local.test';
+  target_email     text := 'nagi-demo@nagi.kas.vu';
 
   target_user_id   uuid;
   target_org_id    uuid;
