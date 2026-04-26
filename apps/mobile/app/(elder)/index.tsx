@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useNavigation } from 'expo-router';
@@ -6,6 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { safeBack } from '@/lib/nav';
 import { logActivity } from '@/features/activity-log';
 import { DailyShareToggle } from '@/features/privacy/DailyShareToggle';
+import { listUnreadForElder } from '@/features/messages';
 import { useStrings } from '@/lib/i18n';
 import { useElderCtx } from './_layout';
 import { WELCOME_SEEN_KEY } from './welcome';
@@ -25,11 +26,33 @@ const TEXT_CLASS = {
   '2xl': { heading: 'text-5xl', card: 'text-2xl', btn: 'text-3xl' },
 };
 
+/**
+ * Card label for the unread-messages pill. Single message vs many,
+ * with named sender when available. Lang-aware.
+ */
+function messageCardLabel(lang: string, fromName: string | null, count: number): string {
+  if (lang === 'es') {
+    if (count === 1 && fromName) return `📬 Mensaje de ${fromName}`;
+    if (count === 1) return `📬 Tienes un mensaje nuevo`;
+    return `📬 Tienes ${count} mensajes nuevos`;
+  }
+  if (lang === 'pt') {
+    if (count === 1 && fromName) return `📬 Mensagem de ${fromName}`;
+    if (count === 1) return `📬 Você tem uma mensagem nova`;
+    return `📬 Você tem ${count} mensagens novas`;
+  }
+  if (count === 1 && fromName) return `📬 Message from ${fromName}`;
+  if (count === 1) return `📬 You have a new message`;
+  return `📬 You have ${count} new messages`;
+}
+
 export default function ElderHome() {
   const { elder, textSize, highContrast, orgId } = useElderCtx();
   const s = useStrings(elder?.preferred_lang);
   const navigation = useNavigation();
   const canGoBack = navigation.canGoBack();
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadFromName, setUnreadFromName] = useState<string | null>(null);
 
   // First-open gate: redirect to welcome if not yet seen on this device.
   // Single AsyncStorage key, no schema change. See app/(elder)/welcome.tsx.
@@ -43,6 +66,40 @@ export default function ElderHome() {
       .catch(() => {}); // Storage failure: stay on home, welcome will show next launch.
     return () => { cancelled = true; };
   }, []);
+
+  // Cross-tenant message inbox count. We only fetch the count + the
+  // first sender's name for the home pill — full list lives on the
+  // dedicated /(elder)/messages route.
+  useEffect(() => {
+    if (!elder) return;
+    let cancelled = false;
+    void listUnreadForElder(elder.id).then(async unread => {
+      if (cancelled) return;
+      setUnreadCount(unread.length);
+      if (unread.length > 0) {
+        // Resolve first sender's name for the card label.
+        const firstFrom = unread[0].from_elder_id;
+        try {
+          const { supabase } = await import('@/lib/supabase');
+          const { data } = await supabase
+            .from('elders')
+            .select('display_name, profile')
+            .eq('id', firstFrom)
+            .single();
+          if (cancelled) return;
+          const profile = (data as { profile?: Record<string, unknown> } | null)?.profile;
+          const name =
+            (profile?.preferred_name as string | undefined) ??
+            (data as { display_name?: string } | null)?.display_name?.split(' ')[0] ??
+            null;
+          setUnreadFromName(name);
+        } catch { /* best effort */ }
+      } else {
+        setUnreadFromName(null);
+      }
+    });
+    return () => { cancelled = true; };
+  }, [elder]);
 
   if (!elder) {
     return (
@@ -113,6 +170,18 @@ export default function ElderHome() {
             );
           })}
         </View>
+
+        {unreadCount > 0 && (
+          <Pressable
+            onPress={() => router.push('/(elder)/messages')}
+            className="mt-4 bg-accent-100 rounded-2xl py-4 items-center border-2 border-accent-500"
+            style={({ pressed }) => ({ opacity: pressed ? 0.82 : 1 })}
+          >
+            <Text className={`text-accent-ink font-bold ${tc.card}`}>
+              {messageCardLabel(elder.preferred_lang, unreadFromName, unreadCount)}
+            </Text>
+          </Pressable>
+        )}
 
         <Pressable
           onPress={handleHelp}

@@ -24,6 +24,11 @@ import { relativeTime } from '@/lib/time';
 import { isMock } from '@/config/mode';
 import { useSession } from '@/state';
 import { Walkthrough, isWalkthroughSeen } from '@/features/walkthrough';
+import {
+  listMyPendingElderConnections,
+  respondToElderConnection,
+  type PendingElderConnection,
+} from '@/features/connections';
 
 export default function IntermediaryDashboard() {
   const { activeOrgId, userId, clearSession, setSession } = useSession();
@@ -34,7 +39,31 @@ export default function IntermediaryDashboard() {
   const [invitationError, setInvitationError] = useState<string | null>(null);
   const [busyInvitationId, setBusyInvitationId] = useState<string | null>(null);
   const [walkthroughOpen, setWalkthroughOpen] = useState(false);
+  const [pendingConnections, setPendingConnections] = useState<PendingElderConnection[]>([]);
+  const [respondingConn, setRespondingConn] = useState<string | null>(null);
   const shakeAnim                   = useRef(new Animated.Value(0)).current;
+
+  const refreshPendingConnections = useCallback(async () => {
+    const rows = await listMyPendingElderConnections();
+    setPendingConnections(rows);
+  }, []);
+
+  useEffect(() => {
+    if (!userId) return;
+    void refreshPendingConnections();
+  }, [userId, refreshPendingConnections]);
+
+  const handleConnectionResponse = useCallback(
+    async (connectionId: string, accept: boolean) => {
+      setRespondingConn(connectionId);
+      const result = await respondToElderConnection(connectionId, accept);
+      setRespondingConn(null);
+      if (result.ok) {
+        void refreshPendingConnections();
+      }
+    },
+    [refreshPendingConnections],
+  );
 
   // First-time tour: opens automatically once on dashboard mount when
   // the AsyncStorage flag is unset. Replayable from the sidebar via
@@ -334,6 +363,58 @@ export default function IntermediaryDashboard() {
           {invitationError ? (
             <Text className="text-gray-600 text-sm ml-1">{invitationError}</Text>
           ) : null}
+        </View>
+      )}
+
+      {/* ── Pending elder-to-elder connection invites ────────────────── */}
+      {pendingConnections.length > 0 && (
+        <View className="mx-6 mb-3 gap-2">
+          <Text className="text-xs font-medium text-gray-500 ml-1 uppercase tracking-wide">
+            Friend requests across families
+          </Text>
+          {pendingConnections.map(p => {
+            const busy = respondingConn === p.connection_id;
+            return (
+              <View
+                key={p.connection_id}
+                className="bg-surface-intermediary-raised rounded-2xl p-4 border border-gray-100"
+              >
+                <Text className="text-gray-900 leading-snug">
+                  <Text className="font-semibold">{p.proposer_email}</Text>
+                  {' would like '}
+                  <Text className="font-semibold">{p.other_elder_name}</Text>
+                  {' to be friends with '}
+                  <Text className="font-semibold">{p.my_elder_name}</Text>
+                  {'.'}
+                </Text>
+                <Text className="text-gray-500 text-xs mt-1">
+                  Once accepted, the two elders can send each other voice or text messages through Nagi. You can pause the connection any time.
+                </Text>
+                <View className="flex-row gap-2 mt-3">
+                  <Pressable
+                    className="flex-1 border border-gray-200 rounded-xl py-2.5 items-center"
+                    style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                    onPress={() => handleConnectionResponse(p.connection_id, false)}
+                    disabled={busy}
+                  >
+                    <Text className="text-gray-700 font-medium">Decline</Text>
+                  </Pressable>
+                  <Pressable
+                    className="flex-1 bg-accent-600 rounded-xl py-2.5 items-center"
+                    style={({ pressed }) => ({ opacity: pressed ? 0.82 : 1 })}
+                    onPress={() => handleConnectionResponse(p.connection_id, true)}
+                    disabled={busy}
+                  >
+                    {busy ? (
+                      <ActivityIndicator color="#FAF5EC" />
+                    ) : (
+                      <Text className="text-paper font-semibold">Accept</Text>
+                    )}
+                  </Pressable>
+                </View>
+              </View>
+            );
+          })}
         </View>
       )}
 

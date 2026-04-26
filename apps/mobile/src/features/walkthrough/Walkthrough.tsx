@@ -28,6 +28,7 @@ type Slide =
   | 'family'
   | 'recall'
   | 'privacy'
+  | 'friends'
   | 'device-pin'
   | 'elder-pin'
   | 'handoff'
@@ -38,6 +39,7 @@ const ORDER: Slide[] = [
   'family',
   'recall',
   'privacy',
+  'friends',
   'device-pin',
   'elder-pin',
   'handoff',
@@ -169,6 +171,7 @@ export function Walkthrough({ visible, onClose, elderIds }: Props) {
             {slide === 'family' && <SlideFamily />}
             {slide === 'recall' && <SlideRecall />}
             {slide === 'privacy' && <SlidePrivacy />}
+            {slide === 'friends' && <SlideFriends />}
             {slide === 'device-pin' && (
               <SlideDevicePin onEntered={handleDevicePinEntry} busy={busy} />
             )}
@@ -523,6 +526,45 @@ function SlideHandoff({
           Eleanor isn't in this organization — try this from a Pemberton-seeded account.
         </Text>
       )}
+    </View>
+  );
+}
+
+function SlideFriends() {
+  return (
+    <View style={{ gap: 14 }}>
+      <Text style={{ fontSize: 22, fontWeight: '700', color: '#1E1E1E' }}>
+        Friends across families
+      </Text>
+      <Text style={{ fontSize: 14, color: '#545454', lineHeight: 20 }}>
+        With both families' consent, Nagi connects elders across organizations so
+        they can send each other voice or text messages — translated automatically
+        between Spanish and English, played aloud in the recipient's preferred language.
+      </Text>
+      <View
+        style={{
+          backgroundColor: '#DDE5DF',
+          borderRadius: 14,
+          padding: 14,
+          gap: 8,
+        }}
+      >
+        <Text style={{ fontSize: 12, color: '#1A2E25', fontWeight: '600', letterSpacing: 0.5 }}>
+          PRE-WIRED FOR THIS DEMO
+        </Text>
+        <Text style={{ fontSize: 14, color: '#1A2E25', lineHeight: 20 }}>
+          Eleanor (Pemberton, Spanish) and Maggie (Whitmore, English) are already
+          connected. Eleanor's home shows a card "📬 Mensaje de Maggie" when
+          Maggie sends something — and vice versa. Each elder hears the message
+          in their own language; the other elder never has to think about translation.
+        </Text>
+      </View>
+      <Text style={{ fontSize: 13, color: '#727270', lineHeight: 18 }}>
+        From any elder profile in your dashboard, the "Friends across families"
+        section lets you propose new connections by elder name. The other family
+        accepts on their dashboard. Either side can pause the connection at any time —
+        the elder owns the relationship, the family owns the boundary.
+      </Text>
     </View>
   );
 }

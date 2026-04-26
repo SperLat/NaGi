@@ -12,6 +12,7 @@ import {
 } from '@/features/elders';
 import { generateDigest, type DigestResult } from '@/features/digest';
 import { TeamChatPanel } from '@/features/team-chat';
+import { FriendsSection } from '@/features/connections/FriendsSection';
 import { useSession } from '@/state';
 import { setDeviceMode } from '@/lib/kiosk';
 
@@ -232,6 +233,10 @@ export default function ElderOverview() {
         <Text className="text-xs font-medium text-gray-500 mb-2 ml-1 uppercase tracking-wide">
           Care team
         </Text>
+        <View className="mb-4">
+          <FriendsSection elderId={id} elderDisplayName={elder?.display_name ?? ''} />
+        </View>
+
         <View className="mb-6">
           <TeamChatPanel elderId={id} organizationId={activeOrgId} userId={userId} />
         </View>
