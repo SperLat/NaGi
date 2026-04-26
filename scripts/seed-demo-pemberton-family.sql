@@ -33,13 +33,12 @@
 --   Bill:    "How was my walk?"           -> distance log + COPD days
 --   Bill:    "Tell me about Charles"      -> brother grief, shared
 --
--- ── Username-style login (optional) ──────────────────────────────────
--- Supabase's auth uses email as the canonical login identifier, but
--- doesn't validate deliverability. So `nagi-demo@local.test` works as
--- a "username" — judges sign in to nagi.kas.vu with that string and
--- whatever password you set. To create such a demo user, uncomment the
--- block below the configuration section. To use an existing account
--- (e.g. for testing), leave it commented out.
+-- ── Username-style login ─────────────────────────────────────────────
+-- Supabase's auth uses email as the canonical login identifier but
+-- doesn't validate deliverability — so `nagi-demo@local.test` works as
+-- a "username". This script creates that account on first run and
+-- refreshes its password on subsequent runs. Judges sign in to
+-- nagi.kas.vu with the credentials at the top of the create-user block.
 --
 -- ── Idempotency ──────────────────────────────────────────────────────
 -- Every seeded ai_turn row carries payload.seed_marker = 'pemberton-family-v1'.
@@ -55,30 +54,31 @@
 --     ('Margaret Whitmore', 'Arthur Whitmore') AND organization_id = <yours>;
 --
 -- ── To run on cloud ──────────────────────────────────────────────────
--- 1. (Optional) Edit target_email below — defaults to the test account.
--- 2. (Optional) Uncomment the "create demo user" block to provision a
---    fresh username/password account.
--- 3. Open https://supabase.com/dashboard/project/rwpaxqjhblguqnkllnnk/sql/new
--- 4. Paste the entire file -> Run.
+-- 1. Open https://supabase.com/dashboard/project/rwpaxqjhblguqnkllnnk/sql/new
+-- 2. Paste the entire file -> Run.
+--
+-- The script is fully self-contained: creates the demo auth user (if
+-- missing) or refreshes its password (if already there), then seeds
+-- the three elders + 45 days of conversation history. A single Run
+-- gives a judge everything they need to sign in and demo.
 
 -- ════════════════════════════════════════════════════════════════════
--- OPTIONAL: Create a fresh demo user with username-style email.
--- Uncomment this block (remove the /* and */) to provision the user.
--- Idempotent: re-running just resets the password.
+-- STEP 1 — Create demo auth user (or refresh password if it exists).
+-- Idempotent: safe to re-run. Triggers in migration 0016 auto-create
+-- the family organization on first INSERT into auth.users.
 -- ════════════════════════════════════════════════════════════════════
-/*
 DO $create_user$
 DECLARE
   v_user_id uuid;
-  v_email   text := 'nagi-demo@local.test';
-  v_pass    text := 'NagiDemo2026!';
+  v_email   text := 'nagi-demo@local.test';   -- ◆◆◆ EDIT to change the username
+  v_pass    text := 'NagiDemo2026!';          -- ◆◆◆ EDIT to change the password
 BEGIN
   IF EXISTS (SELECT 1 FROM auth.users WHERE email = v_email) THEN
     UPDATE auth.users
        SET encrypted_password = crypt(v_pass, gen_salt('bf')),
            email_confirmed_at = COALESCE(email_confirmed_at, now())
      WHERE email = v_email;
-    RAISE NOTICE 'Demo user % already exists — password refreshed.', v_email;
+    RAISE NOTICE 'Demo user % already exists — password refreshed to %.', v_email, v_pass;
     RETURN;
   END IF;
 
@@ -118,18 +118,16 @@ BEGIN
   RAISE NOTICE 'Demo user created: % / %', v_email, v_pass;
 END
 $create_user$;
-*/
 
 -- ════════════════════════════════════════════════════════════════════
--- MAIN SEED — three Pemberton elders, 45 days each, English
+-- STEP 2 — Seed three Pemberton elders + 45 days of history each
 -- ════════════════════════════════════════════════════════════════════
 
 DO $$
 DECLARE
-  -- ◆◆◆ EDIT THIS — set to the email of the auth user to seed into.
-  -- Default: your existing test account. If you uncommented the
-  -- create-user block above, change this to 'nagi-demo@local.test'.
-  target_email     text := 'sperlat.latam+naguidemo@gmail.com';
+  -- Targets the demo user created in Step 1. If you changed v_email
+  -- above, change this to match.
+  target_email     text := 'nagi-demo@local.test';
 
   target_user_id   uuid;
   target_org_id    uuid;
