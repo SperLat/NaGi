@@ -57,70 +57,70 @@ BEGIN
   -- the elder's profile and the moments seeded for that period.
 
   -- Eleanor — recent widow, gardener, jazz devotee
-  INSERT INTO weekly_digests (organization_id, elder_id, period_start, period_end, digest_markdown, stats_json, created_at) VALUES
+  INSERT INTO weekly_digests (organization_id, elder_id, period_start, period_end, period_end_day, digest_markdown, stats_json, created_at) VALUES
     (v_org_id, v_eleanor_id,
-     (v_today - 7)::timestamptz, (v_today - 1)::timestamptz,
+     (v_today - 7)::timestamptz, (v_today - 1)::timestamptz, (v_today - 1),
      E'## This week with Eleanor\n\nA quieter week than last. Eleanor stayed close to home and let the rain keep her in.\n\nShe pulled out Charles''s Coltrane records on Wednesday afternoon and listened through both sides without interruption — the first time she''s done that since spring. Sofia stopped by Friday with her dog, and they had tea while the sun broke through. Eleanor mentioned the climbing rose at the back wall is heavy with buds.\n\nNothing concerning to flag. If you''re calling this weekend, ask about the Brandywines — she said three came in heavier than last year.',
      '{"questions_asked": 14, "errors": 0, "offline_unavailable": 0, "help_requests_total": 0, "help_requests_acknowledged": 0, "help_requests_pending": 0, "pill_taken": 6, "pill_skipped": 1, "pill_pending": 0}'::jsonb,
      (v_today - 1)::timestamptz),
     (v_org_id, v_eleanor_id,
-     (v_today - 14)::timestamptz, (v_today - 8)::timestamptz,
+     (v_today - 14)::timestamptz, (v_today - 8)::timestamptz, (v_today - 8),
      E'## This week with Eleanor\n\nA slow, steady week. Eleanor used Nagi most mornings, mostly to plan the day or check on the garden — she''s thinking about what to cut back before frost.\n\nShe asked once about a recipe she half-remembered for her mother''s sopa de fideo and walked through the steps with Nagi until she had it. She mentioned Maggie a few times this week and said she missed the river path.\n\nNo errors and no help requests. The medication routine looked steady all week.',
      '{"questions_asked": 18, "errors": 0, "offline_unavailable": 0, "help_requests_total": 0, "help_requests_acknowledged": 0, "help_requests_pending": 0, "pill_taken": 7, "pill_skipped": 0, "pill_pending": 0}'::jsonb,
      (v_today - 8)::timestamptz),
     (v_org_id, v_eleanor_id,
-     (v_today - 21)::timestamptz, (v_today - 15)::timestamptz,
+     (v_today - 21)::timestamptz, (v_today - 15)::timestamptz, (v_today - 15),
      E'## This week with Eleanor\n\nGrief surfaced gently this week. Eleanor mentioned Charles in three different conversations — once about a record, once about the garden, once about a Sunday they used to have. She held the moments without spiraling.\n\nShe sent one help request when the kitchen tablet froze; you handled it within the hour. Otherwise the technology stayed out of her way.\n\nIf you''re thinking about a visit, this might be the week. She didn''t ask, but the warmth in her was reaching for company.',
      '{"questions_asked": 11, "errors": 1, "offline_unavailable": 0, "help_requests_total": 1, "help_requests_acknowledged": 1, "help_requests_pending": 0, "pill_taken": 7, "pill_skipped": 0, "pill_pending": 0}'::jsonb,
      (v_today - 15)::timestamptz),
     (v_org_id, v_eleanor_id,
-     (v_today - 28)::timestamptz, (v_today - 22)::timestamptz,
+     (v_today - 28)::timestamptz, (v_today - 22)::timestamptz, (v_today - 22),
      E'## This week with Eleanor\n\nA brisk, productive week. Eleanor finished the chapter she''d been on for two weeks and said the ending was kinder than she expected. The garden is mostly put up for the season — she''s pleased about that.\n\nShe asked Nagi a handful of small things, mostly logistics. No private moments this week, no flags.\n\nA gentle observation: she''s reading more lately. If you have a book she might like, this is a good time to bring it.',
      '{"questions_asked": 9, "errors": 0, "offline_unavailable": 0, "help_requests_total": 0, "help_requests_acknowledged": 0, "help_requests_pending": 0, "pill_taken": 7, "pill_skipped": 0, "pill_pending": 0}'::jsonb,
      (v_today - 22)::timestamptz);
 
   -- Frances — mild dementia, retired schoolteacher, Pearl the cat
-  INSERT INTO weekly_digests (organization_id, elder_id, period_start, period_end, digest_markdown, stats_json, created_at) VALUES
+  INSERT INTO weekly_digests (organization_id, elder_id, period_start, period_end, period_end_day, digest_markdown, stats_json, created_at) VALUES
     (v_org_id, v_frances_id,
-     (v_today - 7)::timestamptz, (v_today - 1)::timestamptz,
+     (v_today - 7)::timestamptz, (v_today - 1)::timestamptz, (v_today - 1),
      E'## This week with Frances\n\nA tender week. Frances and Pearl spent most mornings in the chair by the window, and the cardinal was back two days running.\n\nShe told the story of her third-grade reading circle again on Tuesday — remembered every kid by name. The aide brought her toast cut into triangles like her mother used to make and Frances mentioned her mother three times that morning.\n\nThe evening melatonin was skipped twice. Not concerning at this baseline — she napped late on the days she missed.',
      '{"questions_asked": 22, "errors": 0, "offline_unavailable": 0, "help_requests_total": 0, "help_requests_acknowledged": 0, "help_requests_pending": 0, "pill_taken": 12, "pill_skipped": 2, "pill_pending": 0}'::jsonb,
      (v_today - 1)::timestamptz),
     (v_org_id, v_frances_id,
-     (v_today - 14)::timestamptz, (v_today - 8)::timestamptz,
+     (v_today - 14)::timestamptz, (v_today - 8)::timestamptz, (v_today - 8),
      E'## This week with Frances\n\nFrances sang most of "Bringing in the Sheaves" without prompting on Wednesday — the aide said she hadn''t done that in months. She was bright that day.\n\nShe asked twice where Pearl was when Pearl was right next to her. Both times Nagi gently pointed and Frances laughed at herself. The conversations stayed warm.\n\nMorning meds were on time every day. The evening dose she let lapse three times — she went to bed early on those nights, which is its own kind of fine.',
      '{"questions_asked": 19, "errors": 0, "offline_unavailable": 0, "help_requests_total": 0, "help_requests_acknowledged": 0, "help_requests_pending": 0, "pill_taken": 11, "pill_skipped": 3, "pill_pending": 0}'::jsonb,
      (v_today - 8)::timestamptz),
     (v_org_id, v_frances_id,
-     (v_today - 21)::timestamptz, (v_today - 15)::timestamptz,
+     (v_today - 21)::timestamptz, (v_today - 15)::timestamptz, (v_today - 15),
      E'## This week with Frances\n\nA cardinal landed on the windowsill Monday morning and Frances watched it for ten minutes before saying anything. Then she said: "I think I''ll write it down today, before I forget the color."\n\nShe asked Nagi for help spelling "vermilion" and they wrote a short note together. The aide put it in the kitchen drawer.\n\nNo flags. The week felt small and complete.',
      '{"questions_asked": 16, "errors": 0, "offline_unavailable": 0, "help_requests_total": 0, "help_requests_acknowledged": 0, "help_requests_pending": 0, "pill_taken": 13, "pill_skipped": 1, "pill_pending": 0}'::jsonb,
      (v_today - 15)::timestamptz),
     (v_org_id, v_frances_id,
-     (v_today - 28)::timestamptz, (v_today - 22)::timestamptz,
+     (v_today - 28)::timestamptz, (v_today - 22)::timestamptz, (v_today - 22),
      E'## This week with Frances\n\nFrances had a harder Sunday — confused about which day it was, asked twice if her sister was visiting. By Monday she was steady again. The aide noted the pattern; nothing acute.\n\nThe rest of the week was Pearl, the cardinal, and a long afternoon of looking at old photographs. She named everyone in the 1957 reunion picture.\n\nIf you''re calling, she remembers Tuesday afternoons more reliably than mornings.',
      '{"questions_asked": 14, "errors": 0, "offline_unavailable": 0, "help_requests_total": 1, "help_requests_acknowledged": 1, "help_requests_pending": 0, "pill_taken": 12, "pill_skipped": 2, "pill_pending": 0}'::jsonb,
      (v_today - 22)::timestamptz);
 
   -- Bill — ex-Army Korea, model planes, daily walker
-  INSERT INTO weekly_digests (organization_id, elder_id, period_start, period_end, digest_markdown, stats_json, created_at) VALUES
+  INSERT INTO weekly_digests (organization_id, elder_id, period_start, period_end, period_end_day, digest_markdown, stats_json, created_at) VALUES
     (v_org_id, v_bill_id,
-     (v_today - 7)::timestamptz, (v_today - 1)::timestamptz,
+     (v_today - 7)::timestamptz, (v_today - 1)::timestamptz, (v_today - 1),
      E'## This week with Bill\n\nBill finished the wing assembly on the B-17 this week — said the rigging took longer than the airframe and laughed about it. He did the full block twice on Thursday. The COPD was quieter that day.\n\nThe neighbor''s grandson stopped by Friday and Bill walked him through every model on the shelf, told him which year each plane saw service. The kid was riveted.\n\nThe morning inhaler was taken every day. He skipped the evening dose twice — direct talk about it lands well; he''ll take the reminder when it''s framed practically.',
      '{"questions_asked": 8, "errors": 0, "offline_unavailable": 0, "help_requests_total": 0, "help_requests_acknowledged": 0, "help_requests_pending": 0, "pill_taken": 12, "pill_skipped": 2, "pill_pending": 0}'::jsonb,
      (v_today - 1)::timestamptz),
     (v_org_id, v_bill_id,
-     (v_today - 14)::timestamptz, (v_today - 8)::timestamptz,
+     (v_today - 14)::timestamptz, (v_today - 8)::timestamptz, (v_today - 8),
      E'## This week with Bill\n\nA solid week of walking. Bill made it past the post-office bench twice, which he hasn''t done this month. He keeps a quiet log of his own; Nagi just helps when he asks for the date.\n\nHe told the story about Charles fixing a carburetor with a hairpin in ''68. Laughed at the part where they used the hairpin. He misses Charles steadily but doesn''t make a thing of it.\n\nNothing to flag. If you''re calling, the walks are the thing he''ll talk about.',
      '{"questions_asked": 6, "errors": 0, "offline_unavailable": 0, "help_requests_total": 0, "help_requests_acknowledged": 0, "help_requests_pending": 0, "pill_taken": 14, "pill_skipped": 0, "pill_pending": 0}'::jsonb,
      (v_today - 8)::timestamptz),
     (v_org_id, v_bill_id,
-     (v_today - 21)::timestamptz, (v_today - 15)::timestamptz,
+     (v_today - 21)::timestamptz, (v_today - 15)::timestamptz, (v_today - 15),
      E'## This week with Bill\n\nWeather kept Bill in three days running. He used the time to sand the B-17 fuselage and watch the Korea documentary on PBS — said it got the chow hall almost right.\n\nHe asked Nagi about model paint thinner brands and they walked through the differences. He''s pleased to have someone who''ll actually answer that without changing the subject.\n\nMedications steady. No errors, no help requests.',
      '{"questions_asked": 7, "errors": 0, "offline_unavailable": 0, "help_requests_total": 0, "help_requests_acknowledged": 0, "help_requests_pending": 0, "pill_taken": 14, "pill_skipped": 0, "pill_pending": 0}'::jsonb,
      (v_today - 15)::timestamptz),
     (v_org_id, v_bill_id,
-     (v_today - 28)::timestamptz, (v_today - 22)::timestamptz,
+     (v_today - 28)::timestamptz, (v_today - 22)::timestamptz, (v_today - 22),
      E'## This week with Bill\n\nBill walked the loop every day this week. New personal best for the month — to the bench past the post office and back without resting. The COPD was kind to him.\n\nHe started a new model: a P-51 Mustang. Said the canopy work is going to be the patience test.\n\nEvening inhaler skipped once. Veteran sensibility on the meds: he takes them when the day''s pace lets him; doesn''t fuss when it doesn''t.',
      '{"questions_asked": 5, "errors": 0, "offline_unavailable": 0, "help_requests_total": 0, "help_requests_acknowledged": 0, "help_requests_pending": 0, "pill_taken": 13, "pill_skipped": 1, "pill_pending": 0}'::jsonb,
      (v_today - 22)::timestamptz);
