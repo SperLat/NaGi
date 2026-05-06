@@ -19,6 +19,7 @@ supabase/.backups/
 # OS
 .DS_Store
 Thumbs.db
+*.stackdump
 
 # AI tool session state (never commit) — but DO commit the runtime-skills
 # artifact (.claude/skills/), which is the human-readable open-source

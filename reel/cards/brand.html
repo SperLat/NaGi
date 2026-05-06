@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>brand</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Newsreader:opsz,wght@6..72,300;6..72,400&family=Noto+Serif+JP:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<style>
+  .stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+  }
+  .kanji-wrap {
+    position: relative;
+    line-height: 1;
+  }
+  .kanji {
+    color: var(--paper);
+    animation: ink-reveal 3.2s cubic-bezier(.2,.6,.2,1) 0.4s forwards,
+               slow-breath 6.5s ease-in-out 3.6s infinite;
+    clip-path: inset(100% 0 0 0);
+    opacity: 0;
+    text-shadow: 0 4px 40px rgba(0,0,0,0.18);
+  }
+  .reading {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 1.25rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    opacity: 0;
+    animation: fade-in 1.4s ease-out 3.6s forwards;
+    color: var(--cream);
+  }
+  .tagline {
+    font-family: 'Newsreader', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: 3.5rem;
+    line-height: 1.2;
+    text-align: center;
+    max-width: 24ch;
+    margin-top: 4rem;
+    opacity: 0;
+    animation: fade-up 1.6s ease-out 4.4s forwards;
+  }
+  .tagline .accent {
+    font-style: normal;
+    color: var(--cream);
+  }
+</style>
+</head>
+<body class="palette-sealull">
+  <main class="card">
+    <div class="stack">
+      <div class="kanji-wrap">
+        <div class="kanji">凪</div>
+      </div>
+      <div class="reading">Nagi · Kasvu</div>
+      <div class="tagline">El cuidado real, hecho <span class="accent">visible</span>.</div>
+    </div>
+  </main>
+</body>
+</html>

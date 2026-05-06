@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Nagi — outro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:opsz,wght@6..72,300;6..72,400&family=Noto+Serif+JP:wght@300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<style>
+  .frame {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    align-items: center;
+    padding: 8rem 10rem;
+    gap: 6rem;
+  }
+  .left {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .mark {
+    font-family: 'Noto Serif JP', serif;
+    font-weight: 300;
+    font-size: 7rem;
+    color: var(--pine);
+    line-height: 1;
+    margin-bottom: 1.5rem;
+  }
+  .reading {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--pine);
+    opacity: 0.7;
+    margin-bottom: 2.5rem;
+  }
+  .cta {
+    font-family: 'Newsreader', serif;
+    font-size: 4.4rem;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--pine-deep);
+    margin-bottom: 0.6rem;
+  }
+  .cta-en {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--neutral-700);
+    margin-bottom: 3rem;
+  }
+  .url-pill {
+    padding: 1rem 2.4rem;
+    border: 2px solid var(--pine);
+    color: var(--pine);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 2rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    border-radius: 9999px;
+    margin-bottom: 2rem;
+  }
+
+  .right {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.6rem;
+  }
+  .qr {
+    width: 380px;
+    height: 380px;
+    background: var(--paper);
+    border: 1px solid var(--neutral-300);
+    border-radius: 1.2rem;
+    padding: 1.4rem;
+    box-shadow: 0 12px 40px rgba(26, 46, 37, 0.08);
+  }
+  .qr img {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .qr-label {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--neutral-700);
+    opacity: 0.7;
+  }
+
+  .creds {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 1.4rem;
+    row-gap: 0.4rem;
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 1.25rem;
+    color: var(--pine-ink);
+    background: var(--cream);
+    padding: 1.6rem 2rem;
+    border-radius: 0.8rem;
+    border: 1px solid var(--neutral-300);
+    margin-top: 0.6rem;
+  }
+  .creds .k {
+    color: var(--neutral-700);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 0.9rem;
+    align-self: center;
+  }
+  .creds .v { font-weight: 500; }
+
+  .credit {
+    position: absolute;
+    bottom: 3rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--neutral-700);
+    opacity: 0.6;
+  }
+</style>
+</head>
+<body class="palette-paper">
+  <main class="frame">
+    <div class="left">
+      <div class="mark">凪</div>
+      <div class="reading">Nagi · Kasvu</div>
+      <div class="cta">Pruébalo con tu familia.</div>
+      <div class="cta-en">Try it with your family</div>
+      <div class="url-pill">nagi.kas.vu</div>
+      <div class="creds">
+        <span class="k">user</span>  <span class="v">nagi-demo@nagi.kas.vu</span>
+        <span class="k">pass</span>  <span class="v">NagiDemo2026!</span>
+      </div>
+    </div>
+    <div class="right">
+      <div class="qr">
+        <img alt="QR code to nagi.kas.vu"
+             src="https://api.qrserver.com/v1/create-qr-code/?data=https%3A%2F%2Fnagi.kas.vu&size=600x600&margin=8&color=1A2E25&bgcolor=FAF5EC">
+      </div>
+      <div class="qr-label">Scan to open</div>
+    </div>
+    <div class="credit">Built with Claude · Claude 4.7 Hackathon · Nagi · Kasvu</div>
+  </main>
+</body>
+</html>

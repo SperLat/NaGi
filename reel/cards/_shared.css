@@ -1,0 +1,148 @@
+/* Cedar / Nagi reel — shared card styles.
+   Palette tokens mirror apps/mobile/tailwind.config.js. */
+
+:root {
+  --fog:           #F7F5F2;
+  --paper:         #FAF5EC;
+  --fog-deep:      #EDEAE3;
+  --charcoal:      #1E1E1E;
+  --charcoal-deep: #0F0F0F;
+  --pine:          #34503E;
+  --pine-deep:     #26392F;
+  --pine-ink:      #1A2E25;
+  --sealull:       #5C7A85;
+  --sealull-tint:  #8BA7B0;
+  --cream:         #F0E8D8;
+  --neutral-700:   #3D3D3C;
+  --neutral-300:   #C2C0BC;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+  font-family: 'Newsreader', 'Source Serif Pro', Georgia, serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  cursor: none;
+}
+
+.card {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12rem;
+  position: relative;
+}
+
+/* ── Palettes ──────────────────────────────────── */
+
+.palette-charcoal {
+  background: var(--charcoal-deep);
+  color: var(--paper);
+}
+.palette-fog {
+  background: var(--fog);
+  color: var(--charcoal);
+}
+.palette-paper {
+  background: var(--paper);
+  color: var(--pine-deep);
+}
+.palette-sealull {
+  background: linear-gradient(180deg, var(--sealull) 0%, var(--pine) 100%);
+  color: var(--paper);
+}
+
+/* ── Typography ────────────────────────────────── */
+
+.eyebrow {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 1.5rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  opacity: 0.6;
+  margin-bottom: 3rem;
+}
+
+.headline {
+  font-family: 'Newsreader', 'Source Serif Pro', Georgia, serif;
+  font-weight: 400;
+  font-size: 6.5rem;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  text-align: center;
+  max-width: 28ch;
+}
+
+.subhead {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 1.75rem;
+  letter-spacing: 0.04em;
+  margin-top: 3rem;
+  opacity: 0.72;
+}
+
+.kanji {
+  font-family: 'Noto Serif JP', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+  font-weight: 300;
+  font-size: 28rem;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+/* ── Animation primitives ──────────────────────── */
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slow-breath {
+  0%, 100% { transform: scale(1.00); }
+  50%      { transform: scale(1.012); }
+}
+@keyframes ink-reveal {
+  /* Brush-wash from bottom to top, mimicking sumi-e ink rising on paper. */
+  0%   { clip-path: inset(100% 0 0 0); opacity: 0; }
+  20%  { opacity: 1; }
+  100% { clip-path: inset(0 0 0 0);    opacity: 1; }
+}
+@keyframes drift-apart {
+  0%   { letter-spacing: -0.02em; opacity: 0; }
+  30%  { letter-spacing: -0.02em; opacity: 1; }
+  100% { letter-spacing:  0.18em; opacity: 0.55; }
+}
+
+/* ── Atoms ─────────────────────────────────────── */
+
+.dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: currentColor;
+  display: inline-block;
+  margin: 0 0.5rem;
+  vertical-align: middle;
+  opacity: 0.4;
+}
+
+.url {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 2.5rem;
+  letter-spacing: 0.04em;
+  font-weight: 500;
+  margin-top: 4rem;
+  padding: 1.25rem 3rem;
+  border: 2px solid currentColor;
+  border-radius: 9999px;
+  display: inline-block;
+}

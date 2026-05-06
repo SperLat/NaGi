@@ -1,0 +1,94 @@
+{
+  "meta": {
+    "title": "Nagi — 4.7 Hackathon Demo Reel",
+    "voiceLang": "es-MX",
+    "subtitleLang": "en",
+    "fps": 30,
+    "width": 1920,
+    "height": 1080,
+    "totalDuration": 75,
+    "demoUrl": "https://nagi.kas.vu",
+    "demoEmail": "nagi-demo@nagi.kas.vu",
+    "demoPassword": "NagiDemo2026!",
+    "demoTenant": "The Pemberton Family"
+  },
+  "shots": [
+    {
+      "id": "problem-1",
+      "beat": "problem",
+      "t": 0.0,
+      "dur": 7.0,
+      "voice_es": "Mamá olvidó tomar su medicamento. Otra vez.",
+      "subtitle_en": "Mom forgot her medication. Again.",
+      "visual": "still://problem-1.png",
+      "palette": "charcoal",
+      "note": "Open as black-on-charcoal still in CapCut. Hold 7s."
+    },
+    {
+      "id": "problem-2",
+      "beat": "problem",
+      "t": 7.0,
+      "dur": 8.0,
+      "voice_es": "Y la familia, dispersa, nunca se enteró.",
+      "subtitle_en": "And the family, scattered, never knew.",
+      "visual": "still://problem-2.png",
+      "palette": "charcoal",
+      "note": "Same palette as problem-1 — sustains the heaviness."
+    },
+    {
+      "id": "app-pin",
+      "beat": "software",
+      "t": 15.0,
+      "dur": 9.0,
+      "voice_es": "Nagi reúne a la familia alrededor del mayor.",
+      "subtitle_en": "Nagi gathers the family around the elder.",
+      "visual": "tella://pin-entry",
+      "palette": "fog",
+      "note": "Tella capture: caregiver opens app → enters PIN → home. Auto-zoom on PIN entry."
+    },
+    {
+      "id": "app-digest",
+      "beat": "software",
+      "t": 24.0,
+      "dur": 14.0,
+      "voice_es": "Cada noche, la IA escribe el resumen del día. Quienes le aman, lo leen.",
+      "subtitle_en": "Every night, AI writes the day's digest. The people who love them read it.",
+      "visual": "tella://digest",
+      "palette": "fog",
+      "note": "Tella capture: daily digest for Eleanor Pemberton. Scroll showing AI-written summary."
+    },
+    {
+      "id": "app-reply",
+      "beat": "software",
+      "t": 38.0,
+      "dur": 14.0,
+      "voice_es": "La familia responde con voz, foto, palabra. Y el mayor lo siente.",
+      "subtitle_en": "Family replies with voice, photo, words. And the elder feels it.",
+      "visual": "tella://care-circle",
+      "palette": "fog",
+      "note": "Tella capture: care-circle reply (voice or photo) → cut to elder's screen receiving it."
+    },
+    {
+      "id": "philosophy",
+      "beat": "why",
+      "t": 52.0,
+      "dur": 13.0,
+      "voice_es": "Kasvu — el cuidado real, hecho visible. Como el mar en calma. 凪.",
+      "subtitle_en": "Kasvu — real care, made visible. Like the sea at rest. 凪.",
+      "visual": "still://brand.png",
+      "palette": "sealull",
+      "note": "Single still exported from cards/brand.html (open in browser, screenshot at end of ink-reveal animation)."
+    },
+    {
+      "id": "invitation",
+      "beat": "invitation",
+      "t": 65.0,
+      "dur": 10.0,
+      "voice_es": "Pruébalo con tu familia. Demo en nagi punto kas punto vu — credenciales en pantalla.",
+      "subtitle_en": "Try it with your family. Demo at nagi.kas.vu — credentials on screen.",
+      "visual": "still://outro.png",
+      "palette": "paper",
+      "note": "Single still exported from cards/outro.html (QR + creds + footer credit)."
+    }
+  ]
+}
