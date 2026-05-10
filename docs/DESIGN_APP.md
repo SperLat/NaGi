@@ -720,4 +720,4 @@ Per the build packet's stop conditions, reviewed against the 12 routes:
 
 ---
 
-*Authored under Kronos discipline. Bound to BRAND.md, BRAND_MANUAL.md, PRINCIPLES.md, ARCHITECTURE.md. Licensed CC BY 4.0.*
+*Authored under Kronos discipline. Bound to BRAND.md, BRAND_MANUAL.md, PRINCIPLES.md, ARCHITECTURE.md. Licensed under the Nagi Non-Commercial License.*

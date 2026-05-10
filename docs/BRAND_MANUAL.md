@@ -50,7 +50,7 @@ Wordmark and mark are locked. They cannot be:
 
 ### 1.5 Co-branding
 
-For the open-source audience (per BRAND.md §10), the project name **Cedar** appears in technical artifacts only (README headers, license, contributor docs). Cedar uses the same Inter weight/tracking as Nagi, never the kanji.
+For the non-commercial source-available audience (per BRAND.md §10), the project name **Cedar** appears in technical artifacts only (README headers, license, contributor docs). Cedar uses the same Inter weight/tracking as Nagi, never the kanji.
 
 ---
 
@@ -514,4 +514,4 @@ Mirrors BRAND.md §12, with manual-implementation specifics added:
 
 ---
 
-*Authored under Kronos discipline. Bound to BRAND.md and PRINCIPLES.md. Licensed CC BY 4.0 — share freely, attribute Cedar.*
+*Authored under Kronos discipline. Bound to BRAND.md and PRINCIPLES.md. Licensed under the Nagi Non-Commercial License.*

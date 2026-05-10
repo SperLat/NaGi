@@ -100,7 +100,7 @@ cedar/
 ├── .github/workflows/
 │   ├── ci.yml                           # typecheck + test + lint
 │   └── mobile-eas.yml                   # optional EAS build
-├── LICENSE                              # MIT
+├── LICENSE                              # Nagi Non-Commercial License
 ├── README.md
 ├── package.json                         # pnpm workspace root
 ├── pnpm-workspace.yaml
@@ -463,7 +463,7 @@ v0 ships only the self-hosted tier and a personal mock-mode build. Hosted tier i
 
 Strict dependency order. Do not start step N before N-1 is verifiable.
 
-1. **Scaffold + licensing + CI skeleton.** `pnpm` workspace, Expo Router app boots, NativeWind renders one screen, MIT license, `tsc --noEmit` passes in CI.
+1. **Scaffold + licensing + CI skeleton.** `pnpm` workspace, Expo Router app boots, NativeWind renders one screen, non-commercial license, `tsc --noEmit` passes in CI.
 2. **Mock mode foundation.** Mode toggle, client interface, in-memory Supabase shim, canned AI stub. One screen reads a mocked elder. This is built first so step 3+ can develop without live infra.
 3. **Tenancy schema + RLS.** Migrations 0001, 0005. `scripts/verify-rls.ts` proves cross-org reads return empty.
 4. **Auth + org membership.** Sign-up creates org of kind `family`. Org switcher deferred (single-org happy path v0).
@@ -522,7 +522,7 @@ A reviewer must be able to check each line. No item is subjective.
 - [ ] Second turn in same conversation shows `cache_read_tokens > 0` in `ai_interactions` row.
 - [ ] `ai-classify` roundtrip under 800ms on haiku-4-5.
 - [ ] `docker compose -f deploy/docker-compose.yml up` on a clean Linux host brings up Supabase + edge runtime; the mobile app configured against it can sign in and chat.
-- [ ] LICENSE is MIT. No dependency in `apps/mobile/package.json` has a non-permissive license (script checks).
+- [ ] LICENSE is non-commercial. No dependency in `apps/mobile/package.json` has a license incompatible with non-commercial distribution (script checks).
 - [ ] `seed-mock.ts` produces a demo-ready state in under 5 seconds.
 - [ ] Docs exist: `README.md` (≤1 page quickstart), `SELF_HOSTING.md`, `SECURITY.md`, `PRINCIPLES.md`.
 

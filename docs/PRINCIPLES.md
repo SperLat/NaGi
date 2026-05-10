@@ -66,4 +66,4 @@ When in doubt: remove, not add.
 ---
 
 *These principles are authored by ALMA as part of the Cedar initiative.*
-*They are licensed under Creative Commons BY 4.0 — share freely, attribute Cedar.*
+*They are licensed under the Nagi Non-Commercial License.*

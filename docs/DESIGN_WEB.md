@@ -3,7 +3,7 @@
 **Bound by:** BRAND.md (spine), BRAND_MANUAL.md (tokens), PRINCIPLES.md (constitution).
 **Domain plan:**
 - **Hackathon demo:** `nagi.kasvu.dev` (subdomain on Kasvu infra; signals the lineage to judges; zero registration cost).
-- **Defensive registration:** `iamnagi.org` (acquired separately; the .org TLD signals non-commercial/community alignment with the Apache 2.0 + open-source posture).
+- **Defensive registration:** `iamnagi.org` (acquired separately; the .org TLD signals non-commercial/community alignment with the Nagi Non-Commercial License posture).
 - **Premium-if-affordable:** `nagi.care` (~$80–120/yr if available — the most semantically perfect TLD; redirect to `iamnagi.org` if acquired).
 - **Not pursuing:** `nagi.com`, `nagi.app` — both taken or unavailable; no rebrand is worth losing the kokuji story for.
 
@@ -118,12 +118,12 @@ Each beat: a numbered glyph (Inter `text-5xl` weight 200, `accent-primary`, just
 
 ---
 
-### Section 4 — Open-source posture
+### Section 4 — Non-commercial source-available posture
 
 **Purpose:** Address the trust-and-control question that an evaluating intermediary or clinician will ask before recommending to their family/team.
 
 **Headline:**
-> MIT-licensed. Self-host or run hosted. Either is first-class.
+> Free for non-commercial use. Self-host or run hosted. Either is first-class.
 
 `text-3xl` weight 700, `neutral-800`.
 
@@ -218,10 +218,10 @@ Below the block, a single line in `text-sm neutral-500`:
 ┌──────────────────────────────────────────────────────────┐
 │  凪  Nagi          GitHub  Docs  Principles  Self-host    │
 │                                                          │
-│  Cedar — open-source infrastructure for elder digital    │
-│  inclusion. Licensed MIT.                                │
-│  Brand and docs licensed CC BY 4.0 — share freely,       │
-│  attribute Cedar.                                        │
+│  Cedar — non-commercial infrastructure for elder digital │
+│  inclusion. Commercial use requires written permission.  │
+│  Share and adapt for personal, educational, charitable,  │
+│  research, and public-benefit use.                       │
 │                                                          │
 │  Built in Costa Rica.                                    │
 └──────────────────────────────────────────────────────────┘
@@ -382,4 +382,4 @@ Mirrors BRAND.md §12 with web-specific items added:
 
 ---
 
-*Authored under Kronos discipline. Bound to BRAND.md, BRAND_MANUAL.md, PRINCIPLES.md. Licensed CC BY 4.0 — share freely, attribute Cedar.*
+*Authored under Kronos discipline. Bound to BRAND.md, BRAND_MANUAL.md, PRINCIPLES.md. Licensed under the Nagi Non-Commercial License.*

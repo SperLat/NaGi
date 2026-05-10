@@ -146,9 +146,9 @@ Care infrastructure should not be proprietary, closed, or dependent on a single 
 - The roadmap is public and informed by the people actually using the software
 - Contributions are welcomed with the same criteria Kasvu uses: *Is it aligned with the spirit? Does it add something genuinely useful? Can a real family member use it without translation?*
 
-The Nagi software is released under **Apache License 2.0** (see [LICENSE](../LICENSE)) — an OSI-approved permissive license that allows commercial reuse, adaptation, and self-hosting without restriction. The brand assets and documentation are released under **CC BY 4.0** so that organizations self-hosting Nagi for paying clients can use the materials freely with attribution.
+The Nagi software is released under the **Nagi Non-Commercial License** (see [LICENSE](../LICENSE)). It is free for personal, educational, research, charitable, community, and other non-profit public-benefit use. Commercial, for-profit, SaaS, paid consulting, revenue-generating, or internal for-profit business use requires prior written permission.
 
-The philosophy itself — Kasvu — is released by its maintainers under CC BY-NC-SA 4.0, with an explicit carve-out for software implementations in the elder-care, caregiving, and community-health domains. Nagi falls under that carve-out; downstream Nagi forks inherit the Apache 2.0 software license.
+The philosophy itself — Kasvu — is released by its maintainers under CC BY-NC-SA 4.0, with an explicit carve-out for software implementations in the elder-care, caregiving, and community-health domains. Nagi falls under that carve-out; downstream Nagi forks inherit the Nagi Non-Commercial License.
 
 ---
 

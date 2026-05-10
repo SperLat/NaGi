@@ -129,4 +129,6 @@ small enough to read in an afternoon.
 
 ## License
 
-Apache License 2.0 — see [LICENSE](LICENSE).
+Nagi is free for non-commercial use only. Commercial, for-profit, SaaS,
+paid consulting, revenue-generating, or internal for-profit business use
+requires prior written permission. See [LICENSE](LICENSE).
